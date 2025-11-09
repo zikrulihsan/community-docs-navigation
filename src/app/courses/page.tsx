@@ -110,10 +110,10 @@ export default function CoursesPage() {
 
   return (
     <DocLayout>
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Available Courses</h1>
-          <p className="text-lg text-muted-foreground">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">Available Courses</h1>
+          <p className="text-base sm:text-lg text-muted-foreground">
             Explore our comprehensive collection of courses. Learn new skills and advance your career.
           </p>
         </div>
@@ -126,7 +126,7 @@ export default function CoursesPage() {
           <Badge variant="outline">DevOps</Badge>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
           {courses.map((course) => (
             <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
               <div className="relative h-48 overflow-hidden">
@@ -184,13 +184,13 @@ export default function CoursesPage() {
                   </div>
                 )}
               </CardContent>
-              <CardFooter className="gap-2">
+              <CardFooter className="gap-2 flex-col sm:flex-row">
                 {course.progress > 0 ? (
-                  <Button className="flex-1">Continue Learning</Button>
+                  <Button className="w-full sm:flex-1">Continue Learning</Button>
                 ) : (
-                  <Button className="flex-1">Enroll Now</Button>
+                  <Button className="w-full sm:flex-1">Enroll Now</Button>
                 )}
-                <Button variant="outline">Details</Button>
+                <Button variant="outline" className="w-full sm:w-auto">Details</Button>
               </CardFooter>
             </Card>
           ))}

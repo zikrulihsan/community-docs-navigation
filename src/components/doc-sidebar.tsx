@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, BookOpen, Calendar, Users } from "lucide-react";
+import { ChevronDown, BookOpen, Calendar, Users, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-export default function DocSidebar() {
+interface DocSidebarProps {
+  onNavigate?: () => void;
+}
+
+export default function DocSidebar({ onNavigate }: DocSidebarProps = {}) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(true);
 
@@ -23,16 +27,28 @@ export default function DocSidebar() {
       href: "/courses",
       description: "Learning resources and tutorials",
     },
+    // {
+    //   title: "Mentor",
+    //   icon: Users,
+    //   href: "/mentor",
+    //   description: "Connect with mentors",
+    // },
     {
-      title: "Mentor",
-      icon: Users,
-      href: "/mentor",
-      description: "Connect with mentors",
+      title: "Community",
+      icon: MessageSquare,
+      href: "/community",
+      description: "Join communities",
     },
   ];
 
+  const handleLinkClick = () => {
+    if (onNavigate) {
+      onNavigate();
+    }
+  };
+
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border bg-card overflow-y-auto">
+    <aside className="fixed left-0 top-0 h-full w-64 border-r border-border bg-card overflow-y-auto">
       <div className="p-6">
         <div className="flex items-center gap-2 mb-8">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
@@ -65,6 +81,7 @@ export default function DocSidebar() {
             <div className="ml-2 space-y-1 border-l-2 border-border pl-2">
               <Link
                 href="/"
+                onClick={handleLinkClick}
                 className={cn(
                   "block px-3 py-2 text-sm rounded-md transition-colors",
                   pathname === "/"
@@ -82,6 +99,7 @@ export default function DocSidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={handleLinkClick}
                     className={cn(
                       "block px-3 py-2 text-sm rounded-md transition-colors",
                       isActive
@@ -103,24 +121,24 @@ export default function DocSidebar() {
         <div className="mt-8 p-4 bg-muted rounded-lg">
           <p className="text-xs text-muted-foreground mb-2">Quick Links</p>
           <div className="space-y-1">
-            <a
+            <Link
               href="#"
               className="block text-xs text-primary hover:underline"
             >
               GitHub
-            </a>
-            <a
+            </Link>
+            <Link
               href="#"
               className="block text-xs text-primary hover:underline"
             >
               Discord
-            </a>
-            <a
+            </Link>
+            <Link
               href="#"
               className="block text-xs text-primary hover:underline"
             >
               Twitter
-            </a>
+            </Link>
           </div>
         </div>
       </div>
