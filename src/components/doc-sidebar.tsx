@@ -27,12 +27,12 @@ export default function DocSidebar({ onNavigate }: DocSidebarProps = {}) {
       href: "/courses",
       description: "Learning resources and tutorials",
     },
-    // {
-    //   title: "Mentor",
-    //   icon: Users,
-    //   href: "/mentor",
-    //   description: "Connect with mentors",
-    // },
+    {
+      title: "Mentor",
+      icon: Users,
+      href: "/mentor",
+      description: "Connect with mentors",
+    },
     {
       title: "Community",
       icon: MessageSquare,

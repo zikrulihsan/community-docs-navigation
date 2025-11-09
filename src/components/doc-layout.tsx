@@ -11,6 +11,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function DocLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -65,7 +66,8 @@ export default function DocLayout({ children }: { children: React.ReactNode }) {
               </kbd>
             </div>
 
-   
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
             {/* Mobile Search Icon */}
             <Button
