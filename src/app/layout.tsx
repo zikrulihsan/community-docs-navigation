@@ -9,6 +9,20 @@ import Script from "next/script";
 export const metadata: Metadata = {
   title: "Software Engineer Growth Community",
   description: "Komunitas Para Software Engineer Tumbuh Bareng",
+  metadataBase: new URL("https://swegrowth.id"),
+  openGraph: {
+    title: "Software Engineer Growth Community",
+    description: "Komunitas Para Software Engineer Tumbuh Bareng - Platform untuk belajar, berbagi, dan tumbuh bersama",
+    url: "https://swegrowth.id",
+    siteName: "SWE Growth Community",
+    type: "website",
+    locale: "id_ID",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Software Engineer Growth Community",
+    description: "Komunitas Para Software Engineer Tumbuh Bareng - Platform untuk belajar, berbagi, dan tumbuh bersama",
+  },
 };
 
 export default function RootLayout({
