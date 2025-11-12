@@ -11,10 +11,9 @@ export default function Home() {
     <DocLayout>
       <div className="space-y-8 sm:space-y-12">
         <div className="space-y-4">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">Welcome to Community Hub</h1>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">Selamat Datang di Komunitas Software Engineer</h1>
           <p className="text-base sm:text-lg lg:text-xl text-muted-foreground">
-            Your one-stop platform for learning, networking, and growing together. Join events,
-            enroll in courses, and connect with experienced mentors.
+            Platform untuk belajar, berbagi, dan tumbuh bersama. Bergabung dengan komunitas, ikuti acara, dan temukan mentor.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <Button size="lg" className="w-full sm:w-auto">Get Started</Button>
@@ -28,9 +27,9 @@ export default function Home() {
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
                 <BookOpen className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle>Learn</CardTitle>
+              <CardTitle>Belajar</CardTitle>
               <CardDescription>
-                Access a wide range of courses designed to help you master new skills and advance your career.
+                Akses berbagai kursus yang dirancang untuk membantu Anda menguasai keterampilan baru dan memajukan karir Anda.
               </CardDescription>
             </CardHeader>
           </Card>
