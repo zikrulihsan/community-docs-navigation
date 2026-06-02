@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SWE Growth — tumbuh bareng sebagai software engineer</title>
+<link rel="icon" type="image/png" href="assets/swe-growth-logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* set theme before paint to avoid flash */
+</style>
+<script>
+  (function(){
+    try{
+      var p = localStorage.getItem('swe-theme') || 'system';
+      var d = p==='system' ? (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light') : p;
+      document.documentElement.dataset.theme = p;
+      document.documentElement.dataset.resolved = d;
+    }catch(e){
+      document.documentElement.dataset.theme='system';
+      document.documentElement.dataset.resolved='light';
+    }
+  })();
+</script>
+<style>
+  :root{
+    --bg:       oklch(0.980 0.011 150);
+    --bg-2:     oklch(0.966 0.015 152);
+    --paper:    oklch(0.995 0.004 150);
+    --ink:      oklch(0.255 0.035 248);
+    --ink-soft: oklch(0.435 0.030 248);
+    --ink-faint:oklch(0.575 0.026 248);
+    --line:     oklch(0.895 0.013 200);
+    --line-2:   oklch(0.835 0.018 200);
+    --green:    oklch(0.660 0.155 152);
+    --green-deep:oklch(0.540 0.140 153);
+    --green-br: oklch(0.770 0.165 153);
+    --navy:     oklch(0.225 0.040 250);
+    --navy-2:   oklch(0.290 0.038 250);
+    --gold:     oklch(0.820 0.105 90);
+
+    --font-display: "Ubuntu", system-ui, sans-serif;
+    --font-body: "Hanken Grotesk", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+    --maxw: 1180px;
+    --r: 18px;
+    color-scheme: light;
+  }
+
+  /* ===== DARK THEME (deep-teal, poster-inspired) ===== */
+  :root[data-resolved="dark"]{
+    color-scheme: dark;
+    --bg:        oklch(0.275 0.032 173);
+    --bg-2:      oklch(0.318 0.036 173);
+    --paper:     oklch(0.338 0.038 174);
+    --ink:       oklch(0.935 0.018 95);
+    --ink-soft:  oklch(0.815 0.018 125);
+    --ink-faint: oklch(0.680 0.020 140);
+    --line:      oklch(0.420 0.030 174);
+    --line-2:    oklch(0.500 0.034 174);
+    --green:     oklch(0.720 0.165 150);
+    --green-deep:oklch(0.790 0.150 152);
+    --green-br:  oklch(0.850 0.150 153);
+    --navy:      oklch(0.205 0.030 174);
+    --navy-2:    oklch(0.278 0.034 173);
+    --gold:      oklch(0.840 0.105 90);
+  }
+  html{ background:var(--bg); }
+
+  /* keep the WhatsApp mockup realistically light in dark mode */
+  :root[data-resolved="dark"] .wa{ background:oklch(0.975 0.006 150); border-color:oklch(0.90 0.01 150); }
+  :root[data-resolved="dark"] .wa-head{ background:oklch(0.540 0.140 153); }
+  :root[data-resolved="dark"] .bub{ background:#fff; color:oklch(0.255 0.02 200); }
+  :root[data-resolved="dark"] .bub.me{ background:oklch(0.88 0.09 150); color:oklch(0.255 0.02 200); }
+  :root[data-resolved="dark"] .bub.host{ box-shadow:0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.66 0.155 152 / .4); }
+  :root[data-resolved="dark"] .wa-type{ background:#fff; color:oklch(0.55 0.02 200); border-top-color:oklch(0.90 0.01 150); }
+  :root[data-resolved="dark"] .wa-type .field{ background:oklch(0.945 0.012 140); }
+  /* deep-green CTA card stays rich behind white text */
+  :root[data-resolved="dark"] .join-card{ background:oklch(0.500 0.135 152); }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    font-family:var(--font-body);
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--green); color:#fff; }
+
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ width:100%; max-width:var(--maxw); margin:0 auto; padding:0 28px; }
+
+  .mono{ font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase; }
+
+  /* chevron mark */
+  .mark{
+    flex:none; display:grid; place-items:center; border-radius:50%;
+    background:var(--navy); color:var(--green-br);
+  }
+  .mark svg{ width:60%; height:60%; }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:color-mix(in oklch, var(--bg) 80%, transparent);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s, background .3s;
+  }
+  nav.scrolled{ border-color:var(--line); background:color-mix(in oklch, var(--bg) 92%, transparent); }
+  .nav-in{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; height:76px; gap:20px; }
+  .nav-left{ display:flex; align-items:center; gap:16px; justify-self:start; }
+  .brand{ display:flex; align-items:center; gap:11px; font-weight:700; font-size:1.06rem; letter-spacing:-0.01em; }
+  .brand .mark{ width:32px; height:32px; }
+  .brand-logo{ height:40px; width:40px; border-radius:11px; object-fit:cover; display:block; }
+  .brand .b-name{ display:flex; flex-direction:column; line-height:1; }
+  .brand .b-name b{ font-weight:700; }
+  .brand .b-name span{ font-family:var(--font-mono); font-size:0.56rem; letter-spacing:.22em; color:var(--ink-faint); text-transform:uppercase; margin-top:3px; }
+  .nav-links{ display:flex; align-items:center; gap:32px; justify-self:center; }
+  .nav-links a.lk{ font-size:0.94rem; color:var(--ink-soft); font-weight:500; transition:color .2s; }
+  .nav-links a.lk:hover{ color:var(--ink); }
+  .btn{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:var(--font-body); font-weight:600; font-size:0.95rem;
+    padding:11px 20px; border-radius:100px; border:none; cursor:pointer;
+    transition:transform .18s cubic-bezier(.2,.8,.3,1), box-shadow .25s, background .2s;
+  }
+  .btn svg{ width:17px; height:17px; }
+  .btn-primary{ background:var(--green); color:#fff; box-shadow:0 1px 2px oklch(0.54 0.14 153 / .35), 0 8px 22px oklch(0.66 0.155 152 / .30); }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 2px 4px oklch(0.54 0.14 153 / .4), 0 14px 30px oklch(0.66 0.155 152 / .4); }
+  .btn-ghost{ background:transparent; color:var(--ink); box-shadow:inset 0 0 0 1.5px var(--line-2); }
+  .btn-ghost:hover{ box-shadow:inset 0 0 0 1.5px var(--ink); transform:translateY(-2px); }
+  .nav-cta{ display:flex; align-items:center; gap:16px; justify-self:end; }
+  .nav-cta .btn-primary{ padding:10px 19px; font-size:0.9rem; box-shadow:0 1px 2px oklch(0.54 0.14 153 / .3), 0 6px 16px oklch(0.66 0.155 152 / .22); }
+  .theme-switch{ position:relative; }
+  .ts-trigger{ display:inline-flex; align-items:center; gap:5px; height:34px; padding:0 10px; border:1px solid var(--line); background:var(--bg-2); border-radius:100px; cursor:pointer; color:var(--ink-soft); transition:color .18s, border-color .18s, background .18s; }
+  .ts-trigger:hover{ color:var(--ink); border-color:var(--line-2); }
+  .ts-trigger .ts-cur{ display:grid; place-items:center; }
+  .ts-trigger .ts-cur svg{ width:17px; height:17px; display:block; }
+  .ts-caret{ width:12px; height:12px; opacity:.55; transition:transform .25s; }
+  .theme-switch.open .ts-caret{ transform:rotate(180deg); }
+  .ts-options{ position:absolute; top:calc(100% + 9px); left:0; display:flex; flex-direction:column; gap:2px; min-width:158px; background:var(--paper); border:1px solid var(--line); border-radius:13px; padding:6px; box-shadow:0 18px 44px -18px oklch(0.25 0.04 250 / .45); opacity:0; transform:translateY(-6px) scale(.98); transform-origin:top left; pointer-events:none; transition:opacity .18s, transform .18s; z-index:60; }
+  .theme-switch.open .ts-options{ opacity:1; transform:none; pointer-events:auto; }
+  .ts-options button{ display:flex; align-items:center; gap:11px; padding:9px 11px; border:none; background:transparent; border-radius:9px; cursor:pointer; color:var(--ink-soft); font-family:var(--font-body); font-size:0.88rem; font-weight:500; text-align:left; width:100%; transition:background .15s, color .15s; }
+  .ts-options button svg{ width:17px; height:17px; flex:none; }
+  .ts-options button:hover{ background:var(--bg-2); color:var(--ink); }
+  .ts-options button.on{ background:var(--bg-2); color:var(--green-deep); }
+  .ts-options button.on span{ font-weight:600; }
+
+  /* ---------- HERO ---------- */
+  header.hero{ position:relative; padding:60px 0 84px; }
+  .hero-grid{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center; }
+  .badge{
+    display:inline-flex; align-items:center; gap:9px;
+    background:var(--paper); border:1px solid var(--line);
+    padding:7px 14px 7px 12px; border-radius:100px; color:var(--ink-soft);
+    box-shadow:0 1px 2px oklch(0.4 0.02 250 / .04);
+  }
+  .live-dot{ width:9px; height:9px; border-radius:50%; background:var(--green); position:relative; }
+  .live-dot::after{ content:""; position:absolute; inset:-5px; border-radius:50%; background:var(--green); opacity:.4; animation:pulse 1.8s ease-out infinite; }
+  @keyframes pulse{ 0%{ transform:scale(.6); opacity:.5 } 100%{ transform:scale(1.9); opacity:0 } }
+
+  h1.hero-title{
+    font-family:var(--font-display); font-weight:500;
+    font-size:clamp(3rem, 6vw, 5rem); line-height:1.02; letter-spacing:-0.022em;
+    margin:24px 0 0; text-wrap:balance;
+  }
+  h1.hero-title em{ font-style:italic; color:var(--green-deep); }
+  .hero-sub{ font-size:1.16rem; color:var(--ink-soft); max-width:40ch; margin:22px 0 0; text-wrap:pretty; }
+  .hero-actions{ display:flex; gap:14px; align-items:center; margin-top:32px; flex-wrap:wrap; }
+  .hero-meta{ display:flex; align-items:center; gap:22px; margin-top:32px; color:var(--ink-faint); }
+  .hero-meta .num{ font-family:var(--font-display); font-size:1.5rem; color:var(--ink); font-weight:500; line-height:1; }
+  .hero-meta .stat{ display:flex; flex-direction:column; gap:4px; }
+  .hero-meta .stat span:last-child{ font-size:0.8rem; }
+  .hero-meta .vr{ width:1px; height:36px; background:var(--line-2); }
+
+  /* ---------- WHATSAPP CHAT MOCKUP ---------- */
+  .wa{
+    background:var(--paper); border-radius:26px; padding:12px;
+    box-shadow:0 2px 4px oklch(0.3 0.02 250 / .06), 0 30px 60px -22px oklch(0.3 0.04 250 / .35);
+    border:1px solid var(--line);
+    transform:rotate(0.7deg);
+    max-width:430px; margin-left:auto;
+  }
+  .wa-inner{ border-radius:18px; overflow:hidden; background:oklch(0.945 0.012 140); }
+  .wa-head{ display:flex; align-items:center; gap:12px; padding:13px 15px; background:var(--green-deep); color:#fff; }
+  .wa-head .mark{ width:38px; height:38px; box-shadow:0 0 0 2px oklch(1 0 0 / .2); }
+  .wa-head .g-name{ font-weight:700; font-size:0.96rem; line-height:1.2; }
+  .wa-head .g-sub{ font-size:0.74rem; color:oklch(0.95 0.03 150); margin-top:2px; }
+  .wa-head .g-meta{ flex:1; min-width:0; }
+  .wa-body{
+    padding:16px 14px 18px; height:452px; display:flex; flex-direction:column; justify-content:flex-end; gap:9px; overflow:hidden;
+    background-image:
+      radial-gradient(oklch(0.86 0.02 140 / .55) 1px, transparent 1px);
+    background-size:18px 18px;
+  }
+  .bub{
+    max-width:82%; padding:8px 12px 7px; border-radius:13px; font-size:0.9rem; line-height:1.38;
+    background:var(--paper); box-shadow:0 1px 1px oklch(0.3 0.02 250 / .08); color:var(--ink);
+    border-top-left-radius:4px; align-self:flex-start; position:relative;
+    opacity:0; transform:translateY(10px) scale(.98);
+  }
+  .bub.in{ animation:bubin .45s cubic-bezier(.2,.8,.3,1) forwards; }
+  @keyframes bubin{ to{ opacity:1; transform:none; } }
+  .bub .nm{ font-weight:700; font-size:0.76rem; display:block; margin-bottom:1px; }
+  .bub .tm{ font-family:var(--font-mono); font-size:0.6rem; color:var(--ink-faint); float:right; margin:4px 0 -2px 8px; }
+  .bub.me{ align-self:flex-end; background:oklch(0.88 0.09 150); border-top-left-radius:13px; border-top-right-radius:4px; }
+  .bub.host{ box-shadow:0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.66 0.155 152 / .4); }
+  .nm.c1{ color:oklch(0.55 0.16 20); } .nm.c2{ color:oklch(0.52 0.15 280); }
+  .nm.c3{ color:oklch(0.55 0.14 200); } .nm.c4{ color:oklch(0.55 0.14 60); }
+  .nm.host{ color:var(--green-deep); }
+  .wa-type{ display:flex; align-items:center; gap:9px; padding:11px 15px; background:var(--paper); border-top:1px solid var(--line); color:var(--ink-faint); font-size:0.88rem; }
+  .wa-type .field{ flex:1; background:var(--bg-2); border-radius:100px; padding:8px 14px; }
+  .wa-type .send{ width:34px; height:34px; border-radius:50%; background:var(--green); display:grid; place-items:center; color:#fff; }
+  .wa-type .send svg{ width:16px; height:16px; }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{ padding:92px 0; position:relative; }
+  .sec-tag{ display:inline-flex; align-items:center; gap:10px; color:var(--green-deep); margin-bottom:18px; }
+  .sec-tag::before{ content:""; width:26px; height:1.5px; background:var(--green-deep); }
+  h2.sec-title{ font-family:var(--font-display); font-weight:500; font-size:clamp(2rem,3.6vw,2.9rem); line-height:1.08; letter-spacing:-0.018em; text-wrap:balance; }
+  .lead{ font-size:1.15rem; color:var(--ink-soft); max-width:56ch; margin-top:18px; text-wrap:pretty; }
+
+  /* WHY — letter */
+  .why{ background:var(--bg-2); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .why-grid{ display:grid; grid-template-columns:0.82fr 1.18fr; gap:60px; align-items:start; margin-top:44px; }
+  .letter p{ font-family:var(--font-display); font-size:1.4rem; line-height:1.62; color:var(--ink); margin-bottom:1.05em; text-wrap:pretty; }
+  .letter p .hl{ background:linear-gradient(transparent 62%, oklch(0.77 0.165 153 / .4) 0); padding:0 2px; }
+  .letter .sign{ display:flex; align-items:center; gap:14px; margin-top:10px; }
+  .letter .sign .av{ width:48px; height:48px; border-radius:50%; flex:none; background:repeating-linear-gradient(135deg, var(--bg) 0 7px, var(--line) 7px 8px); border:1px solid var(--line-2); display:grid; place-items:center; font-family:var(--font-mono); font-size:0.5rem; color:var(--ink-faint); text-align:center; }
+  .letter .sign .nm{ font-family:var(--font-display); font-style:italic; font-size:1.4rem; color:var(--green-deep); }
+  .letter .sign small{ display:block; font-family:var(--font-body); font-style:normal; font-size:0.84rem; letter-spacing:.02em; color:var(--ink-faint); margin-top:3px; }
+  .why-aside{ position:sticky; top:100px; }
+  .pull{ border-left:3px solid var(--green); padding:4px 0 4px 22px; }
+  .pull .big{ font-family:var(--font-display); font-size:2.6rem; line-height:1; color:var(--ink); }
+  .pull .lbl{ color:var(--ink-soft); margin-top:8px; font-size:0.96rem; text-wrap:pretty; }
+  .why-aside .pull + .pull{ margin-top:32px; }
+  .diff{
+    margin-top:40px; background:var(--navy); color:#fff; border-radius:var(--r); padding:24px 26px;
+  }
+  .diff .mono{ color:var(--green-br); }
+  .diff p{ font-family:var(--font-display); font-size:1.18rem; line-height:1.5; margin-top:10px; color:oklch(0.94 0.01 150); }
+  .diff p b{ color:#fff; font-weight:600; }
+
+  /* WHAT WE DO — programs */
+  .acts{ display:grid; grid-template-columns:repeat(2,1fr); gap:20px; margin-top:52px; }
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--r);
+    padding:28px 26px 30px; position:relative; overflow:hidden;
+    transition:transform .25s cubic-bezier(.2,.8,.3,1), box-shadow .25s, border-color .25s;
+  }
+  .card:hover{ transform:translateY(-4px); box-shadow:0 18px 40px -22px oklch(0.4 0.04 250 / .4); border-color:var(--line-2); }
+  .card .row{ display:flex; align-items:center; gap:14px; }
+  .card .ico{
+    width:46px; height:46px; border-radius:12px; display:grid; place-items:center; flex:none;
+    background:oklch(0.66 0.155 152 / .14); color:var(--green-deep);
+  }
+  .card .ico svg{ width:23px; height:23px; }
+  .card:nth-child(2) .ico{ background:oklch(0.52 0.15 280 / .12); color:oklch(0.5 0.15 280); }
+  .card:nth-child(3) .ico{ background:oklch(0.55 0.16 20 / .12); color:oklch(0.52 0.16 20); }
+  .card:nth-child(4) .ico{ background:oklch(0.55 0.14 60 / .14); color:oklch(0.48 0.13 62); }
+  .card .knum{ font-family:var(--font-mono); font-size:0.72rem; color:var(--ink-faint); margin-left:auto; }
+  .card h3{ font-family:var(--font-display); font-weight:500; font-size:1.42rem; letter-spacing:-0.01em; margin-top:18px; }
+  .card p{ color:var(--ink-soft); font-size:1rem; margin-top:9px; text-wrap:pretty; }
+  .topics{ margin-top:48px; }
+  .topics .t-lbl{ color:var(--ink-faint); margin-bottom:14px; }
+  .chips{ display:flex; flex-wrap:wrap; gap:11px; }
+  .chip{
+    display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:100px;
+    background:var(--paper); border:1px solid var(--line-2); font-weight:500; font-size:0.95rem; color:var(--ink);
+    transition:transform .18s, border-color .2s;
+  }
+  .chip:hover{ transform:translateY(-2px); border-color:var(--green); }
+  .chip::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--green); }
+
+  /* ===== GROWTH PATH (editorial ledger) ===== */
+  .paths{ margin-top:54px; border-top:1px solid var(--line-2); }
+  .path{
+    display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:36px;
+    padding:34px 8px 34px 4px; border-bottom:1px solid var(--line);
+    position:relative; transition:padding .3s cubic-bezier(.2,.8,.3,1);
+  }
+  .path::before{
+    content:""; position:absolute; left:-28px; right:-28px; top:0; bottom:0;
+    background:var(--paper); border-radius:14px; opacity:0; transform:scale(.985);
+    transition:opacity .3s, transform .3s; z-index:0;
+    box-shadow:0 20px 44px -26px oklch(0.4 0.04 250 / .5);
+  }
+  .path:hover::before{ opacity:1; transform:scale(1); }
+  .path > *{ position:relative; z-index:1; }
+  .path:hover{ padding-left:24px; padding-right:24px; }
+
+  .p-no{ font-family:var(--font-display); font-weight:500; font-size:3.6rem; line-height:.9; letter-spacing:-0.02em;
+    color:var(--line-2); font-feature-settings:"tnum"; transition:color .3s; width:1.7em; }
+  .path:hover .p-no{ color:var(--green); }
+
+  .p-main{ max-width:60ch; }
+  .p-kick{ display:inline-flex; align-items:center; gap:8px; color:var(--green-deep); margin-bottom:9px; }
+  .p-kick .yt{ width:16px; height:16px; }
+  .p-main h3{ font-family:var(--font-display); font-weight:500; font-size:1.72rem; letter-spacing:-0.015em; line-height:1.12; }
+  .p-main p{ color:var(--ink-soft); font-size:1.02rem; margin-top:10px; text-wrap:pretty; }
+  .p-modes{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+  .p-mode{ display:inline-flex; align-items:center; gap:7px; font-size:0.76rem; font-weight:600; padding:5px 12px; border-radius:100px; background:var(--bg-2); color:var(--ink-soft); }
+  .p-mode .d{ width:7px; height:7px; border-radius:50%; flex:none; }
+  .p-mode.sync .d{ background:var(--green); } .p-mode.async .d{ background:var(--gold); }
+
+  .p-end{ display:flex; flex-direction:column; align-items:flex-end; gap:16px; flex:none; min-width:184px; }
+  .p-dest{ display:inline-flex; align-items:center; gap:9px; padding:8px 14px; border-radius:100px;
+    font-family:var(--font-mono); font-size:0.68rem; letter-spacing:.1em; text-transform:uppercase; font-weight:600; white-space:nowrap; }
+  .p-dest svg{ width:16px; height:16px; flex:none; }
+  .p-dest.goakal{ background:oklch(0.66 0.155 152 / .14); color:var(--green-deep); }
+  .p-dest.yt{ background:oklch(0.62 0.21 22 / .12); color:oklch(0.55 0.21 24); }
+  .p-dest.yt svg{ color:#FF0033; }
+  .p-meta{ font-family:var(--font-mono); font-size:0.7rem; color:var(--ink-faint); text-align:right; }
+  .p-meta b{ color:var(--green-deep); font-weight:600; }
+  .p-go{ display:inline-flex; align-items:center; gap:11px; color:var(--ink); font-weight:600; font-size:0.92rem; white-space:nowrap; }
+  .p-go .circ{ width:42px; height:42px; border-radius:50%; border:1.5px solid var(--line-2); display:grid; place-items:center;
+    transition:background .25s, border-color .25s, transform .25s; }
+  .p-go .circ svg{ width:18px; height:18px; transition:transform .25s; }
+  .path:hover .p-go .circ{ background:var(--green-deep); border-color:var(--green-deep); color:#fff; transform:rotate(0deg) scale(1.06); }
+  .path:hover .p-go .circ svg{ transform:translate(2px,-2px); }
+
+  /* GROUPS */
+  .grp-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:50px; }
+  .grp{
+    display:flex; align-items:center; gap:13px; background:var(--paper); border:1px solid var(--line);
+    border-radius:14px; padding:15px 16px; transition:transform .2s, border-color .2s, box-shadow .2s;
+  }
+  .grp:hover{ transform:translateY(-3px); border-color:var(--green); box-shadow:0 12px 26px -18px oklch(0.4 0.04 250 / .5); }
+  .grp .gi{ width:42px; height:42px; border-radius:11px; flex:none; display:grid; place-items:center; background:var(--bg-2); color:var(--green-deep); }
+  .grp .gi svg{ width:21px; height:21px; }
+  .grp .gt{ min-width:0; }
+  .grp .gt .gn{ font-weight:600; font-size:0.97rem; line-height:1.25; }
+  .grp .gt .gc{ font-family:var(--font-mono); font-size:0.7rem; color:var(--ink-faint); margin-top:3px; }
+  .grp .gc b{ color:var(--green-deep); font-weight:600; }
+
+  /* ===== SUB-TOPICS (3 switchable layouts) ===== */
+  .st-wrap{ margin-top:50px; }
+  /* shared bits */
+  .st-ic{ width:44px; height:44px; border-radius:12px; flex:none; display:grid; place-items:center; background:var(--bg-2); color:var(--green-deep); }
+  .st-ic svg{ width:22px; height:22px; }
+  .st-cnt{ font-family:var(--font-mono); font-size:0.7rem; color:var(--ink-faint); }
+  .st-cnt b{ color:var(--green-deep); font-weight:600; }
+  .hide-counts .st-cnt{ display:none; }
+
+  /* ===== TWEAKS PANEL (vanilla) ===== */
+  #tw-panel{ position:fixed; right:18px; bottom:18px; z-index:100; width:286px; background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:0 24px 60px -22px oklch(0.25 0.04 250 / .55); padding:16px 16px 18px; display:none; }
+  #tw-panel.open{ display:block; animation:stFade .25s ease; }
+  .tw-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .tw-head .tt{ font-weight:700; font-size:0.95rem; }
+  .tw-x{ width:27px; height:27px; border:none; background:var(--bg-2); border-radius:8px; cursor:pointer; color:var(--ink-soft); display:grid; place-items:center; transition:background .15s; }
+  .tw-x:hover{ background:var(--line); }
+  .tw-x svg{ width:14px; height:14px; }
+  .tw-sec{ font-family:var(--font-mono); font-size:0.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin:15px 0 9px; }
+  .tw-lbl{ font-size:0.84rem; color:var(--ink-soft); }
+  .tw-seg{ display:flex; gap:4px; background:var(--bg-2); padding:4px; border-radius:10px; margin-top:7px; }
+  .tw-seg button{ flex:1; border:none; background:transparent; padding:8px 4px; border-radius:7px; font-family:var(--font-body); font-size:0.79rem; font-weight:600; color:var(--ink-soft); cursor:pointer; transition:.15s; }
+  .tw-seg button.on{ background:var(--paper); color:var(--green-deep); box-shadow:0 1px 3px oklch(0.3 0.03 250 / .18); }
+  .tw-row{ display:flex; align-items:center; justify-content:space-between; }
+  .tw-toggle{ width:44px; height:25px; border-radius:100px; background:var(--line-2); border:none; cursor:pointer; position:relative; transition:background .2s; flex:none; }
+  .tw-toggle.on{ background:var(--green); }
+  .tw-toggle::after{ content:""; position:absolute; top:3px; left:3px; width:19px; height:19px; border-radius:50%; background:#fff; transition:left .2s; box-shadow:0 1px 2px oklch(0.3 0.03 250 / .3); }
+  .tw-toggle.on::after{ left:22px; }
+  .tw-swatches{ display:flex; gap:9px; margin-top:8px; }
+  .tw-sw{ width:32px; height:32px; border-radius:9px; cursor:pointer; border:2px solid transparent; box-shadow:inset 0 0 0 1px oklch(0.3 0.03 250 / .1); transition:transform .15s; }
+  .tw-sw:hover{ transform:translateY(-2px); }
+  .tw-sw.on{ border-color:var(--ink); }
+  .thr{ display:flex; align-items:flex-start; gap:11px; padding:12px 0; border-top:1px solid var(--line); }
+  .thr:first-child{ border-top:none; }
+  .thr .dot{ width:7px; height:7px; border-radius:50%; background:var(--green); margin-top:8px; flex:none; }
+  .thr .qq{ font-size:0.98rem; color:var(--ink); line-height:1.4; }
+  .thr .rr{ font-family:var(--font-mono); font-size:0.64rem; color:var(--ink-faint); margin-top:4px; letter-spacing:.04em; }
+  .thr-lbl{ font-family:var(--font-mono); font-size:0.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin:4px 0 6px; }
+
+  /* --- A. EXPLORER --- */
+  .st-explorer{ display:grid; grid-template-columns:0.9fr 1.1fr; gap:20px; align-items:start; }
+  .st-list{ display:flex; flex-direction:column; gap:5px; max-height:540px; overflow:auto; padding-right:6px; scrollbar-width:thin; }
+  .st-list::-webkit-scrollbar{ width:6px; } .st-list::-webkit-scrollbar-thumb{ background:var(--line-2); border-radius:6px; }
+  .st-item{ display:flex; align-items:center; gap:13px; padding:12px 14px; border-radius:13px; border:1px solid transparent; cursor:pointer; transition:background .18s, border-color .18s, transform .18s; }
+  .st-item:hover{ background:var(--paper); border-color:var(--line); }
+  .st-item.active{ background:var(--paper); border-color:var(--green); box-shadow:0 10px 24px -18px oklch(0.4 0.06 153 / .6); }
+  .st-item .st-ic{ width:40px; height:40px; }
+  .st-item .nm{ font-weight:600; font-size:0.98rem; line-height:1.2; }
+  .st-item .active-go{ margin-left:auto; color:var(--green-deep); opacity:0; transform:translateX(-4px); transition:.2s; }
+  .st-item.active .active-go{ opacity:1; transform:none; }
+  .st-detail{ background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:30px 30px 32px; position:sticky; top:100px; min-height:430px; }
+  .st-detail .d-head{ display:flex; align-items:center; gap:15px; }
+  .st-detail .d-head .st-ic{ width:54px; height:54px; border-radius:15px; }
+  .st-detail h3{ font-family:var(--font-display); font-weight:500; font-size:1.6rem; letter-spacing:-0.01em; }
+  .st-detail .blurb{ font-size:1.08rem; color:var(--ink-soft); margin:18px 0 22px; text-wrap:pretty; }
+  .st-fade{ animation:stFade .4s cubic-bezier(.2,.8,.3,1); }
+  @keyframes stFade{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
+  /* --- B. ACCORDION --- */
+  .st-acc{ display:flex; flex-direction:column; gap:11px; max-width:860px; }
+  .acc-item{ background:var(--paper); border:1px solid var(--line); border-radius:15px; overflow:hidden; transition:border-color .2s, box-shadow .2s; }
+  .acc-item.open{ border-color:var(--green); box-shadow:0 14px 30px -22px oklch(0.4 0.06 153 / .55); }
+  .acc-head{ display:flex; align-items:center; gap:15px; padding:18px 22px; cursor:pointer; }
+  .acc-head .nm{ font-family:var(--font-display); font-weight:500; font-size:1.28rem; letter-spacing:-0.01em; }
+  .acc-head .st-cnt{ margin-left:auto; }
+  .acc-head .chev{ color:var(--ink-faint); transition:transform .3s; flex:none; }
+  .acc-item.open .chev{ transform:rotate(180deg); color:var(--green-deep); }
+  .acc-body{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .35s cubic-bezier(.2,.8,.3,1); }
+  .acc-item.open .acc-body{ grid-template-rows:1fr; }
+  .acc-inner{ overflow:hidden; }
+  .acc-pad{ padding:0 22px 20px 81px; }
+  .acc-pad .blurb{ color:var(--ink-soft); margin-bottom:8px; text-wrap:pretty; }
+
+  /* --- C. SLIDER --- */
+  .st-slider{ position:relative; }
+  .st-track{ display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; padding:6px 2px 20px; scrollbar-width:none; }
+  .st-track::-webkit-scrollbar{ display:none; }
+  .st-card{ flex:0 0 330px; scroll-snap-align:start; background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:26px 26px 28px; transition:border-color .2s, box-shadow .2s; }
+  .st-card:hover{ border-color:var(--green); box-shadow:0 16px 34px -24px oklch(0.4 0.06 153 / .5); }
+  .st-card .c-head{ display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+  .st-card h3{ font-family:var(--font-display); font-weight:500; font-size:1.32rem; letter-spacing:-0.01em; }
+  .st-card .blurb{ color:var(--ink-soft); font-size:0.98rem; margin:0 0 14px; text-wrap:pretty; }
+  .st-card .thr{ padding:9px 0; } .st-card .thr .qq{ font-size:0.92rem; }
+  .st-sldnav{ display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .st-sldnav .sbtn{ width:42px; height:42px; border-radius:50%; border:1px solid var(--line-2); background:var(--paper); color:var(--ink); display:grid; place-items:center; cursor:pointer; transition:transform .18s, border-color .2s, background .2s; }
+  .st-sldnav .sbtn:hover{ transform:translateY(-2px); border-color:var(--green); color:var(--green-deep); }
+  .st-sldnav .sbtn svg{ width:18px; height:18px; }
+  .st-sldnav .shint{ font-family:var(--font-mono); font-size:0.68rem; letter-spacing:.1em; color:var(--ink-faint); margin-left:6px; }
+
+  @media (max-width:920px){
+    .st-explorer{ grid-template-columns:1fr; }
+    .st-list{ flex-direction:row; overflow-x:auto; max-height:none; padding-bottom:8px; }
+    .st-item{ flex:0 0 auto; }
+    .st-item .nm{ white-space:nowrap; } .st-item .st-cnt{ display:none; }
+    .st-detail{ position:static; }
+    .acc-pad{ padding-left:22px; }
+  }
+
+  /* UPCOMING (dark) */
+  .up{ background:var(--navy); color:#fff; }
+  .up h2.sec-title{ color:#fff; }
+  .up .sec-tag{ color:var(--green-br); } .up .sec-tag::before{ background:var(--green-br); }
+  .up .lead{ color:oklch(0.82 0.015 200); }
+  .events{ margin-top:48px; border-top:1px solid var(--navy-2); }
+  .event{
+    display:grid; grid-template-columns:54px 1fr auto; gap:26px; align-items:center;
+    padding:24px 6px; border-bottom:1px solid var(--navy-2);
+    transition:background .25s, padding-left .25s; cursor:default;
+  }
+  .event:hover{ background:var(--navy-2); padding-left:16px; }
+  .ev-n{ font-family:var(--font-display); font-size:1.7rem; color:var(--green-br); line-height:1; }
+  .ev-main h3{ font-family:var(--font-display); font-weight:500; font-size:1.36rem; color:#fff; }
+  .ev-main p{ color:oklch(0.78 0.015 200); margin-top:4px; font-size:0.96rem; text-wrap:pretty; }
+  .ev-tag{ font-family:var(--font-mono); font-size:0.64rem; letter-spacing:.12em; text-transform:uppercase; padding:7px 13px; border-radius:100px; border:1px solid var(--navy-2); color:oklch(0.82 0.015 200); white-space:nowrap; }
+  .ev-tag.live{ border-color:var(--green-br); color:var(--green-br); }
+  .up-note{ margin-top:30px; color:oklch(0.7 0.02 200); font-size:0.96rem; display:flex; align-items:center; gap:10px; }
+  .up-note .live-dot{ background:var(--green-br); } .up-note .live-dot::after{ background:var(--green-br); }
+
+  /* PERSONAS */
+  .who-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:50px; }
+  .who-c{ background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:26px 26px; display:flex; gap:18px; align-items:flex-start; }
+  .who-c .q{ font-family:var(--font-display); font-style:italic; font-size:2rem; color:var(--green); line-height:0.7; flex:none; }
+  .who-c p{ font-size:1.08rem; color:var(--ink); text-wrap:pretty; }
+  .who-c p b{ color:var(--green-deep); font-weight:600; }
+
+  /* HOST */
+  .host{ background:var(--bg-2); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .host-grid{ display:grid; grid-template-columns:0.78fr 1.22fr; gap:56px; align-items:center; }
+  .host-photo{ aspect-ratio:4/5; border-radius:20px; background:repeating-linear-gradient(135deg, var(--bg) 0 16px, var(--line) 16px 17px); border:1px solid var(--line-2); display:flex; align-items:flex-end; justify-content:center; padding:18px; }
+  .host-photo .cap{ font-family:var(--font-mono); font-size:0.7rem; color:var(--ink-faint); letter-spacing:.1em; }
+  .host .role{ color:var(--green-deep); font-family:var(--font-mono); font-size:0.74rem; letter-spacing:.14em; text-transform:uppercase; }
+  .host h2{ font-family:var(--font-display); font-weight:500; font-size:clamp(1.9rem,3vw,2.5rem); letter-spacing:-0.018em; margin-top:10px; }
+  .host p{ font-size:1.1rem; color:var(--ink-soft); margin-top:20px; max-width:50ch; text-wrap:pretty; }
+  .host p + p{ margin-top:14px; }
+
+  /* SOCIAL / FOLLOW */
+  .social-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:50px; }
+  .social{ display:flex; align-items:center; gap:16px; background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:22px; transition:transform .25s cubic-bezier(.2,.8,.3,1), box-shadow .25s, border-color .25s; }
+  .social:hover{ transform:translateY(-4px); box-shadow:0 18px 40px -22px oklch(0.4 0.04 250 / .4); }
+  .s-ic{ width:52px; height:52px; border-radius:14px; flex:none; display:grid; place-items:center; transition:background .25s, color .25s; }
+  .s-ic svg{ width:26px; height:26px; }
+  .s-meta{ min-width:0; flex:1; }
+  .s-name{ font-family:var(--font-display); font-weight:500; font-size:1.2rem; letter-spacing:-0.01em; display:block; line-height:1.1; }
+  .s-handle{ font-family:var(--font-mono); font-size:0.72rem; color:var(--ink-faint); margin-top:5px; display:block; }
+  .s-go{ color:var(--ink-faint); flex:none; transition:transform .25s, color .25s; }
+  .s-go svg{ width:20px; height:20px; }
+  .social:hover .s-go{ transform:translate(2px,-2px); }
+  .social.linkedin .s-ic{ background:oklch(0.55 0.13 252 / .14); color:oklch(0.52 0.13 252); }
+  .social.linkedin:hover{ border-color:oklch(0.52 0.13 252); }
+  .social.linkedin:hover .s-ic{ background:oklch(0.52 0.13 252); color:#fff; }
+  .social.linkedin:hover .s-go{ color:oklch(0.52 0.13 252); }
+  .social.x .s-ic{ background:oklch(0.5 0.02 250 / .12); color:var(--ink); }
+  .social.x:hover{ border-color:var(--ink); }
+  .social.x:hover .s-ic{ background:var(--ink); color:var(--paper); }
+  .social.x:hover .s-go{ color:var(--ink); }
+  .social.ig .s-ic{ background:oklch(0.6 0.2 8 / .13); color:oklch(0.56 0.2 8); }
+  .social.ig:hover{ border-color:oklch(0.56 0.2 8); }
+  .social.ig:hover .s-ic{ background:linear-gradient(135deg,#F58529,#DD2A7B 52%,#8134AF 92%); color:#fff; }
+  .social.ig:hover .s-go{ color:oklch(0.56 0.2 8); }
+
+  .social-strip{ padding:60px 0 72px; border-top:1px solid var(--line); }
+  .join-social{ margin-top:54px; }
+  .join-social .social-grid{ margin-top:24px; max-width:920px; margin-left:auto; margin-right:auto; }
+  .strip-lbl{ text-align:center; font-family:var(--font-display); font-weight:500; font-size:1.45rem; letter-spacing:-0.01em; color:var(--ink); margin-bottom:30px; text-wrap:balance; }
+  .social-strip .social-grid{ margin-top:0; max-width:920px; margin-left:auto; margin-right:auto; }
+
+  /* JOIN */
+  .join{ padding:104px 0; }
+  .join-card{
+    max-width:880px; margin:0 auto; background:var(--green-deep); color:#fff; text-align:center;
+    border-radius:28px; padding:62px 54px; position:relative; overflow:hidden;
+    box-shadow:0 30px 70px -28px oklch(0.54 0.14 153 / .6);
+  }
+  .join-card::before{ content:""; position:absolute; top:-42%; right:-12%; width:340px; height:340px; border-radius:50%; background:radial-gradient(circle, oklch(0.82 0.16 153 / .5), transparent 68%); }
+  .join-card::after{ content:""; position:absolute; bottom:-50%; left:-10%; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle, oklch(0.3 0.05 250 / .35), transparent 70%); }
+  .join-card .sec-tag{ color:oklch(0.92 0.08 153); justify-content:center; position:relative; }
+  .join-card .sec-tag::before{ background:oklch(0.92 0.08 153); }
+  .join-card h2{ font-family:var(--font-display); font-weight:500; font-size:clamp(2.1rem,4vw,3.1rem); line-height:1.08; letter-spacing:-0.02em; position:relative; text-wrap:balance; }
+  .join-card p{ font-size:1.16rem; color:oklch(0.96 0.04 153); margin:18px auto 0; max-width:48ch; position:relative; }
+  .join-actions{ display:flex; gap:14px; justify-content:center; margin-top:34px; flex-wrap:wrap; position:relative; }
+  .btn-white{ background:#fff; color:var(--green-deep); box-shadow:0 10px 24px oklch(0.4 0.06 153 / .3); }
+  .btn-white:hover{ transform:translateY(-2px); box-shadow:0 16px 32px oklch(0.4 0.06 153 / .4); }
+  .btn-outline-w{ background:transparent; color:#fff; box-shadow:inset 0 0 0 1.5px oklch(0.95 0.04 153 / .6); }
+  .btn-outline-w:hover{ box-shadow:inset 0 0 0 1.5px #fff; transform:translateY(-2px); }
+  .join-steps{ display:flex; gap:12px; justify-content:center; margin-top:38px; flex-wrap:wrap; position:relative; }
+  .step{ font-family:var(--font-mono); font-size:0.72rem; letter-spacing:.04em; color:oklch(0.95 0.04 153); display:flex; align-items:center; gap:9px; }
+  .step .n{ width:22px; height:22px; border-radius:50%; background:oklch(0.95 0.04 153 / .2); display:grid; place-items:center; font-size:0.7rem; }
+  .step-arrow{ color:oklch(0.9 0.05 153 / .6); }
+
+  /* FOOTER */
+  footer{ padding:56px 0 62px; border-top:1px solid var(--line); }
+  .foot-in{ display:flex; align-items:flex-start; justify-content:space-between; gap:30px 48px; flex-wrap:wrap; }
+  .foot-brand{ display:flex; flex-direction:column; gap:16px; max-width:340px; }
+  .foot-links{ display:flex; flex-wrap:wrap; gap:14px 26px; }
+  .foot-links a{ color:var(--ink-soft); font-size:0.92rem; transition:color .2s; }
+  .foot-links a:hover{ color:var(--green-deep); }
+  .foot-note{ color:var(--ink-faint); font-size:0.86rem; }
+
+  /* reveal */
+  .reveal{ opacity:0; transform:translateY(22px); transition:opacity .7s cubic-bezier(.2,.8,.3,1), transform .7s cubic-bezier(.2,.8,.3,1); }
+  .reveal.show{ opacity:1; transform:none; }
+
+  @media (max-width:920px){
+    .hero-grid,.why-grid,.host-grid{ grid-template-columns:1fr; gap:44px; }
+    .grp-grid{ grid-template-columns:1fr 1fr; }
+    .who-grid{ grid-template-columns:1fr; }
+    .why-aside{ position:static; }
+    .nav-links{ display:none; }
+    .wa{ transform:none; margin:0 auto; }
+    .path{ gap:24px; }
+    .p-no{ font-size:2.8rem; }
+    .p-end{ min-width:150px; }
+  }
+  @media (max-width:620px){
+    .wrap{ padding:0 20px; }
+    section{ padding:68px 0; }
+    .acts,.grp-grid{ grid-template-columns:1fr; }
+    .social-grid{ grid-template-columns:1fr; }
+    .path{ grid-template-columns:auto 1fr; gap:18px 16px; padding:26px 4px; }
+    .path:hover{ padding-left:14px; padding-right:14px; }
+    .p-no{ font-size:2.2rem; grid-row:1; }
+    .p-main{ grid-column:2; }
+    .p-end{ grid-column:1 / -1; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:flex-start; gap:14px; min-width:0; }
+    .p-meta{ text-align:left; }
+    .p-go{ margin-left:auto; }
+    .event{ grid-template-columns:40px 1fr; row-gap:8px; }
+    .ev-tag{ grid-column:2; justify-self:start; }
+    .hero-meta{ flex-wrap:wrap; gap:16px; }
+    .join-card{ padding:46px 26px; }
+    .letter p{ font-size:1.22rem; }
+    .nav-cta .btn{ padding:9px 15px; font-size:0.88rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="wrap nav-in">
+    <div class="nav-left">
+      <a class="brand" href="#top" aria-label="SWE Growth Community">
+        <img class="brand-logo" src="assets/swe-growth-logo.png" alt="SWE Growth Community" />
+      </a>
+      <div class="theme-switch" id="themeSwitch">
+        <button type="button" class="ts-trigger" id="tsTrigger" aria-label="Ganti tema" aria-haspopup="true" aria-expanded="false">
+          <span class="ts-cur"></span>
+          <svg class="ts-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="ts-options" role="menu" aria-label="Tema tampilan">
+          <button type="button" data-theme-val="light" role="menuitemradio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/></svg><span>Terang</span></button>
+          <button type="button" data-theme-val="system" role="menuitemradio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12.5" rx="2"/><path d="M9 20.5h6M12 16.5v4"/></svg><span>Sistem</span></button>
+          <button type="button" data-theme-val="dark" role="menuitemradio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13.5A8 8 0 1 1 10.5 4a6.3 6.3 0 0 0 9.5 9.5z"/></svg><span>Gelap</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a class="lk" href="#kenapa">Kenapa kita ada</a>
+      <a class="lk" href="#kegiatan">Yang kita lakuin</a>
+      <a class="lk" href="#grup">Grup diskusi</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-primary" href="#gabung">Gabung komunitas</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top" data-screen-label="Hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="badge mono"><span class="live-dot"></span>Komunitas Software Engineer · Indonesia</span>
+      <h1 class="hero-title" style="font-size: 70px">Bareng - Bareng Bertumbuh sebagai Software Engineer 🤝</h1>
+      <p class="hero-sub" style="font-family: &quot;Hanken Grotesk&quot;">Tumbuh sebagai engineer itu capek, kan? Apalagi kalau jalan sendirian.</p>
+      <p class="hero-sub" style="font-family: &quot;Hanken Grotesk&quot;">Yok capeknya bareng - bareng aja.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#gabung">Gabung komunitas
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="#kegiatan">Lihat kegiatan kita</a>
+      </div>
+      <div class="hero-meta">
+        <div class="stat"><span class="num">1024+</span><span class="mono">anggota</span></div>
+        <div class="vr"></div>
+        <div class="stat"><span class="num">13+</span><span class="mono">GRUP DISKUSI</span></div>
+        <div class="vr"></div>
+        <div class="stat"><span class="num">gratis</span><span class="mono">selamanya</span></div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="wa">
+        <div class="wa-inner">
+          <div class="wa-head">
+            <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9 L12 5 L18 9"/><path d="M6 13.5 L12 9.5 L18 13.5"/><path d="M6 18 L12 14 L18 18"/></svg></span>
+            <div class="g-meta">
+              <div class="g-name">General Discussion · SWE Growth</div>
+              <div class="g-sub">995 anggota · 218 online</div>
+            </div>
+          </div>
+          <div class="wa-body" id="waBody"></div>
+          <div class="wa-type">
+            <div class="field">Ketik pesan…</div>
+            <span class="send"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4l0 6 12 2-12 2z"/></svg></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- WHY -->
+<section class="why" id="kenapa" data-screen-label="Kenapa kita ada">
+  <div class="wrap" style="font-family: &quot;Hanken Grotesk&quot;">
+    <span class="sec-tag mono">Selayang pandang</span>
+    <h2 class="sec-title">Awalnya cuma kelas. Sekarang, rumah buat tumbuh bareng.</h2>
+    <div class="why-grid">
+      <div class="why-aside">
+        <div class="pull">
+          <div class="big">0...</div>
+          <div class="lbl">biayanya buat gabung. Langsung gas aja selagi masih bisa ditampung.</div>
+        </div>
+        <div class="pull">
+          <div class="big">1</div>
+          <div class="lbl">fokusnya: <em>membersamai career growth</em> software engineer Indonesia.</div>
+        </div>
+        <div class="diff">
+          <span class="mono">Yang agak sedikit beda</span>
+          <p style="font-family: Newsreader">Komunitas kita tidak terlalu fokus ke tech stack atau teknikal tertentu. Tidak juga berdasarkan daerah tertentu seperti komunitas daerah.</p>
+          <p style="font-family: Newsreader">Fokus utamanya adalah membersamai perjalanan dan perjuangan temen - temen software engineer di Indonesia, dimanapun mereka berada.</p>
+        </div>
+      </div>
+      <div class="letter">
+        <p style="font-family: Newsreader">SWE Growth pertama kali ada hanya sebagai platform belajar, bukan komunitas. Dulu isinya kelas berbayar aja. Fokus topiknya memang untuk upgrade karir software engineer, terlebih di hal non teknis.</p>
+        <p style="font-family: Newsreader">Waktu buka kelas pertama, lah kok rame?</p>
+        <p style="font-family: Newsreader">Ternyata, memang banyak yang relate dengan topik yang dibawakan di dalam maupun diluar grup yang dibuat saat itu.</p>
+        <p style="font-family: Newsreader">Alhasil kita mantapkan aja untuk bawa SWE Growth ini ke arah komunitas, <span class="hl">terbuka untuk semua</span>.</p>
+        <p style="font-family: Newsreader">Kami menemukan satu pola: teman-teman yang <em>udah</em> masuk dunia SWE pun sering bingung soal <em>"what next?"</em>. Mereka butuh dukungan buat tumbuh dan bisa survive di industri yang dinamis ini.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT WE DO -->
+<section id="kegiatan" data-screen-label="Yang kita lakuin">
+  <div class="wrap">
+    <span class="sec-tag mono">Yang kita lakuin</span>
+    <h2 class="sec-title">Cara kita tumbuh bareng.</h2>
+    <p class="lead">Semua program dirancang dari kebutuhan nyata teman-teman di lapangan — dan sebagian besar direkam. Tinggal klik buat lanjut ke platform kelasnya, playlist, atau diskusinya.</p>
+    <div class="paths">
+
+      <!-- 01 — KELAS ONLINE -->
+      <a class="path" href="https://goakal.com/ahsanprojectsbw" target="_blank" rel="noopener">
+        <span class="p-no">01</span>
+        <div class="p-main">
+          <span class="p-kick mono">Kelas terstruktur</span>
+          <h3>Kelas Online</h3>
+          <p>Wadah tempat belajar bareng mentor - mentor yang sudah punya pengalaman di bidangnya. Ada yang berbayar, ada yang gratis. Ada yang dari swe growth ada yang dari mentornyg.
+Apapun itu, kita coba untuk upgrade diri bareng - bareng.</p>
+        </div>
+        <div class="p-end">
+          <span class="p-dest goakal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16M4 12h16M4 18.5h10"/></svg>Goakal</span>
+          <span class="p-meta">Belajar bareng mentor</span>
+          <span class="p-go">Mulai belajar<span class="circ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span></span>
+        </div>
+      </a>
+
+      <!-- 02 — SHARING SESSION & PODCAST -->
+      <a class="path" href="https://www.youtube.com/playlist?list=PLgWXFC8NK7WCUpvVLrYL2GsJHhOdHDv7R" target="_blank" rel="noopener">
+        <span class="p-no">02</span>
+        <div class="p-main">
+          <span class="p-kick mono">Sharing session &amp; podcast</span>
+          <h3>Sharing Session &amp; Podcast</h3>
+          <p>Obrolan santai tapi berisi di dunia software engineering - bareng mentor dan atau sesama anggota. Ada sesi livenya, tapi kalo ketinggalan tetap bisa nonton ulang semuanya di playlist youtube kita.</p>
+        </div>
+        <div class="p-end">
+          <span class="p-dest yt"><svg class="yt" viewBox="0 0 24 24" fill="#FF0033"><path d="M23 7.5a3 3 0 0 0-2.1-2.1C19 5 12 5 12 5s-7 0-8.9.4A3 3 0 0 0 1 7.5 31 31 0 0 0 .6 12 31 31 0 0 0 1 16.5a3 3 0 0 0 2.1 2.1C5 19 12 19 12 19s7 0 8.9-.4A3 3 0 0 0 23 16.5 31 31 0 0 0 23.4 12 31 31 0 0 0 23 7.5zM9.8 15.3V8.7l5.7 3.3z"/></svg>YouTube</span>
+          <span class="p-meta">Playlist · semua episode</span>
+          <span class="p-go">Buka playlist<span class="circ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span></span>
+        </div>
+      </a>
+
+      <!-- 03 — DISKUSI KOMUNITAS -->
+      <a class="path" href="https://www.youtube.com/playlist?list=PLgWXFC8NK7WCUpvVLrYL2GsJHhOdHDv7R" target="_blank" rel="noopener">
+        <span class="p-no">03</span>
+        <div class="p-main">
+          <span class="p-kick mono">Diskusi komunitas</span>
+          <h3>Diskusi Komunitas</h3>
+          <p>Obrolan harian yang nggak pernah berhenti di grup.
+Tapi sesi diskusi ga cuma di WA, sering juga kita diskusi live. Dari bedah problem sampai tanya-jawab bareng. </p>
+          <div class="p-modes">
+            <span class="p-mode sync"><span class="d"></span>Live online · direkam</span>
+            <span class="p-mode async"><span class="d"></span>Grup WhatsApp</span>
+          </div>
+        </div>
+        <div class="p-end">
+          <span class="p-dest yt"><svg class="yt" viewBox="0 0 24 24" fill="#FF0033"><path d="M23 7.5a3 3 0 0 0-2.1-2.1C19 5 12 5 12 5s-7 0-8.9.4A3 3 0 0 0 1 7.5 31 31 0 0 0 .6 12 31 31 0 0 0 1 16.5a3 3 0 0 0 2.1 2.1C5 19 12 19 12 19s7 0 8.9-.4A3 3 0 0 0 23 16.5 31 31 0 0 0 23.4 12 31 31 0 0 0 23 7.5zM9.8 15.3V8.7l5.7 3.3z"/></svg>YouTube</span>
+          <span class="p-meta">Playlist · diskusi live</span>
+          <span class="p-go">Buka playlist<span class="circ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span></span>
+        </div>
+      </a>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- GROUP DISCUSSIONS -->
+<section id="grup" data-screen-label="Grup diskusi">
+  <div class="wrap">
+    <span class="sec-tag mono" style="font-size: 12px">Grup diskusi</span>
+    <h2 class="sec-title" style="font-family: Ubuntu">Tiap minat, ada grupnya.</h2>
+    <p class="lead">Komunitas kebagi jadi sub-topik biar obrolan tetap fokus - dari backend, AI tools, CS fundamental, sampai book club dan persiapan kerja ke luar negeri.</p>
+    <div class="st-wrap" id="stWrap"></div>
+  </div>
+</section>
+
+<!-- JOIN -->
+<section class="join" id="gabung" data-screen-label="Gabung">
+  <div class="wrap">
+    <div class="join-card">
+      <span class="sec-tag mono" style="font-size: 14px">Cara gabung</span>
+      <h2>Pintunya sudah di hadapanmu🚪</h2>
+      <p style="font-size: 20px">Buka pintu untuk ruang tumbuh bersama.
+
+
+Masuk ke grup, sapa teman-teman di grup, perkenalan, terus ikut kegiatan apa pun yang lagi jalan. Segampang itu.</p>
+      <div class="join-actions">
+        <a class="btn btn-white" href="#">Gabung lewat WhatsApp
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-outline-w" href="#">Isi data anggota</a>
+      </div>
+      <div class="join-steps">
+        <span class="step"><span class="n">1</span>Gabung grup</span>
+        <span class="step-arrow">→</span>
+        <span class="step"><span class="n">2</span>Sapa &amp; isi data 👋</span>
+        <span class="step-arrow">→</span>
+        <span class="step"><span class="n">3</span>Ikut kegiatan apa pun</span>
+      </div>
+    </div>
+    <div class="join-social" id="sosmed">
+      <p class="strip-lbl">Tetap update dengan kegiatan kami.</p>
+      <div class="social-grid">
+        <a class="social linkedin" href="https://www.linkedin.com/company/swe-growth-community" target="_blank" rel="noopener">
+          <span class="s-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.85V21h-4z"/></svg></span>
+          <div class="s-meta"><span class="s-name">LinkedIn</span><span class="s-handle">SWE Growth Community</span></div>
+          <span class="s-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+        </a>
+        <a class="social x" href="https://x.com/swegrowth" target="_blank" rel="noopener">
+          <span class="s-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-7.1 8.1L22 21h-6.4l-5-6.5L4.8 21H1.8l7.6-8.7L2 3h6.6l4.5 6.1L17.5 3zm-1.05 16h1.7L7.65 4.8H5.85z"/></svg></span>
+          <div class="s-meta"><span class="s-name">X</span><span class="s-handle">@swegrowth</span></div>
+          <span class="s-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+        </a>
+        <a class="social ig" href="https://www.instagram.com/swegrowth" target="_blank" rel="noopener">
+          <span class="s-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.2"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.25" fill="currentColor" stroke="none"/></svg></span>
+          <div class="s-meta"><span class="s-name">Instagram</span><span class="s-handle">@swegrowth</span></div>
+          <span class="s-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer data-screen-label="Footer">
+  <div class="wrap foot-in">
+    <div class="foot-brand">
+    <a class="brand" href="#top">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9 L12 5 L18 9"/><path d="M6 13.5 L12 9.5 L18 13.5"/><path d="M6 18 L12 14 L18 18"/></svg></span>
+      <span class="b-name"><b>swe growth</b><span>bagian dari ahsan project</span></span>
+    </a>
+      <div class="foot-note">Dari, oleh dan untuk Software Engineer yang mau terus tumbuh 🚀</div>
+    </div>
+    <div class="foot-links">
+      <a href="#kenapa">Kenapa kita ada</a>
+      <a href="#kegiatan">Kegiatan</a>
+      <a href="#grup">Grup</a>
+      <a href="#gabung">Gabung</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // nav shadow
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 12), { passive:true });
+
+  // ---- theme switch (light / system / dark) ----
+  (function(){
+    const root = document.documentElement;
+    const mq = matchMedia('(prefers-color-scheme: dark)');
+    const sw = document.getElementById('themeSwitch');
+    const trigger = document.getElementById('tsTrigger');
+    const cur = sw ? sw.querySelector('.ts-cur') : null;
+    const resolve = p => p==='system' ? (mq.matches?'dark':'light') : p;
+    function setCur(p){
+      if(!sw || !cur) return;
+      const opt = sw.querySelector('.ts-options button[data-theme-val="'+p+'"]');
+      if(opt){ cur.innerHTML = opt.querySelector('svg').outerHTML; }
+    }
+    function apply(p){
+      root.dataset.theme = p;
+      root.dataset.resolved = resolve(p);
+      if(sw) sw.querySelectorAll('.ts-options button').forEach(b => b.classList.toggle('on', b.dataset.themeVal===p));
+      setCur(p);
+      try{ localStorage.setItem('swe-theme', p); }catch(e){}
+    }
+    function closeSw(){ if(sw){ sw.classList.remove('open'); if(trigger) trigger.setAttribute('aria-expanded','false'); } }
+    apply(root.dataset.theme || 'system');
+    mq.addEventListener('change', ()=>{ if(root.dataset.theme==='system') root.dataset.resolved = resolve('system'); });
+    if(trigger) trigger.addEventListener('click', e=>{ e.stopPropagation(); const open = sw.classList.toggle('open'); trigger.setAttribute('aria-expanded', open?'true':'false'); });
+    if(sw) sw.querySelector('.ts-options').addEventListener('click', e=>{ const b = e.target.closest('button'); if(b){ apply(b.dataset.themeVal); closeSw(); } });
+    document.addEventListener('click', e=>{ if(sw && !sw.contains(e.target)) closeSw(); });
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSw(); });
+  })();
+
+  // ---- YouTube lazy embed for activity cards ----
+  document.querySelectorAll('.vid').forEach(v=>{
+    const id = v.dataset.yt;
+    if(id){
+      const img = document.createElement('img');
+      img.className = 'thumb'; img.loading = 'lazy'; img.alt = 'Thumbnail video';
+      img.src = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      v.insertBefore(img, v.firstChild);
+    }
+    v.addEventListener('click', ()=>{
+      const vid = v.dataset.yt;
+      if(vid){
+        v.innerHTML = `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&rel=0" title="YouTube video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      } else if(v.dataset.href && v.dataset.href !== '#'){
+        window.open(v.dataset.href, '_blank', 'noopener');
+      }
+    });
+  });
+
+  // ---- sub-topics data ----
+  const topics = [
+    { n:'General Discussion', c:995, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.9A8.4 8.4 0 1 1 21 11.5z"/></svg>`, blurb:'Obrolan harian segala arah — intro anggota baru, kabar industri, sampai curhat soal kerjaan.', threads:[
+      { q:'AI bakal gantiin junior dev nggak sih? ramai banget nih', r:84 },
+      { q:'Share role & company baru kalian dong, biar saling kenal', r:51 },
+      { q:'Tips jaga work-life balance di startup yang serba cepat?', r:37 } ] },
+    { n:'Backend SE Growth', c:751, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v6c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-6"/><path d="M4.5 11.5v6c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-6"/></svg>`, blurb:'Desain API, database, dan scaling. Tempat ngebedah keputusan arsitektur dari kasus nyata.', threads:[
+      { q:'Monolith vs microservices buat tim 5 orang, mending mana?', r:62 },
+      { q:'Cara paling rapi handle N+1 query di ORM', r:29 },
+      { q:'Idempotency key di payment service — pola yang kalian pakai?', r:18 } ] },
+    { n:'AI Tools SWE Growth', c:724, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.6l2.1 5.6 5.6 2.1-5.6 2.1L12 18l-2.1-5.6L4.3 10.3l5.6-2.1z"/><circle cx="18.7" cy="5.3" r="1.2"/></svg>`, blurb:'Ngulik AI buat bikin kerjaan engineering lebih cepat — tanpa kehilangan kualitas.', threads:[
+      { q:'Workflow Cursor + Claude kalian gimana sehari-hari?', r:73 },
+      { q:'Prompt buat code review otomatis yang beneran kepake', r:41 },
+      { q:'AI bikin produktif beneran atau cuma hype? debat yuk', r:55 } ] },
+    { n:'CS Fundamental SE', c:646, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8l-4 4 4 4"/><path d="M15 8l4 4-4 4"/></svg>`, blurb:'Algoritma, struktur data, dan dasar sistem — pondasi yang bikin kamu tahan banting.', threads:[
+      { q:'Recap Big-O buat yang udah lama lupa', r:48 },
+      { q:'Kapan sebenernya pakai hash map vs tree?', r:33 },
+      { q:'Belajar Operating System dari resource mana ya?', r:26 } ] },
+    { n:'English Club', c:640, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.7 2.8 2.7 15.2 0 18c-2.7-2.8-2.7-15.2 0-18z"/></svg>`, blurb:'Latihan bahasa Inggris buat interview, dokumentasi, dan rencana kerja ke luar negeri.', threads:[
+      { q:'Weekly speaking practice tiap Sabtu, gabung yuk', r:39 },
+      { q:'Minta koreksi cover letter buat apply abroad dong', r:22 },
+      { q:'Mock interview in English — cari partner', r:17 } ] },
+    { n:'Frontend SE Growth', c:458, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M3 9h18"/><circle cx="6" cy="6.7" r=".55" fill="currentColor"/><circle cx="8" cy="6.7" r=".55" fill="currentColor"/></svg>`, blurb:'React, state management, performa, dan craft UI. Dari debugging sampai pilihan arsitektur.', threads:[
+      { q:'Server Components worth dipindahin sekarang nggak?', r:44 },
+      { q:'Cara debug re-render berlebih yang efektif', r:31 },
+      { q:'Pilihan state management favorit kalian di 2026?', r:58 } ] },
+    { n:'Book Club SWE Growth', c:375, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4H18a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H6.5A2.5 2.5 0 0 1 4 16.5v-10A2.5 2.5 0 0 1 6.5 4z"/><path d="M4 16.5A2.5 2.5 0 0 1 6.5 14H19"/></svg>`, blurb:'Baca buku bareng, bab per bab, terus diskusi ramai-ramai biar nempel.', threads:[
+      { q:'Lagi baca: The Effective Engineer — diskusi bab 4', r:28 },
+      { q:'Designing Data-Intensive Apps, ada yang nyusul?', r:35 },
+      { q:'Rekomendasi buku buat yang mau jadi tech lead', r:24 } ] },
+    { n:'Ingin Jadi Programmer Senior', c:274, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5l6-6 4 4 7.5-7.5"/><path d="M16 7h4.5v4.5"/></svg>`, blurb:'Jalur dari mid ke senior — ekspektasi, cara nunjukkin impact, dan mindset-nya.', threads:[
+      { q:'Beda mid vs senior yang sebenernya apa sih?', r:67 },
+      { q:'Cara nunjukkin impact biar dilirik buat promosi', r:43 },
+      { q:'Udah senior tapi masih imposter syndrome, normal?', r:52 } ] },
+    { n:'Infra & DevOps', c:177, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 18.5a4.5 4.5 0 0 1-.6-8.96 6 6 0 0 1 11.55 1.2A3.8 3.8 0 0 1 17.5 18.5z"/></svg>`, blurb:'CI/CD, cloud, container, dan reliability. Belajar bikin sistem yang nggak gampang tumbang.', threads:[
+      { q:'Stack CI/CD hemat buat side project, rekomendasi?', r:21 },
+      { q:'Belajar Kubernetes dari nol, roadmap-nya gimana?', r:30 },
+      { q:'Cost optimization di AWS — tips paling ngefek', r:19 } ] },
+    { n:'Study Group', c:null, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8.5L12 4.5l9.5 4-9.5 4z"/><path d="M6.5 10.7V15c0 1.3 2.5 2.4 5.5 2.4s5.5-1.1 5.5-2.4v-4.3"/><path d="M21.5 8.5v5.2"/></svg>`, blurb:'Belajar terstruktur bareng dengan jadwal & target — biar nggak berhenti di tengah jalan.', threads:[
+      { q:'Batch System Design mulai minggu depan, daftar yuk', r:14 },
+      { q:'Cari partner LeetCode konsisten harian', r:11 },
+      { q:'Jadwal study session bulan ini', r:8 } ] },
+    { n:'Soft Skills SWE Growth', c:null, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16.2 5.6a3.2 3.2 0 0 1 0 6"/><path d="M17 19a5.5 5.5 0 0 0-2.2-4.4"/></svg>`, blurb:'Komunikasi, kerja tim, dan negosiasi — skill yang sering nentuin karir lebih dari kode.', threads:[
+      { q:'Cara kasih feedback ke rekan tanpa bikin baper', r:26 },
+      { q:'Ngadepin PM yang demanding gimana caranya?', r:19 },
+      { q:'Public speaking buat engineer, ada tipsnya?', r:13 } ] },
+    { n:'Perlengkapan SE Growth', c:null, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7" width="19" height="10.5" rx="2"/><path d="M6 10.5h.01M9 10.5h.01M12 10.5h.01M15 10.5h.01M18 10.5h.01M7.5 14h9"/></svg>`, blurb:'Gear, setup, dan tools. Tempat pamer meja kerja dan minta rekomendasi sebelum checkout.', threads:[
+      { q:'Rekomendasi keyboard mechanical buat ngoding seharian', r:33 },
+      { q:'Pamer setup WFH kalian dong', r:41 },
+      { q:'Monitor 4K worth it nggak buat coding?', r:22 } ] },
+  ];
+  const tIc = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.9A8.4 8.4 0 1 1 21 11.5z"/></svg>';
+  const cntHtml = g => g.c ? '<b>'+g.c.toLocaleString('id-ID')+'+</b> anggota aktif' : 'sub-topik baru';
+  const threadsHtml = t => t.threads.map(th => `<div class="thr"><span class="dot"></span><div><div class="qq">${th.q}</div><div class="rr">${th.r} balasan</div></div></div>`).join('');
+
+  const stWrap = document.getElementById('stWrap');
+  let stVariant = 'explorer';
+  let stActive = 0;
+
+  function renderExplorer(){
+    stWrap.innerHTML = `
+      <div class="st-explorer">
+        <div class="st-list" id="stList">
+          ${topics.map((t,i)=>`
+            <div class="st-item${i===stActive?' active':''}" data-i="${i}">
+              <span class="st-ic">${t.ic}</span>
+              <div><div class="nm">${t.n}</div><div class="st-cnt">${cntHtml(t)}</div></div>
+              <span class="active-go"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>`).join('')}
+        </div>
+        <div class="st-detail" id="stDetail"></div>
+      </div>`;
+    renderDetail();
+    stList = document.getElementById('stList');
+    stList.querySelectorAll('.st-item').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        stActive = +el.dataset.i;
+        stList.querySelectorAll('.st-item').forEach(x=>x.classList.toggle('active', x===el));
+        renderDetail();
+      });
+    });
+  }
+  function renderDetail(){
+    const t = topics[stActive];
+    const d = document.getElementById('stDetail');
+    d.innerHTML = `
+      <div class="st-fade">
+        <div class="d-head"><span class="st-ic">${t.ic}</span><div><h3>${t.n}</h3><div class="st-cnt">${cntHtml(t)}</div></div></div>
+        <p class="blurb">${t.blurb}</p>
+        <div class="thr-lbl">Yang lagi ramai dibahas</div>
+        ${threadsHtml(t)}
+      </div>`;
+  }
+
+  function renderAccordion(){
+    stWrap.innerHTML = `<div class="st-acc">
+      ${topics.map((t,i)=>`
+        <div class="acc-item${i===0?' open':''}" data-i="${i}">
+          <div class="acc-head">
+            <span class="st-ic">${t.ic}</span>
+            <span class="nm">${t.n}</span>
+            <span class="st-cnt">${cntHtml(t)}</span>
+            <span class="chev"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+          </div>
+          <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+            <p class="blurb">${t.blurb}</p>
+            <div class="thr-lbl">Yang lagi ramai dibahas</div>
+            ${threadsHtml(t)}
+          </div></div></div>
+        </div>`).join('')}
+    </div>`;
+    stWrap.querySelectorAll('.acc-head').forEach(h=>{
+      h.addEventListener('click', ()=>{
+        const item = h.closest('.acc-item');
+        const wasOpen = item.classList.contains('open');
+        stWrap.querySelectorAll('.acc-item').forEach(x=>x.classList.remove('open'));
+        if(!wasOpen) item.classList.add('open');
+      });
+    });
+  }
+
+  function renderSlider(){
+    stWrap.innerHTML = `
+      <div class="st-slider">
+        <div class="st-track" id="stTrack">
+          ${topics.map(t=>`
+            <div class="st-card">
+              <div class="c-head"><span class="st-ic">${t.ic}</span><div><h3>${t.n}</h3><div class="st-cnt">${cntHtml(t)}</div></div></div>
+              <p class="blurb">${t.blurb}</p>
+              <div class="thr-lbl">Yang lagi ramai dibahas</div>
+              ${threadsHtml(t)}
+            </div>`).join('')}
+        </div>
+        <div class="st-sldnav">
+          <span class="sbtn" id="stPrev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
+          <span class="sbtn" id="stNext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+          <span class="shint">geser buat lihat ${topics.length} sub-topik</span>
+        </div>
+      </div>`;
+    const track = document.getElementById('stTrack');
+    const step = 346;
+    document.getElementById('stPrev').addEventListener('click', ()=> track.scrollBy({ left:-step, behavior:'smooth' }));
+    document.getElementById('stNext').addEventListener('click', ()=> track.scrollBy({ left:step, behavior:'smooth' }));
+  }
+
+  let stList;
+  function applyVariant(v){
+    stVariant = v;
+    if(v==='accordion') renderAccordion();
+    else if(v==='slider') renderSlider();
+    else renderExplorer();
+  }
+  window.__applyVariant = applyVariant;
+  applyVariant('explorer');
+
+  // ---- WhatsApp chat simulation ----
+  const chat = [
+    { n:'Rina', cl:'c1', t:'halo semua, aku frontend 2 tahun. mau mulai serius belajar system design, mulai dari mana ya?', tm:'19.01' },
+    { n:'Bagas', cl:'c2', t:'sini bahas system design bareng, gw baru gagal interview wkwk', tm:'19.04' },
+    { me:true, n:'Kamu', t:'wkwk samaan, gas latihan bareng 🔥', tm:'19.04' },
+    { n:'Dimas', cl:'c3', t:'BARU DAPET OFFER ABROAD!! makasih grup ini 🎉🇮🇩', tm:'19.06' },
+    { who:'host', n:'Zikrul (Founder)', cl:'host', t:'MANTAP Dimas 🚀 traktir sharing "going abroad" dong', tm:'19.06' },
+    { n:'Sari', cl:'c4', t:'ada yg ikut book club minggu ini? lagi baca Effective Engineer 📚', tm:'19.08' },
+    { n:'Yoga', cl:'c2', t:'+1 effective engineer, isinya daging semua 💯', tm:'19.09' },
+    { n:'Bagas', cl:'c2', t:'share roadmap kalian dong, biar gw nyusul 🙏', tm:'19.10' },
+    { me:true, n:'Kamu', t:'ntar gw drop link diskusinya di sini 👍', tm:'19.11' },
+  ];
+  const body = document.getElementById('waBody');
+  let ci = 0;
+  function pushChat(){
+    const m = chat[ci % chat.length];
+    const el = document.createElement('div');
+    el.className = 'bub' + (m.me ? ' me' : '') + (m.who==='host' ? ' host' : '');
+    el.innerHTML = (m.me ? '' : `<span class="nm ${m.cl||''}">${m.n}</span>`) + m.t + `<span class="tm">${m.tm}</span>`;
+    body.appendChild(el);
+    requestAnimationFrame(()=> el.classList.add('in'));
+    while(body.children.length > 8) body.removeChild(body.firstChild);
+    ci++;
+  }
+  pushChat(); pushChat(); pushChat(); pushChat(); pushChat(); pushChat(); pushChat();
+  setInterval(pushChat, 2700);
+
+  // ---- reveal on scroll ----
+  const reveals = [];
+  document.querySelectorAll('section .wrap > *, header .hero-copy > *, header .hero-visual').forEach(el=>{
+    el.classList.add('reveal'); reveals.push(el);
+  });
+  const showIfVisible = el => { const r = el.getBoundingClientRect(); if(r.top < innerHeight * 0.92) el.classList.add('show'); };
+  reveals.forEach(showIfVisible);
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target); } });
+  }, { threshold:0.12, rootMargin:'0px 0px -8% 0px' });
+  reveals.forEach(el=>io.observe(el));
+  setTimeout(()=> reveals.forEach(el=>el.classList.add('show')), 1200);
+  addEventListener('load', ()=> reveals.forEach(showIfVisible));
+</script>
+
+<!-- Tweaks panel (vanilla) -->
+<div id="tw-panel" role="dialog" aria-label="Tweaks">
+  <div class="tw-head">
+    <span class="tt">Tweaks</span>
+    <button class="tw-x" id="twClose" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="tw-sec">Sub-topik</div>
+  <div class="tw-lbl">Tampilan</div>
+  <div class="tw-seg" id="twLayout">
+    <button data-v="explorer">Explorer</button>
+    <button data-v="accordion">Accordion</button>
+    <button data-v="slider">Slider</button>
+  </div>
+  <div class="tw-row" style="margin-top:15px;"><span class="tw-lbl">Jumlah anggota</span><button class="tw-toggle" id="twCounts" aria-label="Toggle jumlah anggota"></button></div>
+  <div class="tw-sec">Tema</div>
+  <div class="tw-lbl">Warna aksen</div>
+  <div class="tw-swatches" id="twAccent"></div>
+</div>
+<script>
+  // ---- Tweaks (vanilla, host-protocol) ----
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "layout": "explorer",
+    "showCounts": true,
+    "accent": 0
+  }/*EDITMODE-END*/;
+  const TW_ACCENTS = [
+    ['#2BA56A','#1C8252','#45C98A'],
+    ['#14A8A0','#0E847E','#34C9C0'],
+    ['#2F7DE0','#2461BD','#5398F2'],
+    ['#7A5AE0','#5F40C4','#9A82F0'],
+  ];
+  const tw = Object.assign({}, TWEAK_DEFAULTS);
+
+  function twApplyAccent(i){
+    const a = TW_ACCENTS[i] || TW_ACCENTS[0];
+    const r = document.documentElement.style;
+    r.setProperty('--green', a[0]); r.setProperty('--green-deep', a[1]); r.setProperty('--green-br', a[2]);
+  }
+  function twApplyAll(){
+    if(window.__applyVariant) window.__applyVariant(tw.layout || 'explorer');
+    document.body.classList.toggle('hide-counts', !tw.showCounts);
+    twApplyAccent(tw.accent || 0);
+  }
+
+  // build accent swatches
+  const accentWrap = document.getElementById('twAccent');
+  accentWrap.innerHTML = TW_ACCENTS.map((a,i)=>`<button class="tw-sw" data-i="${i}" style="background:${a[0]}"></button>`).join('');
+
+  function twSync(){
+    document.querySelectorAll('#twLayout button').forEach(b=> b.classList.toggle('on', b.dataset.v===tw.layout));
+    document.getElementById('twCounts').classList.toggle('on', !!tw.showCounts);
+    document.querySelectorAll('#twAccent .tw-sw').forEach(b=> b.classList.toggle('on', +b.dataset.i===(tw.accent||0)));
+  }
+  function setTweak(edits){
+    Object.assign(tw, edits);
+    if('layout' in edits && window.__applyVariant) window.__applyVariant(tw.layout);
+    if('showCounts' in edits) document.body.classList.toggle('hide-counts', !tw.showCounts);
+    if('accent' in edits) twApplyAccent(tw.accent);
+    twSync();
+    try{ window.parent.postMessage({ type:'__edit_mode_set_keys', edits }, '*'); }catch(e){}
+  }
+
+  document.getElementById('twLayout').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(b) setTweak({ layout:b.dataset.v });
+  });
+  document.getElementById('twCounts').addEventListener('click', ()=> setTweak({ showCounts: !tw.showCounts }));
+  accentWrap.addEventListener('click', e=>{
+    const b = e.target.closest('.tw-sw'); if(b) setTweak({ accent: +b.dataset.i });
+  });
+
+  // host edit-mode protocol
+  const twPanel = document.getElementById('tw-panel');
+  window.addEventListener('message', e=>{
+    const t = e.data && e.data.type;
+    if(t==='__activate_edit_mode') twPanel.classList.add('open');
+    else if(t==='__deactivate_edit_mode') twPanel.classList.remove('open');
+  });
+  document.getElementById('twClose').addEventListener('click', ()=>{
+    twPanel.classList.remove('open');
+    try{ window.parent.postMessage({ type:'__edit_mode_dismissed' }, '*'); }catch(e){}
+  });
+  try{ window.parent.postMessage({ type:'__edit_mode_available' }, '*'); }catch(e){}
+
+  // apply persisted defaults on load
+  twApplyAll();
+  twSync();
+</script>
+</body>
+</html>
+
