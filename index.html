@@ -614,7 +614,7 @@
     .path:hover{ padding-left:14px; padding-right:14px; }
     .p-no{ font-size:2.2rem; grid-row:1; }
     .p-main{ grid-column:2; }
-    .p-end{ grid-column:1 / -1; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:flex-start; gap:14px; min-width:0; }
+    .p-end{ grid-column:2 / -1; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:flex-start; gap:14px; min-width:0; }
     .p-meta{ text-align:left; }
     .p-go{ margin-left:auto; }
     .event{ grid-template-columns:40px 1fr; row-gap:8px; }
@@ -826,7 +826,7 @@ Tapi sesi diskusi ga cuma di WA, sering juga kita diskusi live. Dari bedah probl
 
 Masuk ke grup, sapa teman-teman di grup, perkenalan, terus ikut kegiatan apa pun yang lagi jalan. Segampang itu.</p>
       <div class="join-actions">
-        <a class="btn btn-white" href="https://goakal.com/ahsanprojectsbw/swegrowthmember">Gabung di WA Community
+        <a class="btn btn-white" href="https://goakal.com/ahsanprojectsbw/swegrowthmember/c79qf/apply">Gabung ke WA Community
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
         <a class="btn btn-outline-w" href="https://wa.me/6282338588078">Tanya - tanya di WA</a>
@@ -980,7 +980,7 @@ Masuk ke grup, sapa teman-teman di grup, perkenalan, terus ikut kegiatan apa pun
       { q:'Lagi baca: The Effective Engineer — diskusi bab 4', r:28 },
       { q:'Designing Data-Intensive Apps, ada yang nyusul?', r:35 },
       { q:'Rekomendasi buku buat yang mau jadi tech lead', r:24 } ] },
-    { n:'Infra & DevOps', c:177, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 18.5a4.5 4.5 0 0 1-.6-8.96 6 6 0 0 1 11.55 1.2A3.8 3.8 0 0 1 17.5 18.5z"/></svg>`, blurb:'CI/CD, cloud, container, dan reliability. Belajar bikin sistem yang nggak gampang tumbang.', threads:[
+    { n:'Soft skills', c:177, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 18.5a4.5 4.5 0 0 1-.6-8.96 6 6 0 0 1 11.55 1.2A3.8 3.8 0 0 1 17.5 18.5z"/></svg>`, blurb:'CI/CD, cloud, container, dan reliability. Belajar bikin sistem yang nggak gampang tumbang.', threads:[
       { q:'Stack CI/CD hemat buat side project, rekomendasi?', r:21 },
       { q:'Belajar Kubernetes dari nol, roadmap-nya gimana?', r:30 },
       { q:'Cost optimization di AWS — tips paling ngefek', r:19 } ] },
@@ -1110,61 +1110,61 @@ Masuk ke grup, sapa teman-teman di grup, perkenalan, terus ikut kegiatan apa pun
   const ICON_MANAGE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="4" rx="1"/><rect x="3" y="16.5" width="6" height="4" rx="1"/><rect x="15" y="16.5" width="6" height="4" rx="1"/><path d="M12 7v3M6 16.5V13h12v3.5M12 10v3"/></svg>`;
   const groupSlides = [
     { ti:0, online:218, msgs:[
-      { n:'Rina', cl:'c1', t:'halo semua, aku frontend 2 tahun. mau mulai serius belajar system design 👋', tm:'19.01' },
-      { n:'Bagas', cl:'c2', t:'sini bahas bareng, gw baru gagal interview wkwk', tm:'19.04' },
+      { n:'Hanif', cl:'c1', t:'halo semua, aku frontend 2 tahun. mau mulai serius belajar system design 👋', tm:'19.01' },
+      { n:'Hasrul', cl:'c2', t:'sini bahas bareng, gw baru gagal interview wkwk', tm:'19.04' },
       { me:true, t:'wkwk samaan, gas latihan bareng 🔥', tm:'19.04' },
-      { n:'Dimas', cl:'c3', t:'BARU DAPET OFFER ABROAD!! makasih grup ini 🎉🇮🇩', tm:'19.06' },
-      { n:true, n:'Zikrul SWE Growth', t:'MANTAP Dimas 🚀 traktir sharing "going abroad" dong', tm:'19.07' },
+      { n:'Agung', cl:'c3', t:'BARU DAPET OFFER ABROAD!! makasih grup ini 🇮🇩', tm:'19.06' },
+      { n:'Zikrul SWE Growth', cl:'c3', t:'MANTAP Dimas 🚀 traktir sharing "going abroad" dong', tm:'19.07' },
       { me:true, t:'ntar gw drop link diskusinya di sini 👍', tm:'19.09' } ] },
     { ti:1, online:140, msgs:[
-      { n:'Fajar', cl:'c2', t:'monolith vs microservices buat tim 5 orang, mending mana?', tm:'20.12' },
-      { n:'Sari', cl:'c4', t:'mulai monolith dulu aja, split kalau udah kerasa sakitnya', tm:'20.15' },
+      { n:'Lino', cl:'c2', t:'monolith vs microservices buat tim 5 orang, mending mana?', tm:'20.12' },
+      { n:'Jauhar', cl:'c4', t:'mulai monolith dulu aja, split kalau udah kerasa sakitnya', tm:'20.15' },
       { me:true, t:'setuju, jangan over-engineer di awal 👍', tm:'20.16' },
-      { n:'Bagas', cl:'c1', t:'btw ada yg pernah rapihin N+1 query di ORM? lagi pusing', tm:'20.19' },
-      { n:'Yoga', cl:'c3', t:'pakai eager loading / select_related biasanya beres kok', tm:'20.22' },
-      { me:true, t:'nice, gw coba refactor dulu 🙏', tm:'20.24' } ] },
+      { n:'Oshi', cl:'c1', t:'btw ada yg pernah rapihin N+1 query di ORM? lagi pusing', tm:'20.19' },
+      { n:'Nanda', cl:'c3', t:'pakai eager loading / select_related biasanya beres kok', tm:'20.22' },
+      { me:true, t:'nice, gw coba refactor dulu ', tm:'20.24' } ] },
     { ti:2, online:160, msgs:[
-      { n:'Yoga', cl:'c2', t:'workflow Cursor + Claude kalian gimana sehari-hari?', tm:'13.40' },
-      { me:true, t:'gw pakai buat draft + review, sisanya tetap manual 🤖', tm:'13.42' },
-      { n:'Rina', cl:'c1', t:'prompt code review kalian share dong, pengen nyoba', tm:'13.45' },
-      { n:true, n:'Zikrul SWE Growth', t:'nanti gw kumpulin di pinned ya ✨', tm:'13.47' },
-      { n:'Sari', cl:'c4', t:'gw pisahin sih: AI buat boilerplate, logic tetap dipikir sendiri', tm:'13.49' },
-      { n:'Yoga', cl:'c2', t:'biar nggak ketergantungan ya, setuju 👍', tm:'13.51' } ] },
+      { n:'Zain', cl:'c2', t:'ada kabar AI kere hore baru nih, modelnya murah tapi hasilnya gila', tm:'13.40' },
+      { n:'Zahid', cl:'c1', t:'wkwk era AI kere hore emang, gratisan aja udah kepake banget sekarang', tm:'13.42' },
+      { n:'Michael', cl:'c2', t:'btw kalian tim mana sih? Claude, Codex, atau mocin? ', tm:'13.45' },
+      { me:true, t:'gw tim Claude, paling enak buat coding 🤖', tm:'13.46' },
+      { n:'Iqbal', cl:'c4', t:'gw campur: Claude buat mikir, mocin buat yang murah meriah', tm:'13.49' },
+      { n:'Zikrul SWE Growth', cl:'c3', t:'tim apa aja boleh, yang penting tetap mikir sendiri ya ✨', tm:'13.51' } ] },
     { ti:4, online:95, msgs:[
-      { n:'Sari', cl:'c4', t:'weekly speaking practice Sabtu ini, join yuk 🗣️', tm:'09.05' },
-      { n:'Dimas', cl:'c3', t:'minta koreksi cover letter buat apply abroad dong', tm:'09.11' },
+      { n:'Akhyar', cl:'c4', t:'weekly speaking practice Sabtu ini, join yuk 🗣️', tm:'09.05' },
+      { n:'Zain', cl:'c3', t:'minta koreksi cover letter buat apply abroad dong', tm:'09.11' },
       { me:true, t:'kirim sini, gw bantu review ✍️', tm:'09.12' },
-      { n:'Fajar', cl:'c2', t:'mock interview in English — gw cari partner nih', tm:'09.18' },
-      { n:'Rina', cl:'c1', t:'gw join yang Sabtu! butuh banget latihan ngomong', tm:'09.20' },
-      { n:true, n:'Zikrul SWE Growth', t:'mantap, nanti gw share room link-nya 🔗', tm:'09.22' } ] },
+      { n:'Mukhlis', cl:'c2', t:'mock interview in English — gw cari partner nih', tm:'09.18' },
+      { n:'Vivi', cl:'c1', t:'gw join yang Sabtu! butuh banget latihan ngomong', tm:'09.20' },
+      { n:'Zikrul SWE Growth', cl:'c3', t:'mantap, nanti gw share room link-nya 🔗', tm:'09.22' } ] },
     { ti:6, online:60, msgs:[
-      { n:'Rina', cl:'c1', t:'lagi baca The Effective Engineer 📚 diskusi bab 4 yuk', tm:'21.02' },
+      { n:'Arif', cl:'c1', t:'lagi baca The Effective Engineer 📚 diskusi bab 4 yuk', tm:'21.02' },
       { me:true, t:'+1, isinya daging semua 💯', tm:'21.03' },
-      { n:'Bagas', cl:'c2', t:'Designing Data-Intensive Apps ada yg mau nyusul?', tm:'21.06' },
-      { n:'Sari', cl:'c4', t:'rekomendasi buku buat calon tech lead dong', tm:'21.09' },
-      { n:'Dimas', cl:'c3', t:'gw vote DDIA buat batch baca bareng bulan depan', tm:'21.12' },
-      { n:'Yoga', cl:'c2', t:'setuju, sekalian bikin catatan bareng 📒', tm:'21.14' } ] },
+      { n:'Abid', cl:'c2', t:'Designing Data-Intensive Apps ada yg mau nyusul?', tm:'21.06' },
+      { n:'Oshi', cl:'c4', t:'rekomendasi buku buat calon tech lead dong', tm:'21.09' },
+      { n:'Azam', cl:'c3', t:'gw vote DDIA buat batch baca bareng bulan depan', tm:'21.12' },
+      { n:'Adnan', cl:'c2', t:'setuju, sekalian bikin catatan bareng 📒', tm:'21.14' } ] },
     { ti:7, online:48, msgs:[
       { n:'Fajar', cl:'c2', t:'beda mid vs senior yang sebenernya apa sih?', tm:'17.30' },
-      { n:true, n:'Zikrul SWE Growth', t:'bukan soal ngoding doang, tapi impact & ownership 🚀', tm:'17.33' },
+      { n:'Zikrul SWE Growth', cl:'c3', t:'bukan soal ngoding doang, tapi impact & ownership 🚀', tm:'17.33' },
       { me:true, t:'noted, makasih insight-nya', tm:'17.34' },
-      { n:'Dimas', cl:'c3', t:'cara nunjukkin impact biar dilirik buat promosi?', tm:'17.38' },
-      { n:'Sari', cl:'c4', t:'mentoring junior juga ngangkat "impact" kamu lho', tm:'17.41' },
+      { n:'Zain', cl:'c3', t:'cara nunjukkin impact biar dilirik buat promosi?', tm:'17.38' },
+      { n:'Akhyar', cl:'c4', t:'mentoring junior juga ngangkat "impact" kamu lho', tm:'17.41' },
       { me:true, t:'bener, gw mulai ambil lebih banyak ownership deh', tm:'17.43' } ] },
     { g:{ n:'SWE Growth Hidup Sehat', c:312, ic:ICON_HEALTH }, online:54, msgs:[
-      { n:'Andi', cl:'c2', t:'gimana sih cara handle perut yang makin offside? kerjaan duduk mulu hmm', tm:'07.10' },
-      { n:'Rina', cl:'c1', t:'mulai dari jalan 8rb langkah + kurangin gorengan, ngefek pelan-pelan kok', tm:'07.13' },
-      { n:'Sari', cl:'c4', t:'aku kunci di reminder pagi biar konsisten, sekali skip suka keterusan wkwk', tm:'07.15' },
-      { n:'Yoga', cl:'c3', t:'set target kecil dulu aja, 3x seminggu, naikin pelan-pelan', tm:'07.18' },
+      { n:'Zain', cl:'c2', t:'gimana sih cara handle perut yang makin offside? kerjaan duduk mulu hmm', tm:'07.10' },
+      { n:'Ajitama', cl:'c1', t:'mulai dari jalan 8rb langkah + kurangin gorengan, ngefek pelan-pelan kok', tm:'07.13' },
+      { n:'Michael', cl:'c4', t:'aku kunci di reminder pagi biar konsisten, sekali skip suka keterusan wkwk', tm:'07.15' },
+      { n:'Riga', cl:'c3', t:'set target kecil dulu aja, 3x seminggu, naikin pelan-pelan', tm:'07.18' },
       { me:true, t:'#lapor lari 5km hari ini 🏃‍♂️', tm:'07.41' },
-      { bot:true, n:'Growth Bot', t:'selamat ya! 🎉 streak olahraga kamu jalan terus, mantap 💪', tm:'07.41' } ] },
+      { bot:true, n:'Growth Bot', t:'selamat ya! streak olahraga kamu jalan terus, mantap 💪', tm:'07.41' } ] },
     { g:{ n:'Managerial Discussion', c:198, ic:ICON_MANAGE }, online:31, msgs:[
-      { n:'Dimas', cl:'c3', t:'gimana cara kalian healing setelah seharian ngurus management? penat banget', tm:'18.20' },
-      { n:'Fajar', cl:'c2', t:'gw matiin notif kerja abis jam 6, terus full main sama anak. wajib sih', tm:'18.23' },
-      { n:'Sari', cl:'c4', t:'journaling 10 menit + jalan sore, kepala langsung enteng', tm:'18.26' },
-      { n:'Rina', cl:'c1', t:'block 1 hari no-meeting tiap minggu, ngebantu banget buat napas', tm:'18.29' },
+      { n:'Joko', cl:'c3', t:'gimana cara kalian healing setelah seharian ngurus management? penat banget', tm:'18.20' },
+      { n:'Panji', cl:'c2', t:'gw matiin notif kerja abis jam 6, terus full main sama anak. wajib sih', tm:'18.23' },
+      { n:'Arif', cl:'c4', t:'journaling 10 menit + jalan sore, kepala langsung enteng', tm:'18.26' },
+      { n:'Tegar', cl:'c1', t:'block 1 hari no-meeting tiap minggu, ngebantu banget buat napas', tm:'18.29' },
       { me:true, t:'noted, kayaknya gw kebanyakan meeting tanpa jeda hehe', tm:'18.31' },
-      { n:true, n:'Zikrul SWE Growth', t:'jaga diri dulu, baru bisa jagain tim 🙏', tm:'18.34' } ] },
+      { n:'Zikrul SWE Growth', cl:'c3', t:'jaga diri dulu, baru bisa jagain tim 🙏', tm:'18.34' } ] },
   ];
   const slideMeta = g => g.g ? g.g : (topics[g.ti] || { n:'Grup', c:null, ic:'' });
 
