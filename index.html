@@ -82,7 +82,7 @@
   :root[data-resolved="dark"] .join-card{ background:oklch(0.500 0.135 152); }
 
   *{ box-sizing:border-box; margin:0; padding:0; }
-  html{ scroll-behavior:smooth; }
+  html{ scroll-behavior:smooth; overflow-x:clip; }
   body{
     font-family:var(--font-body);
     background:var(--bg);
@@ -611,6 +611,7 @@
     .acts,.grp-grid{ grid-template-columns:1fr; }
     .social-grid{ grid-template-columns:1fr; }
     .path{ grid-template-columns:auto 1fr; gap:18px 16px; padding:26px 4px; }
+    .path::before{ left:-12px; right:-12px; }
     .path:hover{ padding-left:14px; padding-right:14px; }
     .p-no{ font-size:2.2rem; grid-row:1; }
     .p-main{ grid-column:2; }
@@ -968,10 +969,10 @@ Masuk ke grup, sapa teman-teman di grup, perkenalan, terus ikut kegiatan apa pun
       { q:'Recap Big-O buat yang udah lama lupa', r:48 },
       { q:'Kapan sebenernya pakai hash map vs tree?', r:33 },
       { q:'Belajar Operating System dari resource mana ya?', r:26 } ] },
-    { n:'English Club', c:640, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.7 2.8 2.7 15.2 0 18c-2.7-2.8-2.7-15.2 0-18z"/></svg>`, blurb:'Latihan bahasa Inggris buat interview, dokumentasi, dan rencana kerja ke luar negeri.', threads:[
-      { q:'Weekly speaking practice tiap Sabtu, gabung yuk', r:39 },
-      { q:'Minta koreksi cover letter buat apply abroad dong', r:22 },
-      { q:'Mock interview in English — cari partner', r:17 } ] },
+    { n:'English Club', c:640, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.7 2.8 2.7 15.2 0 18c-2.7-2.8-2.7-15.2 0-18z"/></svg>`, blurb:'Ngobrol santai pakai bahasa Inggris biar makin pede speaking. Yuk latihan bareng tiap minggu!', threads:[
+      { q:'Weekly speaking practice every Saturday — join us!', r:39 },
+      { q:'Looking for a partner for daily English chat, anyone in?', r:31 },
+      { q:'Casual conversation session tonight — come join!', r:24 } ] },
     { n:'Frontend SE Growth', c:458, ic:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M3 9h18"/><circle cx="6" cy="6.7" r=".55" fill="currentColor"/><circle cx="8" cy="6.7" r=".55" fill="currentColor"/></svg>`, blurb:'React, state management, performa, dan craft UI. Dari debugging sampai pilihan arsitektur.', threads:[
       { q:'Server Components worth dipindahin sekarang nggak?', r:44 },
       { q:'Cara debug re-render berlebih yang efektif', r:31 },
@@ -1131,12 +1132,12 @@ Masuk ke grup, sapa teman-teman di grup, perkenalan, terus ikut kegiatan apa pun
       { n:'Iqbal', cl:'c4', t:'gw campur: Claude buat mikir, mocin buat yang murah meriah', tm:'13.49' },
       { n:'Zikrul SWE Growth', cl:'c3', t:'tim apa aja boleh, yang penting tetap mikir sendiri ya ✨', tm:'13.51' } ] },
     { ti:4, online:95, msgs:[
-      { n:'Akhyar', cl:'c4', t:'weekly speaking practice Sabtu ini, join yuk 🗣️', tm:'09.05' },
-      { n:'Zain', cl:'c3', t:'minta koreksi cover letter buat apply abroad dong', tm:'09.11' },
-      { me:true, t:'kirim sini, gw bantu review ✍️', tm:'09.12' },
-      { n:'Mukhlis', cl:'c2', t:'mock interview in English — gw cari partner nih', tm:'09.18' },
-      { n:'Vivi', cl:'c1', t:'gw join yang Sabtu! butuh banget latihan ngomong', tm:'09.20' },
-      { n:'Zikrul SWE Growth', cl:'c3', t:'mantap, nanti gw share room link-nya 🔗', tm:'09.22' } ] },
+      { n:'Akhyar', cl:'c4', t:'weekly speaking practice this Saturday, join us 🗣️', tm:'09.05' },
+      { n:'Zain', cl:'c3', t:"let's talk in English today, no bahasa allowed 😄", tm:'09.11' },
+      { me:true, t:'haha sure, I really need to practice speaking ✍️', tm:'09.12' },
+      { n:'Mukhlis', cl:'c2', t:'looking for a partner for daily conversation, anyone interested?', tm:'09.18' },
+      { n:'Vivi', cl:'c1', t:"I'm in for Saturday! I want to get fluent at speaking", tm:'09.20' },
+      { n:'Zikrul SWE Growth', cl:'c3', t:"awesome, I'll share the room link later 🔗", tm:'09.22' } ] },
     { ti:6, online:60, msgs:[
       { n:'Arif', cl:'c1', t:'lagi baca The Effective Engineer 📚 diskusi bab 4 yuk', tm:'21.02' },
       { me:true, t:'+1, isinya daging semua 💯', tm:'21.03' },
