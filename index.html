@@ -173,9 +173,11 @@
   .live-dot::after{ content:""; position:absolute; inset:-5px; border-radius:50%; background:var(--green); opacity:.4; animation:pulse 1.8s ease-out infinite; }
   @keyframes pulse{ 0%{ transform:scale(.6); opacity:.5 } 100%{ transform:scale(1.9); opacity:0 } }
 
+  .hero-copy{ container-type:inline-size; }
   h1.hero-title{
     font-family:var(--font-display); font-weight:500;
-    font-size:clamp(3rem, 6vw, 5rem); line-height:1.02; letter-spacing:-0.022em;
+    /* sized against the column width (cqi) so it always wraps to ~4 lines, not the viewport */
+    font-size:clamp(2.8rem, 10.2cqi, 6rem); line-height:1.02; letter-spacing:-0.022em;
     margin:24px 0 0; text-wrap:balance;
   }
   h1.hero-title em{ font-style:italic; color:var(--green-deep); }
