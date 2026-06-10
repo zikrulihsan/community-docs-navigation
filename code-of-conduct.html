@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Code of Conduct — SWE Growth</title>
+<meta name="description" content="Code of Conduct komunitas Software Engineer Growth — nilai, aturan interaksi, dan batas aman untuk ruang belajar yang nyaman, fokus, dan saling menghargai." />
+<link rel="icon" type="image/png" href="assets/swe-growth-logo.png" />
+<link rel="stylesheet" href="assets/fonts.css" />
+<script>
+  (function(){
+    try{
+      var p = localStorage.getItem('swe-theme') || 'system';
+      var d = p==='system' ? (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light') : p;
+      document.documentElement.dataset.theme = p;
+      document.documentElement.dataset.resolved = d;
+    }catch(e){
+      document.documentElement.dataset.theme='system';
+      document.documentElement.dataset.resolved='light';
+    }
+  })();
+</script>
+<style>
+  :root{
+    --bg:       oklch(0.980 0.011 150);
+    --bg-2:     oklch(0.966 0.015 152);
+    --paper:    oklch(0.995 0.004 150);
+    --ink:      oklch(0.255 0.035 248);
+    --ink-soft: oklch(0.435 0.030 248);
+    --ink-faint:oklch(0.575 0.026 248);
+    --line:     oklch(0.895 0.013 200);
+    --line-2:   oklch(0.835 0.018 200);
+    --green:    oklch(0.660 0.155 152);
+    --green-deep:oklch(0.540 0.140 153);
+    --green-br: oklch(0.770 0.165 153);
+    --navy:     oklch(0.225 0.040 250);
+    --navy-2:   oklch(0.290 0.038 250);
+    --gold:     oklch(0.820 0.105 90);
+
+    --font-display: "Ubuntu", system-ui, sans-serif;
+    --font-body: "Hanken Grotesk", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+    --maxw: 1180px;
+    --r: 18px;
+    color-scheme: light;
+  }
+
+  :root[data-resolved="dark"]{
+    color-scheme: dark;
+    --bg:        oklch(0.275 0.032 173);
+    --bg-2:      oklch(0.318 0.036 173);
+    --paper:     oklch(0.338 0.038 174);
+    --ink:       oklch(0.935 0.018 95);
+    --ink-soft:  oklch(0.815 0.018 125);
+    --ink-faint: oklch(0.680 0.020 140);
+    --line:      oklch(0.420 0.030 174);
+    --line-2:    oklch(0.500 0.034 174);
+    --green:     oklch(0.720 0.165 150);
+    --green-deep:oklch(0.790 0.150 152);
+    --green-br:  oklch(0.850 0.150 153);
+    --navy:      oklch(0.205 0.030 174);
+    --navy-2:    oklch(0.278 0.034 173);
+    --gold:      oklch(0.840 0.105 90);
+  }
+  html{ background:var(--bg); }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; overflow-x:clip; }
+  body{
+    font-family:var(--font-body);
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--green); color:#fff; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ width:100%; max-width:var(--maxw); margin:0 auto; padding:0 28px; }
+  .mono{ font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase; }
+  .mark{ flex:none; display:grid; place-items:center; border-radius:50%; background:var(--navy); color:var(--green-br); }
+  .mark svg{ width:60%; height:60%; }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:color-mix(in oklch, var(--bg) 80%, transparent);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s, background .3s;
+  }
+  nav.scrolled{ border-color:var(--line); background:color-mix(in oklch, var(--bg) 92%, transparent); }
+  .nav-in{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; height:76px; gap:20px; }
+  .nav-left{ display:flex; align-items:center; gap:16px; justify-self:start; }
+  .brand{ display:flex; align-items:center; gap:11px; font-weight:700; font-size:1.06rem; letter-spacing:-0.01em; }
+  .brand .mark{ width:32px; height:32px; }
+  .brand-logo{ height:40px; width:40px; border-radius:11px; object-fit:cover; display:block; }
+  .brand .b-name{ display:flex; flex-direction:column; line-height:1; }
+  .brand .b-name b{ font-weight:700; }
+  .brand .b-name span{ font-family:var(--font-mono); font-size:0.56rem; letter-spacing:.22em; color:var(--ink-faint); text-transform:uppercase; margin-top:3px; }
+  .nav-links{ display:flex; align-items:center; gap:32px; justify-self:center; }
+  .nav-links a.lk{ font-size:0.94rem; color:var(--ink-soft); font-weight:500; transition:color .2s; }
+  .nav-links a.lk:hover{ color:var(--ink); }
+  .nav-links a.lk.current{ color:var(--green-deep); font-weight:600; }
+  .btn{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:var(--font-body); font-weight:600; font-size:0.95rem;
+    padding:11px 20px; border-radius:100px; border:none; cursor:pointer;
+    transition:transform .18s cubic-bezier(.2,.8,.3,1), box-shadow .25s, background .2s;
+  }
+  .btn svg{ width:17px; height:17px; }
+  .btn-primary{ background:var(--green); color:#fff; box-shadow:0 1px 2px oklch(0.54 0.14 153 / .35), 0 8px 22px oklch(0.66 0.155 152 / .30); }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 2px 4px oklch(0.54 0.14 153 / .4), 0 14px 30px oklch(0.66 0.155 152 / .4); }
+  .nav-cta{ display:flex; align-items:center; gap:12px; justify-self:end; }
+  .nav-burger{ display:none; width:42px; height:42px; flex:none; align-items:center; justify-content:center; border:1px solid var(--line); background:var(--bg-2); border-radius:11px; cursor:pointer; color:var(--ink-soft); transition:color .18s, border-color .18s, background .18s; }
+  .nav-burger:hover{ color:var(--ink); border-color:var(--line-2); }
+  .nav-burger svg{ width:21px; height:21px; display:block; }
+  .nav-burger .ic-close{ display:none; }
+  .nav-menu-cta{ display:none; }
+  nav.menu-open .nav-burger .ic-open{ display:none; }
+  nav.menu-open .nav-burger .ic-close{ display:block; }
+  .nav-cta .btn-primary{ padding:10px 19px; font-size:0.9rem; box-shadow:0 1px 2px oklch(0.54 0.14 153 / .3), 0 6px 16px oklch(0.66 0.155 152 / .22); }
+  .theme-switch{ position:relative; }
+  .ts-trigger{ display:inline-flex; align-items:center; gap:5px; height:34px; padding:0 10px; border:1px solid var(--line); background:var(--bg-2); border-radius:100px; cursor:pointer; color:var(--ink-soft); transition:color .18s, border-color .18s, background .18s; }
+  .ts-trigger:hover{ color:var(--ink); border-color:var(--line-2); }
+  .ts-trigger .ts-cur{ display:grid; place-items:center; }
+  .ts-trigger .ts-cur svg{ width:17px; height:17px; display:block; }
+  .ts-caret{ width:12px; height:12px; opacity:.55; transition:transform .25s; }
+  .theme-switch.open .ts-caret{ transform:rotate(180deg); }
+  .ts-options{ position:absolute; top:calc(100% + 9px); left:0; display:flex; flex-direction:column; gap:2px; min-width:158px; background:var(--paper); border:1px solid var(--line); border-radius:13px; padding:6px; box-shadow:0 18px 44px -18px oklch(0.25 0.04 250 / .45); opacity:0; transform:translateY(-6px) scale(.98); transform-origin:top left; pointer-events:none; transition:opacity .18s, transform .18s; z-index:60; }
+  .theme-switch.open .ts-options{ opacity:1; transform:none; pointer-events:auto; }
+  .ts-options button{ display:flex; align-items:center; gap:11px; padding:9px 11px; border:none; background:transparent; border-radius:9px; cursor:pointer; color:var(--ink-soft); font-family:var(--font-body); font-size:0.88rem; font-weight:500; text-align:left; width:100%; transition:background .15s, color .15s; }
+  .ts-options button svg{ width:17px; height:17px; flex:none; }
+  .ts-options button:hover{ background:var(--bg-2); color:var(--ink); }
+  .ts-options button.on{ background:var(--bg-2); color:var(--green-deep); }
+  .ts-options button.on span{ font-weight:600; }
+
+  /* ---------- DOC HERO ---------- */
+  .doc-hero{ padding:54px 0 26px; }
+  .crumb{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:0.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); }
+  .crumb a{ color:var(--ink-faint); transition:color .2s; }
+  .crumb a:hover{ color:var(--green-deep); }
+  .crumb svg{ width:13px; height:13px; }
+  .doc-eyebrow{ display:inline-flex; align-items:center; gap:9px; margin-top:22px; background:var(--paper); border:1px solid var(--line); padding:7px 14px 7px 12px; border-radius:100px; color:var(--ink-soft); font-family:var(--font-mono); font-size:0.66rem; letter-spacing:.12em; text-transform:uppercase; box-shadow:0 1px 2px oklch(0.4 0.02 250 / .04); }
+  .doc-eyebrow .dot{ width:8px; height:8px; border-radius:50%; background:var(--green); }
+  h1.doc-title{ font-family:var(--font-display); font-weight:500; font-size:clamp(2.3rem,5vw,3.5rem); line-height:1.05; letter-spacing:-0.02em; margin-top:20px; text-wrap:balance; }
+  .doc-lead{ max-width:620px; margin-top:18px; font-size:1.12rem; line-height:1.62; color:var(--ink-soft); text-wrap:pretty; }
+  .doc-meta{ margin-top:22px; display:flex; flex-wrap:wrap; gap:10px 14px; }
+  .doc-meta .chip{ display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:100px; background:var(--bg-2); border:1px solid var(--line); font-family:var(--font-mono); font-size:0.68rem; letter-spacing:.06em; color:var(--ink-faint); }
+  .doc-meta .chip svg{ width:14px; height:14px; color:var(--green); }
+
+  /* ---------- LAYOUT ---------- */
+  .doc-layout{ display:grid; grid-template-columns:230px 1fr; gap:54px; align-items:start; padding:30px 0 90px; }
+
+  /* table of contents */
+  .toc{ position:sticky; top:96px; }
+  .toc-lbl{ font-family:var(--font-mono); font-size:0.62rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:14px; padding-left:14px; }
+  .toc ol{ list-style:none; border-left:1.5px solid var(--line); }
+  .toc li{ margin:0; }
+  .toc a{ display:block; padding:7px 0 7px 14px; margin-left:-1.5px; border-left:1.5px solid transparent; font-size:0.86rem; color:var(--ink-faint); line-height:1.35; transition:color .18s, border-color .18s; }
+  .toc a:hover{ color:var(--ink); }
+  .toc a.active{ color:var(--green-deep); border-left-color:var(--green); font-weight:600; }
+
+  /* ---------- DOC CONTENT ---------- */
+  .doc{ max-width:760px; min-width:0; }
+  .doc-sec{ scroll-margin-top:96px; padding:34px 0; border-top:1px solid var(--line); }
+  .doc-sec:first-child{ border-top:none; padding-top:6px; }
+  .doc-sec > h2{ font-family:var(--font-display); font-weight:500; font-size:clamp(1.5rem,2.8vw,2rem); letter-spacing:-0.015em; line-height:1.15; display:flex; align-items:baseline; gap:12px; text-wrap:balance; }
+  .doc-sec > h2 .emo{ font-size:0.92em; }
+  .doc-sec h3{ font-family:var(--font-display); font-weight:500; font-size:1.24rem; letter-spacing:-0.01em; color:var(--green-deep); margin-top:30px; display:flex; align-items:baseline; gap:10px; }
+  .doc-sec h3 .idx{ font-family:var(--font-mono); font-size:0.82rem; color:var(--ink-faint); font-weight:400; }
+  .doc p{ font-size:1.02rem; line-height:1.72; color:var(--ink-soft); margin-top:15px; text-wrap:pretty; }
+  .doc p strong, .doc li strong{ color:var(--ink); font-weight:700; }
+  .doc em{ font-style:italic; }
+  .doc ul, .doc ol.steps{ margin-top:16px; padding-left:4px; list-style:none; display:flex; flex-direction:column; gap:11px; }
+  .doc li{ position:relative; padding-left:28px; font-size:1.02rem; line-height:1.65; color:var(--ink-soft); }
+  .doc ul > li::before{ content:""; position:absolute; left:6px; top:0.62em; width:7px; height:7px; border-radius:2px; background:var(--green); }
+  .doc ul ul{ margin-top:11px; }
+  .doc ul ul > li::before{ background:transparent; box-shadow:inset 0 0 0 1.5px var(--green); }
+  ol.steps{ counter-reset:step; }
+  ol.steps > li{ counter-increment:step; padding-left:42px; min-height:28px; display:flex; align-items:center; }
+  ol.steps > li::before{ content:counter(step); position:absolute; left:0; top:0; width:28px; height:28px; border-radius:50%; background:var(--bg-2); border:1px solid var(--line-2); color:var(--green-deep); font-family:var(--font-mono); font-size:0.82rem; font-weight:600; display:grid; place-items:center; }
+
+  /* callout / blockquote */
+  .callout{ margin-top:22px; padding:18px 22px; background:color-mix(in oklch, var(--green) 8%, var(--paper)); border:1px solid color-mix(in oklch, var(--green) 22%, var(--line)); border-left:3px solid var(--green); border-radius:12px; }
+  .callout p{ margin:0; color:var(--ink); font-size:0.98rem; line-height:1.6; }
+  .callout p + p{ margin-top:10px; }
+  .callout.ref{ background:var(--bg-2); border-color:var(--line); border-left-color:var(--ink-faint); }
+  .callout.ref .ref-h{ font-family:var(--font-mono); font-size:0.64rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:8px; }
+  .callout.ref p{ font-size:0.94rem; color:var(--ink-soft); }
+
+  .doc-sec.intent{ background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:24px 26px; margin-top:8px; }
+  .doc-sec.intent p:first-child{ margin-top:0; }
+
+  .doc-end{ margin-top:46px; padding:34px 30px; background:linear-gradient(135deg, var(--navy), var(--navy-2)); border-radius:var(--r); text-align:center; }
+  .doc-end h2{ font-family:var(--font-display); font-weight:500; font-size:1.5rem; color:#fff; letter-spacing:-0.01em; }
+  .doc-end p{ color:oklch(0.86 0.02 150); margin-top:12px; max-width:480px; margin-left:auto; margin-right:auto; }
+  .doc-end .btn{ margin-top:22px; }
+
+  /* FOOTER */
+  footer{ padding:56px 0 62px; border-top:1px solid var(--line); }
+  .foot-in{ display:flex; align-items:flex-start; justify-content:space-between; gap:30px 48px; flex-wrap:wrap; }
+  .foot-brand{ display:flex; flex-direction:column; gap:16px; max-width:340px; }
+  .foot-links{ display:flex; flex-wrap:wrap; gap:14px 26px; }
+  .foot-links a{ color:var(--ink-soft); font-size:0.92rem; transition:color .2s; }
+  .foot-links a:hover{ color:var(--green-deep); }
+  .foot-note{ color:var(--ink-faint); font-size:0.86rem; }
+
+  @media (max-width:920px){
+    .doc-layout{ grid-template-columns:1fr; gap:8px; }
+    .toc{ position:static; margin-bottom:18px; }
+    .toc ol{ display:flex; flex-wrap:wrap; gap:2px 6px; border-left:none; }
+    .toc-lbl{ padding-left:0; }
+    .toc a{ padding:7px 12px; border:1px solid var(--line); border-left:1px solid var(--line); border-radius:100px; margin-left:0; font-size:0.8rem; }
+    .toc a.active{ border-color:var(--green); }
+    .nav-in{ display:flex; justify-content:space-between; }
+    .nav-burger{ display:inline-flex; }
+    .nav-links{
+      position:absolute; top:100%; left:0; right:0;
+      flex-direction:column; align-items:stretch; gap:0; justify-self:stretch;
+      background:var(--paper); border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+      padding:6px 28px 16px;
+      box-shadow:0 26px 46px -26px oklch(0.3 0.04 250 / .45);
+      opacity:0; transform:translateY(-10px); pointer-events:none;
+      transition:opacity .22s ease, transform .22s ease;
+    }
+    nav.menu-open .nav-links{ opacity:1; transform:none; pointer-events:auto; }
+    .nav-links a.lk{ padding:14px 2px; font-size:1.02rem; border-top:1px solid var(--line); }
+    .nav-links a.lk:first-child{ border-top:none; }
+  }
+  @media (max-width:620px){
+    .wrap{ padding:0 20px; }
+    .doc-hero{ padding:34px 0 18px; }
+    .nav-in{ height:66px; }
+    .nav-left{ gap:9px; }
+    .nav-cta{ gap:9px; }
+    .ts-trigger{ padding:0 8px; }
+    .ts-caret{ display:none; }
+    .nav-burger{ width:40px; height:40px; }
+    .nav-cta .btn-primary{ display:none; }
+    .nav-menu-cta{ display:inline-flex; justify-content:center; margin-top:12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="wrap nav-in">
+    <div class="nav-left">
+      <a class="brand" href="index.html#top" aria-label="SWE Growth Community">
+        <img class="brand-logo" src="assets/swe-growth-logo.png" alt="SWE Growth Community" />
+      </a>
+      <div class="theme-switch" id="themeSwitch">
+        <button type="button" class="ts-trigger" id="tsTrigger" aria-label="Ganti tema" aria-haspopup="true" aria-expanded="false">
+          <span class="ts-cur"></span>
+          <svg class="ts-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="ts-options" role="menu" aria-label="Tema tampilan">
+          <button type="button" data-theme-val="light" role="menuitemradio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/></svg><span>Terang</span></button>
+          <button type="button" data-theme-val="system" role="menuitemradio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12.5" rx="2"/><path d="M9 20.5h6M12 16.5v4"/></svg><span>Sistem</span></button>
+          <button type="button" data-theme-val="dark" role="menuitemradio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13.5A8 8 0 1 1 10.5 4a6.3 6.3 0 0 0 9.5 9.5z"/></svg><span>Gelap</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a class="lk" href="index.html#kenapa">Kenapa kita ada</a>
+      <a class="lk" href="index.html#kegiatan">Yang kita lakuin</a>
+      <a class="lk current" href="code-of-conduct.html" aria-current="page">Code of Conduct</a>
+      <a class="btn btn-primary nav-menu-cta" href="index.html#gabung">Gabung komunitas</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-primary" href="index.html#gabung">Gabung komunitas</a>
+      <button type="button" class="nav-burger" id="navBurger" aria-label="Buka menu" aria-expanded="false" aria-controls="navLinks">
+        <svg class="ic-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="ic-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- DOC HERO -->
+<header class="doc-hero">
+  <div class="wrap">
+    <div class="crumb">
+      <a href="index.html#top">Beranda</a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      <span>Code of Conduct</span>
+    </div>
+    <span class="doc-eyebrow"><span class="dot"></span>Community Guidelines</span>
+    <h1 class="doc-title">Code of Conduct</h1>
+    <p class="doc-lead">Software Engineer Growth adalah komunitas terbuka untuk belajar dan bertumbuh sebagai software engineer. Halaman ini menjelaskan nilai, aturan interaksi, dan batas aman yang kita jaga bersama.</p>
+    <div class="doc-meta">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Berlaku untuk semua anggota</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Aman · Nyaman · Saling menghargai</span>
+    </div>
+  </div>
+</header>
+
+<!-- DOC LAYOUT -->
+<div class="wrap">
+  <div class="doc-layout">
+
+    <!-- TOC -->
+    <aside class="toc" aria-label="Daftar isi">
+      <div class="toc-lbl">Daftar Isi</div>
+      <ol>
+        <li><a href="#context">Community Context</a></li>
+        <li><a href="#tujuan">Tujuan Komunitas</a></li>
+        <li><a href="#interaksi">Interaksi</a></li>
+        <li><a href="#sharia">Prinsip Sharia Compliance</a></li>
+        <li><a href="#promosi">Promosi, Sharing & Lowongan</a></li>
+        <li><a href="#privasi">Privasi & Keamanan</a></li>
+        <li><a href="#penegakan">Jika Ditemukan Pelanggaran</a></li>
+        <li><a href="#pelaporan">Pelaporan</a></li>
+        <li><a href="#penutup">Penutup</a></li>
+      </ol>
+    </aside>
+
+    <!-- CONTENT -->
+    <article class="doc">
+
+      <section class="doc-sec" id="context">
+        <h2><span class="emo">🌱</span> Community Context</h2>
+        <p>Software Engineer Growth adalah komunitas terbuka untuk belajar dan bertumbuh sebagai software engineer.</p>
+      </section>
+
+      <section class="doc-sec" id="tujuan">
+        <h2><span class="emo">🎯</span> Tujuan Komunitas</h2>
+        <ul>
+          <li>Menjadi ruang belajar software engineering yang fokus dan produktif</li>
+          <li>Mendorong pertumbuhan skill, karier, dan kualitas berpikir engineer</li>
+          <li>Menjaga lingkungan diskusi yang aman, nyaman, dan saling menghargai</li>
+        </ul>
+      </section>
+
+      <section class="doc-sec" id="interaksi">
+        <h2><span class="emo">🤝</span> Interaksi</h2>
+        <ul>
+          <li>Saling <em>respect</em> dalam berdiskusi</li>
+          <li>Fokus pada ide, pengalaman, dan solusi, bukan perdebatan personal</li>
+          <li>Tidak ada harassment, bullying, spam, atau provokasi</li>
+          <li>Gunakan bahasa yang pantas</li>
+        </ul>
+      </section>
+
+      <section class="doc-sec" id="sharia">
+        <h2><span class="emo">🧭</span> Prinsip Sharia Compliance dalam Komunitas</h2>
+        <p>Komunitas ini menjunjung tinggi <strong>sharia compliance</strong> sebagai <strong>prinsip etika dan batas aman</strong> dalam membangun ruang belajar yang sehat, nyaman, dan berkelanjutan.</p>
+        <p>Pendekatan ini kami pilih karena kami percaya bahwa nilai syariah memberikan <strong>kerangka kehati-hatian (safety boundary)</strong> yang membantu menjaga adab, fokus, dan keberkahan komunitas.</p>
+        <p>Sharia compliance di sini <strong>bukan dimaksudkan sebagai ruang kajian agama</strong>, dan <strong>tidak diarahkan untuk melakukan <em>judgement personal</em> terhadap keyakinan personal anggota</strong>, melainkan sebagai <strong>prinsip kehati-hatian komunitas</strong>.</p>
+
+        <h3><span class="idx">1.</span> Promosi &amp; Informasi Lowongan Kerja</h3>
+        <p>Untuk menjaga <strong>kehati-hatian, kenyamanan, dan keberkahan</strong> dalam komunitas, berlaku ketentuan berikut:</p>
+        <ul>
+          <li><strong>Tidak diperkenankan</strong> membagikan atau mempromosikan informasi lowongan kerja dari <strong>lembaga, produk, atau layanan</strong> yang <strong>secara umum tidak memenuhi prinsip sharia compliance</strong>, termasuk namun tidak terbatas pada:
+            <ul>
+              <li>Lembaga ribawi yang telah dikenal luas (mis. bank konvensional, asuransi konvensional, pinjaman online berbunga)</li>
+              <li>Perusahaan dengan aktivitas yang secara jelas termasuk kategori terlarang (mis. minuman keras, rokok, perjudian, pornografi, dll)</li>
+            </ul>
+          </li>
+          <li>Informasi lowongan kerja dari perusahaan yang <strong>berpotensi abu-abu</strong> dapat ditanyakan terlebih dahulu kepada admin/moderator sebelum dibagikan.</li>
+        </ul>
+        <div class="callout">
+          <p>Ketentuan ini ditetapkan untuk menjaga arah dan nilai komunitas, bukan untuk membatasi atau menilai pilihan personal anggota.</p>
+        </div>
+
+        <h3><span class="idx">2.</span> Diskusi Halal–Haram &amp; Fiqh</h3>
+        <p>Hal ini beberapa kali terjadi di awal terbentuknya SWE Growth yang memang sebagian besar anggotanya di awal-awal terbentuk berasal dari komunitas <strong>muslim profesional</strong>. Namun dari internal SWE Growth tidak menjadikan wadah ini menjadi tempat khusus bagi kalangan tertentu saja, harapannya bisa bermanfaat untuk semua.</p>
+        <p>Berikut ketentuan yang ditetapkan terkait hal ini:</p>
+        <ul>
+          <li>Komunitas ini <strong>bukan ruang tanya jawab agama</strong></li>
+          <li>Pertanyaan halal–haram hanya diperbolehkan jika:
+            <ul>
+              <li>Relevan langsung dengan konteks kerja atau praktik profesional</li>
+              <li>Disampaikan secara singkat dan tidak berkembang menjadi diskusi fiqh mendalam</li>
+            </ul>
+          </li>
+          <li>Tidak diperkenankan:
+            <ul>
+              <li>Perdebatan mazhab</li>
+              <li>Saling menghakimi</li>
+              <li>Menetapkan kesimpulan agama atas nama komunitas</li>
+            </ul>
+          </li>
+        </ul>
+        <p>Diskusi agama yang lebih luas dianjurkan dilakukan di ruang khusus yang memang ditujukan untuk itu.</p>
+
+        <h3><span class="idx">3.</span> Konten Visual</h3>
+        <p>Demi menjaga <strong>kenyamanan, adab, dan kehati-hatian</strong> dalam komunitas:</p>
+        <ul>
+          <li><strong>Tidak diperkenankan</strong> membagikan konten visual yang <strong>menampakkan aurat atau mengandung unsur seksual</strong>, baik laki-laki maupun perempuan, dalam bentuk apa pun.</li>
+          <li>Ketentuan ini <strong>tidak bergantung pada kerapihan, estetika, atau konteks profesional</strong>, melainkan pada <strong>tertutup atau tidaknya aurat</strong> demi kenyamanan bersama.</li>
+          <li>Konten visual mencakup, namun tidak terbatas pada: foto, ilustrasi, meme, sticker, GIF, dan video.</li>
+        </ul>
+        <p>Untuk meminimalkan potensi pelanggaran serta menjaga konsistensi visual komunitas, pendekatan berikut <strong>sangat dianjurkan dan telah diterapkan pada media swe growth sendiri</strong>:</p>
+        <ul>
+          <li>Penggunaan <strong>faceless character</strong>, <strong>no human character</strong>, ikon, objek, atau ilustrasi abstrak.</li>
+          <li>Jika menggunakan representasi manusia, <strong>diutamakan karakter laki-laki</strong> sebagai pendekatan kehati-hatian untuk meminimalkan potensi penyalahgunaan dan pelecehan visual.</li>
+          <li>Representasi manusia harus menggunakan visual yang <strong>aman</strong>, tidak menampilkan detail tubuh, dan <strong>tidak mengarah pada visualisasi aurat</strong>.</li>
+        </ul>
+        <p>Apabila terdapat kebutuhan khusus untuk membagikan materi yang berpotensi sensitif, wajib menggunakan <strong>blur, crop, atau aset alternatif</strong> yang aman.</p>
+        <div class="callout ref">
+          <div class="ref-h">Referensi aurat secara umum (untuk konteks kehati-hatian)</div>
+          <p><strong>Laki-laki:</strong> antara pusar hingga lutut.</p>
+          <p><strong>Perempuan:</strong> seluruh tubuh kecuali wajah dan telapak tangan.</p>
+        </div>
+      </section>
+
+      <section class="doc-sec" id="promosi">
+        <h2><span class="emo">📢</span> Promosi, Sharing, dan Lowongan</h2>
+        <ul>
+          <li>Tidak spam atau promosi berulang</li>
+          <li>Lowongan kerja diperbolehkan jika jelas, jujur, dan relevan</li>
+          <li>Seluruh aktivitas promosi harus selaras dengan prinsip sharia compliance dan batas komunitas</li>
+        </ul>
+      </section>
+
+      <section class="doc-sec" id="privasi">
+        <h2><span class="emo">🔐</span> Privasi &amp; Keamanan</h2>
+        <ul>
+          <li>Jangan membagikan data pribadi orang lain</li>
+          <li>Jangan share data, kode, atau dokumen internal perusahaan</li>
+          <li>Dilarang konten ilegal, phishing, crack, atau bajakan</li>
+        </ul>
+      </section>
+
+      <section class="doc-sec" id="penegakan">
+        <h2><span class="emo">⚖️</span> Jika Ditemukan Pelanggaran</h2>
+        <p>Admin dan moderator berhak melakukan:</p>
+        <ol class="steps">
+          <li>Menyampaikan kembali ketentuan yang berlaku di Code of Conduct ini</li>
+          <li>Penghapusan konten</li>
+          <li>Mute sementara</li>
+          <li>Pengeluaran dari komunitas (untuk pelanggaran berat atau berulang)</li>
+        </ol>
+        <p>Tindakan diambil demi menjaga <strong>kenyamanan, fokus, dan keberkahan komunitas</strong>.</p>
+      </section>
+
+      <section class="doc-sec" id="pelaporan">
+        <h2><span class="emo">📩</span> Pelaporan</h2>
+        <p>Jika menemukan pelanggaran:</p>
+        <ul>
+          <li>Hubungi admin/mod via DM</li>
+          <li>Sertakan konteks singkat</li>
+          <li>Hindari memperpanjang diskusi di ruang publik</li>
+        </ul>
+      </section>
+
+      <section class="doc-sec" id="penutup">
+        <h2>Penutup</h2>
+        <p>Kami percaya komunitas engineering yang sehat membutuhkan <strong>nilai yang dijaga secara konsisten</strong>.</p>
+        <p>Sharia compliance kami posisikan sebagai <strong>jalan aman</strong> untuk membangun ruang belajar yang nyaman, fokus, dan membawa kebaikan bagi seluruh anggota.</p>
+        <div class="doc-end">
+          <h2>Terima kasih telah menjadi bagian dari Software Engineer Growth.</h2>
+          <p>Yuk jaga ruang belajar ini tetap nyaman buat semua orang.</p>
+          <a class="btn btn-primary" href="index.html#gabung">Gabung komunitas</a>
+        </div>
+      </section>
+
+    </article>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap foot-in">
+    <div class="foot-brand">
+    <a class="brand" href="index.html#top">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9 L12 5 L18 9"/><path d="M6 13.5 L12 9.5 L18 13.5"/><path d="M6 18 L12 14 L18 18"/></svg></span>
+      <span class="b-name"><b>swe growth</b><span>bagian dari ahsan project</span></span>
+    </a>
+      <div class="foot-note">Dari, oleh dan untuk Software Engineer yang mau terus tumbuh 🚀</div>
+    </div>
+    <div class="foot-links">
+      <a href="index.html#kenapa">Kenapa kita ada</a>
+      <a href="index.html#kegiatan">Kegiatan</a>
+      <a href="index.html#grup">Grup</a>
+      <a href="index.html#gabung">Gabung</a>
+      <a href="code-of-conduct.html">Code of Conduct</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // nav shadow
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 12), { passive:true });
+
+  // ---- mobile menu (hamburger) ----
+  (function(){
+    const burger = document.getElementById('navBurger');
+    const links = document.getElementById('navLinks');
+    if(!burger || !links) return;
+    const setOpen = open => {
+      nav.classList.toggle('menu-open', open);
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      burger.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+    };
+    burger.addEventListener('click', e => { e.stopPropagation(); setOpen(!nav.classList.contains('menu-open')); });
+    links.addEventListener('click', e => { if(e.target.closest('a')) setOpen(false); });
+    document.addEventListener('click', e => { if(!nav.contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') setOpen(false); });
+  })();
+
+  // ---- theme switch (light / system / dark) ----
+  (function(){
+    const root = document.documentElement;
+    const mq = matchMedia('(prefers-color-scheme: dark)');
+    const sw = document.getElementById('themeSwitch');
+    const trigger = document.getElementById('tsTrigger');
+    const cur = sw ? sw.querySelector('.ts-cur') : null;
+    const resolve = p => p==='system' ? (mq.matches?'dark':'light') : p;
+    function setCur(p){
+      if(!sw || !cur) return;
+      const opt = sw.querySelector('.ts-options button[data-theme-val="'+p+'"]');
+      if(opt){ cur.innerHTML = opt.querySelector('svg').outerHTML; }
+    }
+    function apply(p){
+      root.dataset.theme = p;
+      root.dataset.resolved = resolve(p);
+      if(sw) sw.querySelectorAll('.ts-options button').forEach(b => b.classList.toggle('on', b.dataset.themeVal===p));
+      setCur(p);
+      try{ localStorage.setItem('swe-theme', p); }catch(e){}
+    }
+    function closeSw(){ if(sw){ sw.classList.remove('open'); if(trigger) trigger.setAttribute('aria-expanded','false'); } }
+    apply(root.dataset.theme || 'system');
+    mq.addEventListener('change', ()=>{ if(root.dataset.theme==='system') root.dataset.resolved = resolve('system'); });
+    if(trigger) trigger.addEventListener('click', e=>{ e.stopPropagation(); const open = sw.classList.toggle('open'); trigger.setAttribute('aria-expanded', open?'true':'false'); });
+    if(sw) sw.querySelector('.ts-options').addEventListener('click', e=>{ const b = e.target.closest('button'); if(b){ apply(b.dataset.themeVal); closeSw(); } });
+    document.addEventListener('click', e=>{ if(sw && !sw.contains(e.target)) closeSw(); });
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSw(); });
+  })();
+
+  // ---- TOC scrollspy ----
+  (function(){
+    const links = Array.from(document.querySelectorAll('.toc a'));
+    if(!links.length) return;
+    const map = new Map();
+    links.forEach(a => { const el = document.querySelector(a.getAttribute('href')); if(el) map.set(el, a); });
+    let active = null;
+    const setActive = a => { if(a===active) return; if(active) active.classList.remove('active'); active = a; if(a) a.classList.add('active'); };
+    const obs = new IntersectionObserver(entries => {
+      const visible = entries.filter(e => e.isIntersecting).sort((a,b)=> a.target.offsetTop - b.target.offsetTop);
+      if(visible.length){ setActive(map.get(visible[0].target)); }
+    }, { rootMargin:'-40% 0px -55% 0px', threshold:0 });
+    map.forEach((a, el) => obs.observe(el));
+  })();
+</script>
+</body>
+</html>
