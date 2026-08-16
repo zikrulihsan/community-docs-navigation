@@ -114,17 +114,30 @@ jadi konten rusak nggak akan sampai ke production.
 
 ## Formulir
 
-Pendaftaran event dan pengajuan mentorship pakai **Netlify Forms** — nggak perlu backend.
-Netlify mendeteksi form saat deploy, dan hasilnya masuk ke dashboard Netlify (Forms).
+Pendaftaran event pakai **Netlify Forms** — nggak perlu backend. Netlify mendeteksi form saat
+deploy, dan hasilnya masuk ke dashboard Netlify (Forms).
 
-Ada dua form:
+| Nama form            | Dipakai di           |
+| -------------------- | -------------------- |
+| `event-registration` | halaman detail event |
 
-| Nama form            | Dipakai di            |
-| -------------------- | --------------------- |
-| `event-registration` | halaman detail event  |
-| `mentorship-request` | halaman mentorship    |
+Form diarahkan ke `/terima-kasih` setelah submit, dan pakai honeypot `bot-field` buat menyaring spam.
 
-Keduanya diarahkan ke `/terima-kasih` setelah submit, dan pakai honeypot `bot-field` buat menyaring spam.
+Mentorship **tidak pakai form** — alurnya lewat admin (lihat bagian berikutnya).
+
+## Alur mentorship
+
+Anggota tidak mendaftar lewat web. Halaman `/mentorship` menampilkan daftar mentor, lalu tiap kartu
+punya tombol **"Ajukan ke admin"** yang membuka WhatsApp admin dengan pesan yang sudah terisi sebagian —
+nama mentor yang dituju sudah tercantum, anggota tinggal melengkapi problemnya.
+
+Buat yang belum punya preferensi, ada tombol terpisah di bawah daftar yang mengirim pesan dengan
+keterangan "belum ada preferensi, mohon dibantu carikan".
+
+Nomor admin diatur lewat konstanta `ADMIN_WA` di `src/pages/mentorship.astro`.
+
+**Mentor diinput manual oleh admin** — tambah file `.yaml` di `src/content/mentors/`. Tidak ada
+pendaftaran mentor dari sisi publik.
 
 ## Deploy
 
