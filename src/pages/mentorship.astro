@@ -1,0 +1,124 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import JoinCta from '../components/JoinCta.astro';
+
+const mentors = (await getCollection('mentors')).sort((a, b) =>
+  Number(b.data.available) - Number(a.data.available) || a.data.name.localeCompare(b.data.name),
+);
+
+const topics = [...new Set(mentors.flatMap((m) => m.data.topics))];
+
+const steps = [
+  { n: '1', t: 'Pilih topik', d: 'Tentukan hal paling ganjel sekarang — backend, karier, atau yang lain.' },
+  { n: '2', t: 'Isi form', d: 'Ceritakan konteksmu singkat aja. Admin bantu carikan mentor yang cocok.' },
+  { n: '3', t: 'Ngobrol', d: 'Sesi 1-on-1 via WhatsApp atau Google Meet, sesuai kesepakatan bareng mentor.' },
+];
+---
+<Base
+  title="Mentorship — SWE Growth"
+  description="Program mentorship SWE Growth. Belajar langsung dari engineer yang sudah lebih dulu jalan — gratis untuk anggota komunitas."
+>
+  <PageHero
+    badge="Mentorship"
+    title="Nggak perlu jalan sendirian"
+    lead="Belajar dari yang sudah lebih dulu lewat jalan yang sama. Cocokkan topik, ngobrol santai, dan bawa pulang arah yang lebih jelas."
+  />
+
+  <section class="block">
+    <div class="wrap">
+      <h2 class="section-title">Cara kerjanya</h2>
+      <div class="card-grid">
+        {steps.map((s) => (
+          <div class="card">
+            <span class="step-n">{s.n}</span>
+            <h3>{s.t}</h3>
+            <p>{s.d}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 class="section-title">Mentor yang tersedia</h2>
+      {mentors.length === 0 ? (
+        <div class="empty-note">Daftar mentor lagi disusun. Sementara, langsung tanya di grup aja ya.</div>
+      ) : (
+        <div class="card-grid">
+          {mentors.map((m) => (
+            <div class="card">
+              <span class={m.data.available ? 'chip green' : 'chip'}>
+                {m.data.available ? 'tersedia' : 'sedang penuh'}
+              </span>
+              <h3>{m.data.name}</h3>
+              <p>{m.data.role}{m.data.company ? ` · ${m.data.company}` : ''}</p>
+              <span class="spacer"></span>
+              <div class="meta">
+                {m.data.topics.map((t) => <span class="chip">{t}</span>)}
+              </div>
+              {m.data.linkedin && (
+                <a class="mentor-link" href={m.data.linkedin} target="_blank" rel="noopener">LinkedIn →</a>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 class="section-title">Ajukan sesi mentorship</h2>
+      <form
+        class="form-card"
+        name="mentorship-request"
+        method="POST"
+        action="/terima-kasih"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+      >
+        <input type="hidden" name="form-name" value="mentorship-request" />
+        <p class="hidden"><label>Jangan diisi: <input name="bot-field" /></label></p>
+        <p class="form-sub">Gratis buat anggota komunitas. Admin bakal hubungi kamu buat mencocokkan mentor.</p>
+        <div class="field">
+          <label for="m-name">Nama</label>
+          <input id="m-name" name="name" type="text" required autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="m-email">Email</label>
+          <input id="m-email" name="email" type="email" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="m-topic">Topik yang mau didalami</label>
+          <select id="m-topic" name="topic" required>
+            {topics.map((t) => <option value={t}>{t}</option>)}
+            <option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="m-context">Ceritakan konteksmu</label>
+          <textarea id="m-context" name="context" rows="4" required placeholder="Lagi di posisi apa, dan apa yang paling ganjel sekarang?"></textarea>
+        </div>
+        <button class="btn btn-primary" type="submit">Kirim pengajuan</button>
+      </form>
+      <p class="mentor-cta">
+        Mau jadi mentor? <a href="https://wa.me/6282338588078" target="_blank" rel="noopener">Kabarin admin di WhatsApp</a> — pengalamanmu berharga buat yang baru mulai.
+      </p>
+    </div>
+  </section>
+
+  <JoinCta />
+</Base>
+
+<style>
+  .step-n {
+    display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--navy); color: var(--green-br); font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;
+  }
+  .mentor-link { color: var(--green-deep); font-size: 0.88rem; font-weight: 600; margin-top: 4px; }
+  .mentor-cta { margin-top: 18px; color: var(--ink-soft); font-size: 0.94rem; }
+  .mentor-cta a { color: var(--green-deep); font-weight: 600; }
+</style>

@@ -1,0 +1,77 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'SWE Growth — komunitas software engineer Indonesia. Tumbuh bareng lewat mentorship, event, kelas, dan diskusi komunitas.' } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="icon" type="image/png" href="/assets/swe-growth-logo.png" />
+<link rel="preload" href="/assets/fonts/hanken-grotesk-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/assets/fonts/ubuntu-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+<script is:inline>
+  // set theme before paint to avoid flash
+  (function(){
+    try{
+      var p = localStorage.getItem('swe-theme') || 'system';
+      var d = p==='system' ? (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light') : p;
+      document.documentElement.dataset.theme = p;
+      document.documentElement.dataset.resolved = d;
+    }catch(e){
+      document.documentElement.dataset.theme='system';
+      document.documentElement.dataset.resolved='light';
+    }
+  })();
+</script>
+</head>
+<body>
+<Nav />
+<main>
+  <slot />
+</main>
+<Footer />
+<script is:inline>
+  (function(){
+    var nav = document.getElementById('siteNav');
+    var burger = document.getElementById('navBurger');
+    if(burger && nav){
+      burger.addEventListener('click', function(e){
+        e.stopPropagation();
+        var open = nav.classList.toggle('menu-open');
+        burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('click', function(e){ if(!nav.contains(e.target)) nav.classList.remove('menu-open'); });
+      document.addEventListener('keydown', function(e){ if(e.key==='Escape') nav.classList.remove('menu-open'); });
+    }
+    var root = document.documentElement;
+    var mq = matchMedia('(prefers-color-scheme: dark)');
+    var order = ['system','light','dark'];
+    var btn = document.getElementById('themeBtn');
+    function resolve(p){ return p==='system' ? (mq.matches?'dark':'light') : p; }
+    function apply(p){
+      root.dataset.theme = p;
+      root.dataset.resolved = resolve(p);
+      try{ localStorage.setItem('swe-theme', p); }catch(e){}
+    }
+    if(btn){
+      btn.addEventListener('click', function(){
+        var next = order[(order.indexOf(root.dataset.theme||'system')+1)%order.length];
+        apply(next);
+      });
+    }
+    mq.addEventListener('change', function(){ if(root.dataset.theme==='system') root.dataset.resolved = resolve('system'); });
+  })();
+</script>
+</body>
+</html>

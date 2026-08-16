@@ -10,15 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
+# build output
+/dist
+.astro/
 
 # misc
 .DS_Store
@@ -30,12 +24,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# vercel
-.vercel
+# environment
+.env
+.env.production
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
 # Local Netlify folder
 .netlify

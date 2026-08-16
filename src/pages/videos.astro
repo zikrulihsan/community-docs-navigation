@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import JoinCta from '../components/JoinCta.astro';
+import { formatDate, isoDate } from '../lib/format';
+
+const videos = (await getCollection('videos')).sort(
+  (a, b) => b.data.publishedDate.getTime() - a.data.publishedDate.getTime(),
+);
+---
+<Base
+  title="Video — SWE Growth"
+  description="Rekaman sharing session, kelas online, dan podcast SWE Growth. Ketinggalan sesi live? Tonton ulang di sini."
+>
+  <PageHero
+    badge="Video"
+    title="Ketinggalan sesi live? Santai."
+    lead="Sebagian besar kegiatan kami direkam. Tinggal pilih, tonton ulang kapan pun sempat."
+  />
+
+  <section class="block">
+    <div class="wrap">
+      {videos.length === 0 ? (
+        <div class="empty-note">Belum ada rekaman yang diunggah.</div>
+      ) : (
+        <div class="card-grid">
+          {videos.map((v) => (
+            <a class="card vid-card" href={v.data.url} target="_blank" rel="noopener">
+              {v.data.youtubeId && (
+                <img
+                  class="thumb"
+                  src={`https://img.youtube.com/vi/${v.data.youtubeId}/hqdefault.jpg`}
+                  alt=""
+                  loading="lazy"
+                  width="480"
+                  height="360"
+                />
+              )}
+              <span class="chip green">{v.data.category}</span>
+              <h3>{v.data.title}</h3>
+              <p>{v.data.description}</p>
+              <span class="spacer"></span>
+              <div class="meta">
+                <time datetime={isoDate(v.data.publishedDate)}>{formatDate(v.data.publishedDate)}</time>
+                <span>Tonton di YouTube →</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <JoinCta />
+</Base>
+
+<style>
+  .thumb { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; background: var(--bg-2); }
+</style>

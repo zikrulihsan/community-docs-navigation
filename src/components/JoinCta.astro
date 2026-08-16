@@ -1,0 +1,26 @@
+---
+interface Props {
+  title?: string;
+  body?: string;
+}
+const {
+  title = 'Pintunya sudah di hadapanmu🚪',
+  body = 'Buka pintu untuk ruang tumbuh bersama.\n\nMasuk ke grup, sapa teman-teman di grup, perkenalan, terus ikut kegiatan apa pun yang lagi jalan. Segampang itu.',
+} = Astro.props;
+---
+<section class="block">
+  <div class="wrap">
+    <div class="join-card">
+      <span class="mono" style="opacity:.85">Cara gabung</span>
+      <h2>{title}</h2>
+      <p>{body}</p>
+      <div class="join-actions">
+        <a class="btn btn-white" href="https://goakal.com/ahsanprojectsbw/swegrowthmember/c79qf/apply" target="_blank" rel="noopener">
+          Gabung ke WA Community
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-outline-w" href="https://wa.me/6282338588078" target="_blank" rel="noopener">Tanya - tanya di WA</a>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,79 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import JoinCta from '../components/JoinCta.astro';
+import { formatDate, isoDate } from '../lib/format';
+
+const jobs = (await getCollection('jobs'))
+  .filter((j) => j.data.active)
+  .sort((a, b) => b.data.postedDate.getTime() - a.data.postedDate.getTime());
+
+const rendered = await Promise.all(
+  jobs.map(async (job) => ({ job, Content: (await render(job)).Content })),
+);
+---
+<Base
+  title="Loker — SWE Growth"
+  description="Info lowongan kerja software engineer yang dikurasi sesuai Code of Conduct komunitas SWE Growth."
+>
+  <PageHero
+    badge="Lowongan Kerja"
+    title="Loker yang sudah dikurasi"
+    lead="Semua lowongan di sini disaring biar jelas, jujur, relevan, dan selaras dengan prinsip komunitas."
+  />
+
+  <section class="block">
+    <div class="wrap">
+      {rendered.length === 0 ? (
+        <div class="empty-note">Belum ada lowongan aktif. Cek lagi nanti, atau pantau grup WhatsApp.</div>
+      ) : (
+        <div class="job-list">
+          {rendered.map(({ job, Content }) => (
+            <article class="card hoverable">
+              <div class="job-head">
+                <div>
+                  <h3>{job.data.role}</h3>
+                  <p class="company">{job.data.company}</p>
+                </div>
+                <span class="chip gold">{job.data.type}</span>
+              </div>
+              <div class="prose job-body"><Content /></div>
+              <div class="meta">
+                <span>📍 {job.data.location}</span>
+                <time datetime={isoDate(job.data.postedDate)}>{formatDate(job.data.postedDate)}</time>
+              </div>
+              <a class="btn btn-primary apply" href={job.data.applyUrl} target="_blank" rel="noopener">
+                Lamar
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+              </a>
+            </article>
+          ))}
+        </div>
+      )}
+
+      <div class="note">
+        <h3>Mau pasang loker?</h3>
+        <p>
+          Kirim detailnya ke admin lewat <a href="https://wa.me/6282338588078" target="_blank" rel="noopener">WhatsApp</a>.
+          Semua lowongan ditinjau dulu sesuai <a href="/code-of-conduct">Code of Conduct</a> komunitas.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <JoinCta />
+</Base>
+
+<style>
+  .job-list { display: flex; flex-direction: column; gap: 16px; }
+  .job-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+  .company { color: var(--ink-soft); font-size: 0.95rem; }
+  .job-body { max-width: none; }
+  .job-body :global(p:last-child) { margin-bottom: 0; }
+  .apply { align-self: flex-start; }
+  .note { margin-top: 26px; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r); padding: 22px; }
+  .note h3 { font-size: 1.05rem; margin-bottom: 6px; }
+  .note p { color: var(--ink-soft); font-size: 0.94rem; }
+  .note a { color: var(--green-deep); font-weight: 600; }
+</style>
