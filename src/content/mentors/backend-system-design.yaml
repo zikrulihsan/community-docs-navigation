@@ -1,0 +1,7 @@
+# CONTOH — ganti `name`, `company`, dan `linkedin` dengan data mentor asli.
+# Nama file bebas, yang penting berakhiran .yaml di folder ini.
+name: "Mentor Backend & System Design"
+role: "Backend Engineer"
+company: "Anggota komunitas"
+topics: ["Backend", "System Design", "Database"]
+available: true

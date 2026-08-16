@@ -1,0 +1,8 @@
+# CONTOH — ganti dengan data mentor asli.
+# Set `available: false` kalau mentor lagi penuh — kartunya tetap tampil,
+# tapi tombol "Ajukan ke admin" diganti keterangan bahwa slotnya penuh.
+name: "Mentor Frontend & AI Tools"
+role: "Frontend Engineer"
+company: "Anggota komunitas"
+topics: ["Frontend", "Web Performance", "AI Tools"]
+available: true

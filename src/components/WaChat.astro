@@ -1,0 +1,319 @@
+---
+/**
+ * Simulasi grup WhatsApp di hero — dipertahankan dari situs lama.
+ * Slide pertama di-render di server, jadi tetap ada isinya walau JS belum jalan.
+ */
+const ICON_CHAT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4L3 21l1.1-3.9A8.4 8.4 0 1 1 21 11.5z"/></svg>`;
+const ICON_DB = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v6c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-6"/><path d="M4.5 11.5v6c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-6"/></svg>`;
+const ICON_AI = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.6l2.1 5.6 5.6 2.1-5.6 2.1L12 18l-2.1-5.6L4.3 10.3l5.6-2.1z"/><circle cx="18.7" cy="5.3" r="1.2"/></svg>`;
+const ICON_GLOBE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.7 2.8 2.7 15.2 0 18c-2.7-2.8-2.7-15.2 0-18z"/></svg>`;
+const ICON_BOOK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4H18a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H6.5A2.5 2.5 0 0 1 4 16.5v-10A2.5 2.5 0 0 1 6.5 4z"/><path d="M4 16.5A2.5 2.5 0 0 1 6.5 14H19"/></svg>`;
+const ICON_SOFT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 18.5a4.5 4.5 0 0 1-.6-8.96 6 6 0 0 1 11.55 1.2A3.8 3.8 0 0 1 17.5 18.5z"/></svg>`;
+const ICON_HEALTH = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M4 9v5M17.5 6.5v11M20 9v5M6.5 12h11"/></svg>`;
+const ICON_MANAGE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="4" rx="1"/><rect x="3" y="16.5" width="6" height="4" rx="1"/><rect x="15" y="16.5" width="6" height="4" rx="1"/><path d="M12 7v3M6 16.5V13h12v3.5M12 10v3"/></svg>`;
+
+type Msg = { n?: string; cl?: string; t: string; tm: string; me?: boolean; host?: boolean; bot?: boolean };
+type Slide = { n: string; c: number | null; ic: string; online: number; msgs: Msg[] };
+
+const slides: Slide[] = [
+  {
+    n: 'General Discussion', c: 995, ic: ICON_CHAT, online: 218,
+    msgs: [
+      { n: 'Hanif', cl: 'c1', t: 'halo semua, aku frontend 2 tahun. mau mulai serius belajar system design 👋', tm: '19.01' },
+      { n: 'Hasrul', cl: 'c2', t: 'sini bahas bareng, gw baru gagal interview wkwk', tm: '19.04' },
+      { me: true, t: 'wkwk samaan, gas latihan bareng 🔥', tm: '19.04' },
+      { n: 'Agung', cl: 'c3', t: 'BARU DAPET OFFER ABROAD!! makasih grup ini 🇮🇩', tm: '19.06' },
+      { n: 'Zikrul SWE Growth', cl: 'c3', t: 'MANTAP Dimas 🚀 traktir sharing "going abroad" dong', tm: '19.07' },
+      { me: true, t: 'ntar gw drop link diskusinya di sini 👍', tm: '19.09' },
+    ],
+  },
+  {
+    n: 'Backend SE Growth', c: 751, ic: ICON_DB, online: 140,
+    msgs: [
+      { n: 'Lino', cl: 'c2', t: 'monolith vs microservices buat tim 5 orang, mending mana?', tm: '20.12' },
+      { n: 'Jauhar', cl: 'c4', t: 'mulai monolith dulu aja, split kalau udah kerasa sakitnya', tm: '20.15' },
+      { me: true, t: 'setuju, jangan over-engineer di awal 👍', tm: '20.16' },
+      { n: 'Oshi', cl: 'c1', t: 'btw ada yg pernah rapihin N+1 query di ORM? lagi pusing', tm: '20.19' },
+      { n: 'Nanda', cl: 'c3', t: 'pakai eager loading / select_related biasanya beres kok', tm: '20.22' },
+      { me: true, t: 'nice, gw coba refactor dulu', tm: '20.24' },
+    ],
+  },
+  {
+    n: 'AI Tools SWE Growth', c: 724, ic: ICON_AI, online: 160,
+    msgs: [
+      { n: 'Zain', cl: 'c2', t: 'ada kabar AI kere hore baru nih, modelnya murah tapi hasilnya gila', tm: '13.40' },
+      { n: 'Zahid', cl: 'c1', t: 'wkwk era AI kere hore emang, gratisan aja udah kepake banget sekarang', tm: '13.42' },
+      { n: 'Michael', cl: 'c2', t: 'btw kalian tim mana sih? Claude, Codex, atau mocin?', tm: '13.45' },
+      { me: true, t: 'gw tim Claude, paling enak buat coding 🤖', tm: '13.46' },
+      { n: 'Iqbal', cl: 'c4', t: 'gw campur: Claude buat mikir, mocin buat yang murah meriah', tm: '13.49' },
+      { n: 'Zikrul SWE Growth', cl: 'c3', t: 'tim apa aja boleh, yang penting tetap mikir sendiri ya ✨', tm: '13.51' },
+    ],
+  },
+  {
+    n: 'English Club', c: 640, ic: ICON_GLOBE, online: 95,
+    msgs: [
+      { n: 'Akhyar', cl: 'c4', t: 'weekly speaking practice this Saturday, join us 🗣️', tm: '09.05' },
+      { n: 'Zain', cl: 'c3', t: "let's talk in English today, no bahasa allowed 😄", tm: '09.11' },
+      { me: true, t: 'haha sure, I really need to practice speaking ✍️', tm: '09.12' },
+      { n: 'Mukhlis', cl: 'c2', t: 'looking for a partner for daily conversation, anyone interested?', tm: '09.18' },
+      { n: 'Vivi', cl: 'c1', t: "I'm in for Saturday! I want to get fluent at speaking", tm: '09.20' },
+      { n: 'Zikrul SWE Growth', cl: 'c3', t: "awesome, I'll share the room link later 🔗", tm: '09.22' },
+    ],
+  },
+  {
+    n: 'Book Club SWE Growth', c: 375, ic: ICON_BOOK, online: 60,
+    msgs: [
+      { n: 'Arif', cl: 'c1', t: 'lagi baca The Effective Engineer 📚 diskusi bab 4 yuk', tm: '21.02' },
+      { me: true, t: '+1, isinya daging semua 💯', tm: '21.03' },
+      { n: 'Abid', cl: 'c2', t: 'Designing Data-Intensive Apps ada yg mau nyusul?', tm: '21.06' },
+      { n: 'Oshi', cl: 'c4', t: 'rekomendasi buku buat calon tech lead dong', tm: '21.09' },
+      { n: 'Azam', cl: 'c3', t: 'gw vote DDIA buat batch baca bareng bulan depan', tm: '21.12' },
+      { n: 'Adnan', cl: 'c2', t: 'setuju, sekalian bikin catatan bareng 📒', tm: '21.14' },
+    ],
+  },
+  {
+    n: 'Soft skills', c: 177, ic: ICON_SOFT, online: 48,
+    msgs: [
+      { n: 'Fajar', cl: 'c2', t: 'beda mid vs senior yang sebenernya apa sih?', tm: '17.30' },
+      { n: 'Zikrul SWE Growth', cl: 'c3', t: 'bukan soal ngoding doang, tapi impact & ownership 🚀', tm: '17.33' },
+      { me: true, t: 'noted, makasih insight-nya', tm: '17.34' },
+      { n: 'Zain', cl: 'c3', t: 'cara nunjukkin impact biar dilirik buat promosi?', tm: '17.38' },
+      { n: 'Akhyar', cl: 'c4', t: 'mentoring junior juga ngangkat "impact" kamu lho', tm: '17.41' },
+      { me: true, t: 'bener, gw mulai ambil lebih banyak ownership deh', tm: '17.43' },
+    ],
+  },
+  {
+    n: 'SWE Growth Hidup Sehat', c: 312, ic: ICON_HEALTH, online: 54,
+    msgs: [
+      { n: 'Zain', cl: 'c2', t: 'gimana sih cara handle perut yang makin offside? kerjaan duduk mulu hmm', tm: '07.10' },
+      { n: 'Ajitama', cl: 'c1', t: 'mulai dari jalan 8rb langkah + kurangin gorengan, ngefek pelan-pelan kok', tm: '07.13' },
+      { n: 'Michael', cl: 'c4', t: 'aku kunci di reminder pagi biar konsisten, sekali skip suka keterusan wkwk', tm: '07.15' },
+      { n: 'Riga', cl: 'c3', t: 'set target kecil dulu aja, 3x seminggu, naikin pelan-pelan', tm: '07.18' },
+      { me: true, t: '#lapor lari 5km hari ini 🏃‍♂️', tm: '07.41' },
+      { bot: true, n: 'Growth Bot', t: 'selamat ya! streak olahraga kamu jalan terus, mantap 💪', tm: '07.41' },
+    ],
+  },
+  {
+    n: 'Managerial Discussion', c: 198, ic: ICON_MANAGE, online: 31,
+    msgs: [
+      { n: 'Joko', cl: 'c3', t: 'gimana cara kalian healing setelah seharian ngurus management? penat banget', tm: '18.20' },
+      { n: 'Panji', cl: 'c2', t: 'gw matiin notif kerja abis jam 6, terus full main sama anak. wajib sih', tm: '18.23' },
+      { n: 'Arif', cl: 'c4', t: 'journaling 10 menit + jalan sore, kepala langsung enteng', tm: '18.26' },
+      { n: 'Tegar', cl: 'c1', t: 'block 1 hari no-meeting tiap minggu, ngebantu banget buat napas', tm: '18.29' },
+      { me: true, t: 'noted, kayaknya gw kebanyakan meeting tanpa jeda hehe', tm: '18.31' },
+      { n: 'Zikrul SWE Growth', cl: 'c3', t: 'jaga diri dulu, baru bisa jagain tim 🙏', tm: '18.34' },
+    ],
+  },
+];
+
+const first = slides[0];
+const subText = (s: Slide) =>
+  `${s.c ? s.c.toLocaleString('id-ID') + ' anggota' : 'grup baru'} · ${s.online} online`;
+const nmClass = (m: Msg) => (m.host ? 'host' : m.bot ? 'bot' : m.cl || '');
+---
+<div class="wa-slider">
+  <div class="wa">
+    <div class="wa-inner">
+      <div class="wa-head">
+        <span class="mark" id="waMark" set:html={first.ic}></span>
+        <div class="g-meta">
+          <div class="g-name" id="waName">{first.n}</div>
+          <div class="g-sub" id="waSub">{subText(first)}</div>
+        </div>
+      </div>
+      <div class="wa-body" id="waBody">
+        {first.msgs.map((m) => (
+          <div class={`bub in${m.me ? ' me' : ''}${m.host ? ' host' : ''}${m.bot ? ' bot' : ''}`}>
+            {!m.me && <span class={`nm ${nmClass(m)}`}>{m.n}</span>}
+            {m.t}
+            <span class="tm">{m.tm}</span>
+          </div>
+        ))}
+      </div>
+      <div class="wa-type">
+        <div class="field">Ketik pesan…</div>
+        <span class="send"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4l0 6 12 2-12 2z"/></svg></span>
+      </div>
+    </div>
+  </div>
+  <div class="wa-nav">
+    <button class="wa-btn" id="waPrev" type="button" aria-label="Grup sebelumnya"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <div class="wa-dots" id="waDots" role="tablist" aria-label="Pilih grup">
+      {slides.map((s, i) => (
+        <button type="button" role="tab" data-i={i} class={i === 0 ? 'on' : undefined} aria-label={s.n}></button>
+      ))}
+    </div>
+    <button class="wa-btn" id="waNext" type="button" aria-label="Grup berikutnya"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+  </div>
+</div>
+
+<script is:inline define:vars={{ slides }}>
+  (function () {
+    var body = document.getElementById('waBody');
+    var name = document.getElementById('waName');
+    var sub = document.getElementById('waSub');
+    var mark = document.getElementById('waMark');
+    var dots = document.getElementById('waDots');
+    if (!body || !dots) return;
+
+    var dotEls = [].slice.call(dots.children);
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    var gi = 0, timer = null, bubbleTimers = [], visible = true;
+
+    function render(i) {
+      bubbleTimers.forEach(clearTimeout);
+      bubbleTimers = [];
+      var g = slides[i];
+      mark.innerHTML = g.ic;
+      name.textContent = g.n;
+      sub.textContent = (g.c ? g.c.toLocaleString('id-ID') + ' anggota' : 'grup baru') + ' · ' + g.online + ' online';
+      body.textContent = '';
+      dotEls.forEach(function (d, di) { d.classList.toggle('on', di === i); });
+      g.msgs.forEach(function (m, mi) {
+        var el = document.createElement('div');
+        el.className = 'bub' + (m.me ? ' me' : '') + (m.host ? ' host' : '') + (m.bot ? ' bot' : '');
+        if (!m.me) {
+          var nm = document.createElement('span');
+          nm.className = 'nm ' + (m.host ? 'host' : m.bot ? 'bot' : m.cl || '');
+          nm.textContent = m.n;
+          el.appendChild(nm);
+        }
+        el.appendChild(document.createTextNode(m.t));
+        var tm = document.createElement('span');
+        tm.className = 'tm';
+        tm.textContent = m.tm;
+        el.appendChild(tm);
+        body.appendChild(el);
+        if (reduce.matches) {
+          el.classList.add('in');
+        } else {
+          bubbleTimers.push(setTimeout(function () { el.classList.add('in'); }, 90 + mi * 340));
+        }
+      });
+    }
+
+    function goTo(i, fromUser) {
+      gi = (i + slides.length) % slides.length;
+      render(gi);
+      if (fromUser) restart();
+    }
+
+    function restart() {
+      clearInterval(timer);
+      // Jangan auto-putar kalau user minta gerakan minimal, atau slider lagi nggak kelihatan.
+      if (reduce.matches || !visible) return;
+      timer = setInterval(function () { goTo(gi + 1); }, 5200);
+    }
+
+    document.getElementById('waPrev').addEventListener('click', function () { goTo(gi - 1, true); });
+    document.getElementById('waNext').addEventListener('click', function () { goTo(gi + 1, true); });
+    dots.addEventListener('click', function (e) {
+      var b = e.target.closest('button');
+      if (b) goTo(+b.dataset.i, true);
+    });
+
+    // Hemat kerja: berhenti kalau tab disembunyikan atau slider ke-scroll keluar layar.
+    document.addEventListener('visibilitychange', function () {
+      visible = !document.hidden;
+      restart();
+    });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting && !document.hidden;
+        restart();
+      }, { threshold: 0 }).observe(body);
+    }
+    reduce.addEventListener('change', restart);
+
+    restart();
+  })();
+</script>
+
+<style>
+  .wa {
+    background: var(--paper); border-radius: 26px; padding: 12px;
+    box-shadow: 0 2px 4px oklch(0.3 0.02 250 / .06), 0 30px 60px -22px oklch(0.3 0.04 250 / .35);
+    border: 1px solid var(--line);
+    transform: rotate(0.7deg);
+    max-width: 430px; margin-left: auto;
+  }
+  .wa-inner { border-radius: 18px; overflow: hidden; background: oklch(0.945 0.012 140); }
+  .wa-head { display: flex; align-items: center; gap: 12px; padding: 13px 15px; background: var(--green-deep); color: #fff; }
+  .wa-head .mark { width: 38px; height: 38px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--navy); color: var(--green-br); box-shadow: 0 0 0 2px oklch(1 0 0 / .2); }
+  .wa-head .mark :global(svg) { width: 60%; height: 60%; }
+  .wa-head .g-name { font-weight: 700; font-size: 0.96rem; line-height: 1.2; }
+  .wa-head .g-sub { font-size: 0.74rem; color: oklch(0.95 0.03 150); margin-top: 2px; }
+  .wa-head .g-meta { flex: 1; min-width: 0; }
+  .wa-body {
+    padding: 16px 14px 18px; height: 452px; display: flex; flex-direction: column;
+    justify-content: flex-end; gap: 9px; overflow: hidden;
+    background-image: radial-gradient(oklch(0.86 0.02 140 / .55) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .bub {
+    max-width: 82%; padding: 8px 12px 7px; border-radius: 13px; font-size: 0.9rem; line-height: 1.38;
+    background: var(--paper); box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08); color: var(--ink);
+    border-top-left-radius: 4px; align-self: flex-start; position: relative;
+    opacity: 0; transform: translateY(10px) scale(.98);
+  }
+  .bub.in { animation: bubin .45s cubic-bezier(.2,.8,.3,1) forwards; }
+  @keyframes bubin { to { opacity: 1; transform: none; } }
+  .bub .nm { font-weight: 700; font-size: 0.76rem; display: block; margin-bottom: 1px; }
+  .bub .tm { font-family: var(--font-mono); font-size: 0.6rem; color: var(--ink-faint); float: right; margin: 4px 0 -2px 8px; }
+  .bub.me { align-self: flex-end; background: oklch(0.88 0.09 150); border-top-left-radius: 13px; border-top-right-radius: 4px; }
+  .bub.host { box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.66 0.155 152 / .4); }
+  .nm.c1 { color: oklch(0.55 0.16 20); }
+  .nm.c2 { color: oklch(0.52 0.15 280); }
+  .nm.c3 { color: oklch(0.55 0.14 200); }
+  .nm.c4 { color: oklch(0.55 0.14 60); }
+  .nm.host { color: var(--green-deep); }
+  .nm.bot { color: oklch(0.52 0.13 195); }
+  .nm.bot::after {
+    content: "BOT"; font-family: var(--font-mono); font-size: 0.52rem; font-weight: 700; letter-spacing: .06em;
+    color: #fff; background: oklch(0.6 0.1 195); padding: 1px 4px; border-radius: 4px; margin-left: 6px; vertical-align: 1px;
+  }
+  .bub.bot { background: oklch(0.96 0.025 195); box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.7 0.1 195 / .35); }
+  .wa-type { display: flex; align-items: center; gap: 9px; padding: 11px 15px; background: var(--paper); border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 0.88rem; }
+  .wa-type .field { flex: 1; background: var(--bg-2); border-radius: 100px; padding: 8px 14px; }
+  .wa-type .send { width: 34px; height: 34px; border-radius: 50%; background: var(--green); display: grid; place-items: center; color: #fff; }
+  .wa-type .send svg { width: 16px; height: 16px; }
+
+  .wa-slider { max-width: 430px; margin-left: auto; }
+  .wa-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
+  .wa-btn {
+    flex: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+    display: grid; place-items: center; color: var(--ink-soft);
+    background: var(--paper); border: 1px solid var(--line);
+    box-shadow: 0 1px 2px oklch(0.3 0.02 250 / .06), 0 8px 18px -12px oklch(0.3 0.04 250 / .4);
+    transition: color .18s ease, border-color .18s ease, transform .18s ease, background .18s ease;
+  }
+  .wa-btn svg { width: 20px; height: 20px; }
+  .wa-btn:hover { color: var(--green-deep); border-color: var(--green); transform: translateY(-1px); }
+  .wa-btn:active { transform: translateY(0) scale(.95); }
+  .wa-dots { display: flex; align-items: center; gap: 7px; }
+  .wa-dots button {
+    width: 8px; height: 8px; border-radius: 50%; cursor: pointer; padding: 0;
+    background: var(--line-2); border: none; transition: background .2s ease, width .2s ease;
+  }
+  .wa-dots button.on { width: 22px; border-radius: 5px; background: var(--green); }
+  .wa-dots button:hover:not(.on) { background: var(--ink-faint); }
+
+  /* Mockup-nya sengaja tetap terang di dark mode, biar tetap kerasa seperti WhatsApp asli */
+  :global(:root[data-resolved="dark"]) .wa { background: oklch(0.975 0.006 150); border-color: oklch(0.90 0.01 150); }
+  :global(:root[data-resolved="dark"]) .wa-head { background: oklch(0.540 0.140 153); }
+  :global(:root[data-resolved="dark"]) .bub { background: #fff; color: oklch(0.255 0.02 200); }
+  :global(:root[data-resolved="dark"]) .bub.me { background: oklch(0.88 0.09 150); color: oklch(0.255 0.02 200); }
+  :global(:root[data-resolved="dark"]) .bub.host { box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.66 0.155 152 / .4); }
+  :global(:root[data-resolved="dark"]) .wa-type { background: #fff; color: oklch(0.55 0.02 200); border-top-color: oklch(0.90 0.01 150); }
+  :global(:root[data-resolved="dark"]) .wa-type .field { background: oklch(0.945 0.012 140); }
+
+  @media (max-width: 900px) {
+    .wa-slider { margin-left: auto; margin-right: auto; width: 100%; }
+    .wa { transform: none; margin: 0 auto; max-width: none; width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bub { opacity: 1; transform: none; }
+    .bub.in { animation: none; }
+  }
+</style>

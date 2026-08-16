@@ -4,26 +4,51 @@ import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import JoinCta from '../components/JoinCta.astro';
 
-const mentors = (await getCollection('mentors')).sort((a, b) =>
-  Number(b.data.available) - Number(a.data.available) || a.data.name.localeCompare(b.data.name),
+const ADMIN_WA = '6282338588078';
+
+const mentors = (await getCollection('mentors')).sort(
+  (a, b) => Number(b.data.available) - Number(a.data.available) || a.data.name.localeCompare(b.data.name),
 );
 
-const topics = [...new Set(mentors.flatMap((m) => m.data.topics))];
+/** Pesan WhatsApp ke admin, sudah terisi sebagian biar anggota tinggal lengkapi problemnya. */
+const waLink = (mentor?: string) => {
+  const text = [
+    'Halo admin SWE Growth 👋',
+    '',
+    'Saya mau ikut sesi mentorship.',
+    '',
+    `Mentor yang dituju: ${mentor ?? 'belum ada preferensi, mohon dibantu carikan'}`,
+    'Problem/konteks saya: ',
+  ].join('\n');
+  return `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(text)}`;
+};
 
 const steps = [
-  { n: '1', t: 'Pilih topik', d: 'Tentukan hal paling ganjel sekarang — backend, karier, atau yang lain.' },
-  { n: '2', t: 'Isi form', d: 'Ceritakan konteksmu singkat aja. Admin bantu carikan mentor yang cocok.' },
-  { n: '3', t: 'Ngobrol', d: 'Sesi 1-on-1 via WhatsApp atau Google Meet, sesuai kesepakatan bareng mentor.' },
+  {
+    n: '1',
+    t: 'Lihat daftar mentor',
+    d: 'Cek siapa yang topiknya paling nyambung sama masalahmu. Belum nemu yang cocok? Nggak apa-apa, lanjut ke langkah 2.',
+  },
+  {
+    n: '2',
+    t: 'Hubungi admin',
+    d: 'Ceritakan problemnya, lalu sebutkan mau sama mentor siapa — atau bilang saja belum ada preferensi.',
+  },
+  {
+    n: '3',
+    t: 'Admin cocokkan',
+    d: 'Admin menghubungkan kamu dengan mentor yang pas dan bantu atur jadwal sesinya.',
+  },
 ];
 ---
 <Base
   title="Mentorship — SWE Growth"
-  description="Program mentorship SWE Growth. Belajar langsung dari engineer yang sudah lebih dulu jalan — gratis untuk anggota komunitas."
+  description="Program mentorship SWE Growth. Lihat daftar mentor, lalu hubungi admin untuk dicocokkan — gratis untuk anggota komunitas."
 >
   <PageHero
     badge="Mentorship"
     title="Nggak perlu jalan sendirian"
-    lead="Belajar dari yang sudah lebih dulu lewat jalan yang sama. Cocokkan topik, ngobrol santai, dan bawa pulang arah yang lebih jelas."
+    lead="Belajar dari yang sudah lebih dulu lewat jalan yang sama. Ceritakan problemmu ke admin, nanti kami cocokkan dengan mentor yang pas."
   />
 
   <section class="block">
@@ -43,9 +68,9 @@ const steps = [
 
   <section class="block">
     <div class="wrap">
-      <h2 class="section-title">Mentor yang tersedia</h2>
+      <h2 class="section-title">Daftar mentor</h2>
       {mentors.length === 0 ? (
-        <div class="empty-note">Daftar mentor lagi disusun. Sementara, langsung tanya di grup aja ya.</div>
+        <div class="empty-note">Daftar mentor lagi disusun. Sementara, langsung hubungi admin aja ya.</div>
       ) : (
         <div class="card-grid">
           {mentors.map((m) => (
@@ -55,13 +80,23 @@ const steps = [
               </span>
               <h3>{m.data.name}</h3>
               <p>{m.data.role}{m.data.company ? ` · ${m.data.company}` : ''}</p>
-              <span class="spacer"></span>
-              <div class="meta">
+              <div class="topics">
                 {m.data.topics.map((t) => <span class="chip">{t}</span>)}
               </div>
-              {m.data.linkedin && (
-                <a class="mentor-link" href={m.data.linkedin} target="_blank" rel="noopener">LinkedIn →</a>
-              )}
+              <span class="spacer"></span>
+              <div class="card-actions">
+                {m.data.available ? (
+                  <a class="btn btn-primary sm" href={waLink(m.data.name)} target="_blank" rel="noopener">
+                    Ajukan ke admin
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                  </a>
+                ) : (
+                  <span class="unavailable">Lagi penuh — coba mentor lain dulu ya</span>
+                )}
+                {m.data.linkedin && (
+                  <a class="mentor-link" href={m.data.linkedin} target="_blank" rel="noopener">LinkedIn →</a>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -71,42 +106,19 @@ const steps = [
 
   <section class="block">
     <div class="wrap">
-      <h2 class="section-title">Ajukan sesi mentorship</h2>
-      <form
-        class="form-card"
-        name="mentorship-request"
-        method="POST"
-        action="/terima-kasih"
-        data-netlify="true"
-        netlify-honeypot="bot-field"
-      >
-        <input type="hidden" name="form-name" value="mentorship-request" />
-        <p class="hidden"><label>Jangan diisi: <input name="bot-field" /></label></p>
-        <p class="form-sub">Gratis buat anggota komunitas. Admin bakal hubungi kamu buat mencocokkan mentor.</p>
-        <div class="field">
-          <label for="m-name">Nama</label>
-          <input id="m-name" name="name" type="text" required autocomplete="name" />
+      <div class="no-pref">
+        <div>
+          <h2>Belum ada preferensi mentor?</h2>
+          <p>
+            Santai, itu normal. Langsung hubungi admin dan ceritakan aja apa yang lagi ganjel —
+            nanti kami carikan mentor yang paling nyambung sama kondisimu.
+          </p>
         </div>
-        <div class="field">
-          <label for="m-email">Email</label>
-          <input id="m-email" name="email" type="email" required autocomplete="email" />
-        </div>
-        <div class="field">
-          <label for="m-topic">Topik yang mau didalami</label>
-          <select id="m-topic" name="topic" required>
-            {topics.map((t) => <option value={t}>{t}</option>)}
-            <option value="Lainnya">Lainnya</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="m-context">Ceritakan konteksmu</label>
-          <textarea id="m-context" name="context" rows="4" required placeholder="Lagi di posisi apa, dan apa yang paling ganjel sekarang?"></textarea>
-        </div>
-        <button class="btn btn-primary" type="submit">Kirim pengajuan</button>
-      </form>
-      <p class="mentor-cta">
-        Mau jadi mentor? <a href="https://wa.me/6282338588078" target="_blank" rel="noopener">Kabarin admin di WhatsApp</a> — pengalamanmu berharga buat yang baru mulai.
-      </p>
+        <a class="btn btn-primary" href={waLink()} target="_blank" rel="noopener">
+          Hubungi admin
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -118,7 +130,15 @@ const steps = [
     display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
     background: var(--navy); color: var(--green-br); font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;
   }
-  .mentor-link { color: var(--green-deep); font-size: 0.88rem; font-weight: 600; margin-top: 4px; }
-  .mentor-cta { margin-top: 18px; color: var(--ink-soft); font-size: 0.94rem; }
-  .mentor-cta a { color: var(--green-deep); font-weight: 600; }
+  .topics { display: flex; flex-wrap: wrap; gap: 6px; }
+  .card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 4px; }
+  .btn.sm { padding: 9px 17px; font-size: 0.88rem; }
+  .unavailable { color: var(--ink-faint); font-size: 0.88rem; }
+  .mentor-link { color: var(--green-deep); font-size: 0.88rem; font-weight: 600; }
+  .no-pref {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r); padding: 26px;
+  }
+  .no-pref h2 { font-size: 1.25rem; margin-bottom: 6px; }
+  .no-pref p { color: var(--ink-soft); font-size: 0.95rem; max-width: 56ch; }
 </style>
