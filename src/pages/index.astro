@@ -1,0 +1,120 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import JoinCta from '../components/JoinCta.astro';
+import { formatDate, isoDate, isUpcoming } from '../lib/format';
+
+const events = (await getCollection('events'))
+  .filter((e) => isUpcoming(e.data.date))
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
+  .slice(0, 2);
+
+const posts = (await getCollection('blog'))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 2);
+
+const pillars = [
+  { href: '/mentorship', title: 'Mentorship', body: 'Belajar langsung dari yang sudah lebih dulu jalan. Cocokkan topik, lalu ngobrol.' },
+  { href: '/events', title: 'Event & Kelas', body: 'Kelas online, sharing session, dan podcast. Daftar langsung dari web.' },
+  { href: '/videos', title: 'Video', body: 'Ketinggalan sesi live? Semua rekaman ada di sini.' },
+  { href: '/blog', title: 'Blog', body: 'Tulisan dari member untuk member — pengalaman nyata, bukan teori doang.' },
+  { href: '/jobs', title: 'Loker', body: 'Info lowongan yang sudah dikurasi sesuai nilai komunitas.' },
+  { href: '/code-of-conduct', title: 'Code of Conduct', body: 'Aturan main biar ruang belajar ini nyaman buat semua.' },
+];
+---
+<Base title="SWE Growth — tumbuh bareng sebagai software engineer">
+  <header class="hero">
+    <div class="wrap">
+      <span class="badge mono">Komunitas Software Engineer 🇮🇩</span>
+      <h1>Bareng - Bareng Bertumbuh sebagai Software Engineer&nbsp;🤝</h1>
+      <p class="hero-sub">Tumbuh sebagai engineer itu capek, kan? Apalagi kalau jalan sendirian.</p>
+      <p class="hero-sub">Yok capeknya bareng - bareng aja.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://goakal.com/ahsanprojectsbw/swegrowthmember/c79qf/apply" target="_blank" rel="noopener">
+          Gabung komunitas
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="/events">Lihat event terdekat</a>
+      </div>
+      <div class="hero-meta">
+        <div class="stat"><span class="num">1024+</span><span class="mono">anggota</span></div>
+        <div class="vr"></div>
+        <div class="stat"><span class="num">gratis</span><span class="mono">selamanya</span></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 class="section-title">Semua yang kita lakuin, dalam satu tempat.</h2>
+      <div class="card-grid">
+        {pillars.map((p) => (
+          <a class="card" href={p.href}>
+            <h3>{p.title}</h3>
+            <p>{p.body}</p>
+            <span class="spacer"></span>
+            <span class="chip green">Buka →</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {events.length > 0 && (
+    <section class="block">
+      <div class="wrap">
+        <h2 class="section-title">Event terdekat</h2>
+        <div class="card-grid">
+          {events.map((e) => (
+            <a class="card" href={`/events/${e.id}`}>
+              <span class="chip green">{e.data.mode}</span>
+              <h3>{e.data.title}</h3>
+              <p>{e.data.description}</p>
+              <span class="spacer"></span>
+              <div class="meta">
+                <time datetime={isoDate(e.data.date)}>{formatDate(e.data.date)}</time>
+                {e.data.time && <span>{e.data.time}</span>}
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {posts.length > 0 && (
+    <section class="block">
+      <div class="wrap">
+        <h2 class="section-title">Tulisan terbaru</h2>
+        <div class="card-grid">
+          {posts.map((p) => (
+            <a class="card" href={`/blog/${p.id}`}>
+              <h3>{p.data.title}</h3>
+              <p>{p.data.description}</p>
+              <span class="spacer"></span>
+              <div class="meta">
+                <time datetime={isoDate(p.data.pubDate)}>{formatDate(p.data.pubDate)}</time>
+                <span>{p.data.author}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <JoinCta />
+</Base>
+
+<style>
+  .hero { padding: clamp(48px, 8vw, 88px) 0 40px; }
+  .hero .badge { display: inline-block; color: var(--green-deep); margin-bottom: 16px; }
+  .hero h1 { font-size: clamp(2rem, 5.2vw, 3.2rem); max-width: 20ch; margin-bottom: 18px; }
+  .hero-sub { font-size: clamp(1rem, 2vw, 1.18rem); color: var(--ink-soft); max-width: 52ch; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .hero-meta { display: flex; align-items: center; gap: 22px; margin-top: 34px; }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat .num { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; line-height: 1; }
+  .stat .mono { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+  .vr { width: 1px; height: 34px; background: var(--line-2); }
+</style>

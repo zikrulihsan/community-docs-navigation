@@ -1,0 +1,113 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { formatDate, isoDate, isUpcoming } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const events = await getCollection('events');
+  return events.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, description, date, time, mode, location, speaker, registrationOpen, registrationUrl } = entry.data;
+const upcoming = isUpcoming(date);
+const canRegister = registrationOpen && upcoming;
+---
+<Base title={`${title} — SWE Growth`} description={description}>
+  <header class="page-hero">
+    <div class="wrap">
+      <a class="back" href="/events">← Semua event</a>
+      <span class="chip green" style="margin-bottom:12px">{mode}</span>
+      <h1>{title}</h1>
+      <p class="lead">{description}</p>
+    </div>
+  </header>
+
+  <section class="block">
+    <div class="wrap detail-grid">
+      <div>
+        <dl class="facts">
+          <div><dt>Tanggal</dt><dd><time datetime={isoDate(date)}>{formatDate(date)}</time></dd></div>
+          {time && <div><dt>Waktu</dt><dd>{time}</dd></div>}
+          <div><dt>Lokasi</dt><dd>{location}</dd></div>
+          {speaker && <div><dt>Pembicara</dt><dd>{speaker}</dd></div>}
+        </dl>
+        <div class="prose">
+          <Content />
+        </div>
+      </div>
+
+      <div>
+        {canRegister ? (
+          registrationUrl ? (
+            <div class="form-card">
+              <h3>Daftar event ini</h3>
+              <p class="form-sub">Pendaftaran dibuka lewat halaman eksternal.</p>
+              <a class="btn btn-primary" href={registrationUrl} target="_blank" rel="noopener">
+                Buka form pendaftaran
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+              </a>
+            </div>
+          ) : (
+            <form
+              class="form-card"
+              name="event-registration"
+              method="POST"
+              action="/terima-kasih"
+              data-netlify="true"
+              netlify-honeypot="bot-field"
+            >
+              <input type="hidden" name="form-name" value="event-registration" />
+              <input type="hidden" name="event" value={title} />
+              <p class="hidden"><label>Jangan diisi: <input name="bot-field" /></label></p>
+              <h3>Daftar event ini</h3>
+              <p class="form-sub">Isi data singkat, link acara kami kirim ke emailmu.</p>
+              <div class="field">
+                <label for="name">Nama</label>
+                <input id="name" name="name" type="text" required autocomplete="name" />
+              </div>
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" required autocomplete="email" />
+              </div>
+              <div class="field">
+                <label for="whatsapp">Nomor WhatsApp</label>
+                <input id="whatsapp" name="whatsapp" type="tel" required autocomplete="tel" placeholder="08..." />
+              </div>
+              <div class="field">
+                <label for="question">Ada yang mau ditanyakan? (opsional)</label>
+                <textarea id="question" name="question" rows="3"></textarea>
+              </div>
+              <button class="btn btn-primary" type="submit">Daftar sekarang</button>
+            </form>
+          )
+        ) : (
+          <div class="form-card">
+            <h3>{upcoming ? 'Pendaftaran ditutup' : 'Event sudah selesai'}</h3>
+            <p class="form-sub">
+              {upcoming
+                ? 'Pendaftaran untuk event ini sedang ditutup. Pantau grup WhatsApp buat info berikutnya.'
+                : 'Rekaman biasanya kami unggah ke halaman video beberapa hari setelah acara.'}
+            </p>
+            <a class="btn btn-ghost" href="/videos">Lihat rekaman</a>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .back { display: block; width: fit-content; color: var(--ink-faint); font-size: 0.9rem; margin-bottom: 14px; }
+  .back:hover { color: var(--ink); }
+  .detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: 32px; align-items: start; }
+  @media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } }
+  .facts {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px;
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r);
+    padding: 18px; margin-bottom: 26px;
+  }
+  .facts dt { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 3px; }
+  .facts dd { font-weight: 600; font-size: 0.95rem; }
+</style>

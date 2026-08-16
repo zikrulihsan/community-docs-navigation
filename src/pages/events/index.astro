@@ -1,0 +1,73 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import JoinCta from '../../components/JoinCta.astro';
+import { formatDate, isoDate, isUpcoming } from '../../lib/format';
+
+const all = await getCollection('events');
+const upcoming = all
+  .filter((e) => isUpcoming(e.data.date))
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+const past = all
+  .filter((e) => !isUpcoming(e.data.date))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+<Base
+  title="Event & Kelas — SWE Growth"
+  description="Jadwal kelas online, sharing session, dan podcast SWE Growth. Daftar langsung dari web, gratis untuk semua anggota."
+>
+  <PageHero
+    badge="Event"
+    title="Kegiatan yang lagi jalan"
+    lead="Kelas online, sharing session, dan podcast — semuanya gratis buat anggota komunitas. Daftar langsung dari halaman ini."
+  />
+
+  <section class="block">
+    <div class="wrap">
+      <h2 class="section-title">Akan datang</h2>
+      {upcoming.length === 0 ? (
+        <div class="empty-note">Belum ada event terjadwal. Pantau grup WhatsApp buat info paling cepat.</div>
+      ) : (
+        <div class="card-grid">
+          {upcoming.map((e) => (
+            <a class="card" href={`/events/${e.id}`}>
+              <span class="chip green">{e.data.mode}</span>
+              <h3>{e.data.title}</h3>
+              <p>{e.data.description}</p>
+              <span class="spacer"></span>
+              <div class="meta">
+                <time datetime={isoDate(e.data.date)}>{formatDate(e.data.date)}</time>
+                {e.data.time && <span>{e.data.time}</span>}
+                <span>{e.data.location}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  {past.length > 0 && (
+    <section class="block">
+      <div class="wrap">
+        <h2 class="section-title">Sudah lewat</h2>
+        <div class="card-grid">
+          {past.map((e) => (
+            <a class="card" href={`/events/${e.id}`}>
+              <span class="chip">selesai</span>
+              <h3>{e.data.title}</h3>
+              <p>{e.data.description}</p>
+              <span class="spacer"></span>
+              <div class="meta">
+                <time datetime={isoDate(e.data.date)}>{formatDate(e.data.date)}</time>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <JoinCta />
+</Base>

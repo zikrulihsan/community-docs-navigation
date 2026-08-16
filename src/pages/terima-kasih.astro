@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Terima kasih — SWE Growth" description="Formulir kamu sudah kami terima.">
+  <section class="block thanks">
+    <div class="wrap">
+      <span class="tick">✓</span>
+      <h1>Terima kasih! 🎉</h1>
+      <p>
+        Data kamu sudah masuk. Admin bakal menghubungi lewat email atau WhatsApp — biasanya dalam 1–2 hari kerja.
+      </p>
+      <p class="sub">Sambil nunggu, kamu bisa lihat kegiatan lain yang lagi jalan.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/events">Lihat event lain</a>
+        <a class="btn btn-ghost" href="/">Kembali ke beranda</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .thanks { padding: clamp(56px, 10vw, 110px) 0; text-align: center; }
+  .tick {
+    display: grid; place-items: center; width: 62px; height: 62px; margin: 0 auto 22px;
+    border-radius: 50%; background: var(--green); color: #fff; font-size: 1.7rem; font-weight: 700;
+  }
+  .thanks h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: 14px; }
+  .thanks p { color: var(--ink-soft); max-width: 46ch; margin: 0 auto 8px; }
+  .thanks .sub { color: var(--ink-faint); font-size: 0.94rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 26px; }
+</style>

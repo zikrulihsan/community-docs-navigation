@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import JoinCta from '../../components/JoinCta.astro';
+import { formatDate, isoDate } from '../../lib/format';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+---
+<Base
+  title="Blog — SWE Growth"
+  description="Tulisan dari member untuk member — pengalaman nyata soal engineering, karier, dan tumbuh bareng di komunitas."
+>
+  <PageHero
+    badge="Blog"
+    title="Tulisan dari member, untuk member"
+    lead="Pengalaman nyata dari lapangan — bukan teori yang jauh dari kerjaan sehari-hari."
+  />
+
+  <section class="block">
+    <div class="wrap">
+      {posts.length === 0 ? (
+        <div class="empty-note">Belum ada tulisan. Mau jadi yang pertama? Kabarin admin di grup.</div>
+      ) : (
+        <div class="card-grid">
+          {posts.map((p) => (
+            <a class="card" href={`/blog/${p.id}`}>
+              <h3>{p.data.title}</h3>
+              <p>{p.data.description}</p>
+              <span class="spacer"></span>
+              <div class="meta">
+                <time datetime={isoDate(p.data.pubDate)}>{formatDate(p.data.pubDate)}</time>
+                <span>{p.data.author}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <JoinCta />
+</Base>

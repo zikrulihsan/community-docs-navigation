@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Halaman tidak ditemukan — SWE Growth">
+  <section class="block nf">
+    <div class="wrap">
+      <p class="mono">Error 404</p>
+      <h1>Halamannya nggak ketemu 🧭</h1>
+      <p class="sub">Mungkin link-nya sudah berubah, atau halamannya sudah dipindah.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/">Kembali ke beranda</a>
+        <a class="btn btn-ghost" href="/events">Lihat event</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf { padding: clamp(56px, 10vw, 110px) 0; text-align: center; }
+  .nf .mono { color: var(--ink-faint); margin-bottom: 10px; }
+  .nf h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: 12px; }
+  .nf .sub { color: var(--ink-soft); max-width: 44ch; margin: 0 auto; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 26px; }
+</style>
