@@ -229,91 +229,101 @@ const nmClass = (m: Msg) => (m.host ? 'host' : m.bot ? 'bot' : m.cl || '');
   })();
 </script>
 
-<style>
-  .wa {
+<!--
+  Style-nya sengaja global, bukan ter-scope: bubble chat dibuat lewat JavaScript
+  saat ganti slide, jadi elemennya tidak punya atribut scope Astro dan CSS
+  ter-scope tidak akan kena. Semua selector dikurung di bawah `.wa-slider`
+  supaya tetap tidak bocor ke komponen lain.
+-->
+<style is:global>
+  .wa-slider { max-width: 430px; margin-left: auto; }
+  .wa-slider .wa {
     background: var(--paper); border-radius: 26px; padding: 12px;
     box-shadow: 0 2px 4px oklch(0.3 0.02 250 / .06), 0 30px 60px -22px oklch(0.3 0.04 250 / .35);
     border: 1px solid var(--line);
     transform: rotate(0.7deg);
     max-width: 430px; margin-left: auto;
   }
-  .wa-inner { border-radius: 18px; overflow: hidden; background: oklch(0.945 0.012 140); }
-  .wa-head { display: flex; align-items: center; gap: 12px; padding: 13px 15px; background: var(--green-deep); color: #fff; }
-  .wa-head .mark { width: 38px; height: 38px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--navy); color: var(--green-br); box-shadow: 0 0 0 2px oklch(1 0 0 / .2); }
-  .wa-head .mark :global(svg) { width: 60%; height: 60%; }
-  .wa-head .g-name { font-weight: 700; font-size: 0.96rem; line-height: 1.2; }
-  .wa-head .g-sub { font-size: 0.74rem; color: oklch(0.95 0.03 150); margin-top: 2px; }
-  .wa-head .g-meta { flex: 1; min-width: 0; }
-  .wa-body {
+  .wa-slider .wa-inner { border-radius: 18px; overflow: hidden; background: oklch(0.945 0.012 140); }
+  .wa-slider .wa-head { display: flex; align-items: center; gap: 12px; padding: 13px 15px; background: var(--green-deep); color: #fff; }
+  .wa-slider .wa-head .mark {
+    width: 38px; height: 38px; flex: none; display: grid; place-items: center; border-radius: 50%;
+    background: var(--navy); color: var(--green-br); box-shadow: 0 0 0 2px oklch(1 0 0 / .2);
+  }
+  .wa-slider .wa-head .mark svg { width: 60%; height: 60%; }
+  .wa-slider .wa-head .g-name { font-weight: 700; font-size: 0.96rem; line-height: 1.2; }
+  .wa-slider .wa-head .g-sub { font-size: 0.74rem; color: oklch(0.95 0.03 150); margin-top: 2px; }
+  .wa-slider .wa-head .g-meta { flex: 1; min-width: 0; }
+  .wa-slider .wa-body {
     padding: 16px 14px 18px; height: 452px; display: flex; flex-direction: column;
     justify-content: flex-end; gap: 9px; overflow: hidden;
     background-image: radial-gradient(oklch(0.86 0.02 140 / .55) 1px, transparent 1px);
     background-size: 18px 18px;
   }
-  .bub {
+  .wa-slider .bub {
     max-width: 82%; padding: 8px 12px 7px; border-radius: 13px; font-size: 0.9rem; line-height: 1.38;
     background: var(--paper); box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08); color: var(--ink);
     border-top-left-radius: 4px; align-self: flex-start; position: relative;
     opacity: 0; transform: translateY(10px) scale(.98);
   }
-  .bub.in { animation: bubin .45s cubic-bezier(.2,.8,.3,1) forwards; }
-  @keyframes bubin { to { opacity: 1; transform: none; } }
-  .bub .nm { font-weight: 700; font-size: 0.76rem; display: block; margin-bottom: 1px; }
-  .bub .tm { font-family: var(--font-mono); font-size: 0.6rem; color: var(--ink-faint); float: right; margin: 4px 0 -2px 8px; }
-  .bub.me { align-self: flex-end; background: oklch(0.88 0.09 150); border-top-left-radius: 13px; border-top-right-radius: 4px; }
-  .bub.host { box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.66 0.155 152 / .4); }
-  .nm.c1 { color: oklch(0.55 0.16 20); }
-  .nm.c2 { color: oklch(0.52 0.15 280); }
-  .nm.c3 { color: oklch(0.55 0.14 200); }
-  .nm.c4 { color: oklch(0.55 0.14 60); }
-  .nm.host { color: var(--green-deep); }
-  .nm.bot { color: oklch(0.52 0.13 195); }
-  .nm.bot::after {
+  .wa-slider .bub.in { animation: wa-bubin .45s cubic-bezier(.2,.8,.3,1) forwards; }
+  @keyframes wa-bubin { to { opacity: 1; transform: none; } }
+  .wa-slider .bub .nm { font-weight: 700; font-size: 0.76rem; display: block; margin-bottom: 1px; }
+  .wa-slider .bub .tm { font-family: var(--font-mono); font-size: 0.6rem; color: var(--ink-faint); float: right; margin: 4px 0 -2px 8px; }
+  .wa-slider .bub.me { align-self: flex-end; background: oklch(0.88 0.09 150); border-top-left-radius: 13px; border-top-right-radius: 4px; }
+  .wa-slider .bub.host { box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.66 0.155 152 / .4); }
+  .wa-slider .nm.c1 { color: oklch(0.55 0.16 20); }
+  .wa-slider .nm.c2 { color: oklch(0.52 0.15 280); }
+  .wa-slider .nm.c3 { color: oklch(0.55 0.14 200); }
+  .wa-slider .nm.c4 { color: oklch(0.55 0.14 60); }
+  .wa-slider .nm.host { color: var(--green-deep); }
+  .wa-slider .nm.bot { color: oklch(0.52 0.13 195); }
+  .wa-slider .nm.bot::after {
     content: "BOT"; font-family: var(--font-mono); font-size: 0.52rem; font-weight: 700; letter-spacing: .06em;
     color: #fff; background: oklch(0.6 0.1 195); padding: 1px 4px; border-radius: 4px; margin-left: 6px; vertical-align: 1px;
   }
-  .bub.bot { background: oklch(0.96 0.025 195); box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.7 0.1 195 / .35); }
-  .wa-type { display: flex; align-items: center; gap: 9px; padding: 11px 15px; background: var(--paper); border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 0.88rem; }
-  .wa-type .field { flex: 1; background: var(--bg-2); border-radius: 100px; padding: 8px 14px; }
-  .wa-type .send { width: 34px; height: 34px; border-radius: 50%; background: var(--green); display: grid; place-items: center; color: #fff; }
-  .wa-type .send svg { width: 16px; height: 16px; }
+  .wa-slider .bub.bot { background: oklch(0.96 0.025 195); box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.7 0.1 195 / .35); }
+  .wa-slider .wa-type { display: flex; align-items: center; gap: 9px; padding: 11px 15px; background: var(--paper); border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 0.88rem; }
+  .wa-slider .wa-type .field { flex: 1; background: var(--bg-2); border-radius: 100px; padding: 8px 14px; }
+  .wa-slider .wa-type .send { width: 34px; height: 34px; border-radius: 50%; background: var(--green); display: grid; place-items: center; color: #fff; }
+  .wa-slider .wa-type .send svg { width: 16px; height: 16px; }
 
-  .wa-slider { max-width: 430px; margin-left: auto; }
-  .wa-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
-  .wa-btn {
+  .wa-slider .wa-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
+  .wa-slider .wa-btn {
     flex: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
     display: grid; place-items: center; color: var(--ink-soft);
     background: var(--paper); border: 1px solid var(--line);
     box-shadow: 0 1px 2px oklch(0.3 0.02 250 / .06), 0 8px 18px -12px oklch(0.3 0.04 250 / .4);
     transition: color .18s ease, border-color .18s ease, transform .18s ease, background .18s ease;
   }
-  .wa-btn svg { width: 20px; height: 20px; }
-  .wa-btn:hover { color: var(--green-deep); border-color: var(--green); transform: translateY(-1px); }
-  .wa-btn:active { transform: translateY(0) scale(.95); }
-  .wa-dots { display: flex; align-items: center; gap: 7px; }
-  .wa-dots button {
+  .wa-slider .wa-btn svg { width: 20px; height: 20px; }
+  .wa-slider .wa-btn:hover { color: var(--green-deep); border-color: var(--green); transform: translateY(-1px); }
+  .wa-slider .wa-btn:active { transform: translateY(0) scale(.95); }
+  .wa-slider .wa-dots { display: flex; align-items: center; gap: 7px; }
+  .wa-slider .wa-dots button {
     width: 8px; height: 8px; border-radius: 50%; cursor: pointer; padding: 0;
     background: var(--line-2); border: none; transition: background .2s ease, width .2s ease;
   }
-  .wa-dots button.on { width: 22px; border-radius: 5px; background: var(--green); }
-  .wa-dots button:hover:not(.on) { background: var(--ink-faint); }
+  .wa-slider .wa-dots button.on { width: 22px; border-radius: 5px; background: var(--green); }
+  .wa-slider .wa-dots button:hover:not(.on) { background: var(--ink-faint); }
 
   /* Mockup-nya sengaja tetap terang di dark mode, biar tetap kerasa seperti WhatsApp asli */
-  :global(:root[data-resolved="dark"]) .wa { background: oklch(0.975 0.006 150); border-color: oklch(0.90 0.01 150); }
-  :global(:root[data-resolved="dark"]) .wa-head { background: oklch(0.540 0.140 153); }
-  :global(:root[data-resolved="dark"]) .bub { background: #fff; color: oklch(0.255 0.02 200); }
-  :global(:root[data-resolved="dark"]) .bub.me { background: oklch(0.88 0.09 150); color: oklch(0.255 0.02 200); }
-  :global(:root[data-resolved="dark"]) .bub.host { box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.66 0.155 152 / .4); }
-  :global(:root[data-resolved="dark"]) .wa-type { background: #fff; color: oklch(0.55 0.02 200); border-top-color: oklch(0.90 0.01 150); }
-  :global(:root[data-resolved="dark"]) .wa-type .field { background: oklch(0.945 0.012 140); }
+  :root[data-resolved="dark"] .wa-slider .wa { background: oklch(0.975 0.006 150); border-color: oklch(0.90 0.01 150); }
+  :root[data-resolved="dark"] .wa-slider .wa-head { background: oklch(0.540 0.140 153); }
+  :root[data-resolved="dark"] .wa-slider .bub { background: #fff; color: oklch(0.255 0.02 200); }
+  :root[data-resolved="dark"] .wa-slider .bub.me { background: oklch(0.88 0.09 150); color: oklch(0.255 0.02 200); }
+  :root[data-resolved="dark"] .wa-slider .bub.host { box-shadow: 0 1px 1px oklch(0.3 0.02 250 / .08), inset 0 0 0 1.5px oklch(0.66 0.155 152 / .4); }
+  :root[data-resolved="dark"] .wa-slider .bub.bot { background: oklch(0.96 0.025 195); color: oklch(0.255 0.02 200); }
+  :root[data-resolved="dark"] .wa-slider .wa-type { background: #fff; color: oklch(0.55 0.02 200); border-top-color: oklch(0.90 0.01 150); }
+  :root[data-resolved="dark"] .wa-slider .wa-type .field { background: oklch(0.945 0.012 140); }
 
   @media (max-width: 900px) {
     .wa-slider { margin-left: auto; margin-right: auto; width: 100%; }
-    .wa { transform: none; margin: 0 auto; max-width: none; width: 100%; }
+    .wa-slider .wa { transform: none; margin: 0 auto; max-width: none; width: 100%; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .bub { opacity: 1; transform: none; }
-    .bub.in { animation: none; }
+    .wa-slider .bub { opacity: 1; transform: none; }
+    .wa-slider .bub.in { animation: none; }
   }
 </style>
