@@ -33,7 +33,7 @@ src/
 ├── content.config.ts # skema tiap koleksi konten
 ├── pages/            # rute halaman
 ├── layouts/          # kerangka HTML + theme script
-├── components/       # Nav, Footer, JoinCta, PageHero
+├── components/       # Nav, Footer, JoinCta, PageHero, WaChat (simulasi grup WA di hero)
 └── styles/global.css # design token & komponen bersama
 ```
 
