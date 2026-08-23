@@ -1,0 +1,218 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import { ADMIN_WA } from '../../lib/site';
+
+/**
+ * Form "SWE Growth Mentor Connect".
+ * Situs ini statis, jadi tidak ada backend: jawaban dirangkai jadi satu pesan
+ * lalu langsung dikirim ke WhatsApp admin lewat link wa.me.
+ */
+
+const mentors = (await getCollection('mentors'))
+  .filter((m) => m.data.available)
+  .map((m) => m.data.name)
+  .sort((a, b) => a.localeCompare(b));
+
+/** Pertanyaan mengikuti urutan form Mentor Connect. */
+const questions = [
+  {
+    id: 'kondisi',
+    label: 'Boleh jelaskan kondisimu saat ini?',
+    hint: 'Role saat ini, pekerjaan saat ini, dan kesibukan apa saja yang sedang dilakukan.',
+    rows: 4,
+  },
+  {
+    id: 'masalah',
+    label: 'Apa permasalahan atau areas of improvement yang ingin kamu dapatkan solusinya?',
+    hint: 'Khusus di dunia software engineering — makin spesifik, makin gampang kami carikan mentornya.',
+    rows: 4,
+  },
+  {
+    id: 'motivasi',
+    label: 'Kenapa tertarik mengikuti mentoring?',
+    hint: 'Dan bagaimana kamu melihat mentoring bisa membantu mencapai tujuanmu sebagai software engineer.',
+    rows: 4,
+  },
+  {
+    id: 'kriteria',
+    label: 'Bagaimana kriteria mentor yang kamu harapkan?',
+    hint: 'Misalnya bidang keahlian, level pengalaman, atau gaya mentoring yang cocok buatmu.',
+    rows: 3,
+  },
+];
+---
+<Base
+  title="Form mentorship — SWE Growth"
+  description="Formulir SWE Growth Mentor Connect. Isi kondisi dan kebutuhanmu, lalu kirim langsung ke admin lewat WhatsApp untuk dicocokkan dengan mentor yang pas."
+>
+  <PageHero
+    badge="Mentor Connect"
+    title="Form pendaftaran mentorship"
+    lead="Kami bantu carikan mentor yang cocok buat perkembangan kariermu — dan bantu mentor dapat mentee yang tepat dan berkomitmen. Isi formulir di bawah ini ya."
+  />
+
+  <section class="block">
+    <div class="wrap form-wrap">
+      <a class="back" href="/mentorship">← Kembali ke halaman mentorship</a>
+
+      <div class="notice">
+        <strong>Batch yang lagi buka:</strong> mentorship berjalan selama 2 bulan, dengan sesi seminggu sekali.
+        Setelah tombol kirim ditekan, jawabanmu langsung terangkum jadi pesan WhatsApp ke admin —
+        tinggal tekan <em>send</em> di aplikasi WhatsApp.
+      </div>
+
+      <form class="form-card wide" id="mentorForm" data-wa={ADMIN_WA} novalidate>
+        <h3>Data kamu</h3>
+        <p class="form-sub">Tanda <span class="req">*</span> berarti wajib diisi.</p>
+
+        <div class="field">
+          <label for="nama">Nama <span class="req">*</span></label>
+          <input id="nama" name="nama" type="text" required autocomplete="name" placeholder="Nama lengkap" />
+        </div>
+
+        <div class="field">
+          <label for="wa">Nomor WA aktif <span class="req">*</span></label>
+          <p class="field-hint">Kami akan menghubungimu via WA kalau terpilih di sesi mentorship.</p>
+          <input id="wa" name="wa" type="tel" required autocomplete="tel" placeholder="08..." />
+        </div>
+
+        {mentors.length > 0 && (
+          <div class="field">
+            <label for="mentor">Mentor yang dituju (opsional)</label>
+            <p class="field-hint">Belum ada preferensi? Biarkan saja — nanti kami cocokkan.</p>
+            <select id="mentor" name="mentor">
+              <option value="">Belum ada preferensi, mohon dibantu carikan</option>
+              {mentors.map((name) => <option value={name}>{name}</option>)}
+            </select>
+          </div>
+        )}
+
+        <h3 class="group-title">Ceritakan kebutuhanmu</h3>
+
+        {questions.map((q) => (
+          <div class="field">
+            <label for={q.id}>{q.label} <span class="req">*</span></label>
+            <p class="field-hint">{q.hint}</p>
+            <textarea id={q.id} name={q.id} rows={q.rows} required></textarea>
+          </div>
+        ))}
+
+        <h3 class="group-title">Komitmen</h3>
+
+        <div class="field">
+          <label for="waktu">Seberapa banyak waktu yang kamu komitmenkan untuk aktivitas mentoring? <span class="req">*</span></label>
+          <input id="waktu" name="waktu" type="text" required placeholder="misal: 3 jam per minggu, di luar sesi rutin" />
+        </div>
+
+        <div class="field">
+          <label for="konsisten">Apakah kamu siap untuk bisa konsisten dan inisiatif dalam proses mentoring? <span class="req">*</span></label>
+          <select id="konsisten" name="konsisten" required>
+            <option value="">Pilih jawaban</option>
+            <option value="Siap, saya berkomitmen konsisten dan inisiatif">Siap, saya berkomitmen konsisten dan inisiatif</option>
+            <option value="Siap, tapi masih perlu bantuan menjaga ritme">Siap, tapi masih perlu bantuan menjaga ritme</option>
+            <option value="Belum yakin, ingin diskusi dulu dengan admin">Belum yakin, ingin diskusi dulu dengan admin</option>
+          </select>
+        </div>
+
+        <p class="form-error" id="formError" role="alert" hidden>
+          Masih ada pertanyaan wajib yang belum diisi. Cek lagi bagian yang ditandai ya.
+        </p>
+
+        <button class="btn btn-primary" type="submit">
+          Kirim lewat WhatsApp
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <p class="privacy">
+          Jawabanmu tidak disimpan di website ini — semuanya langsung masuk ke chat WhatsApp kamu ke admin.
+        </p>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const form = document.getElementById('mentorForm') as HTMLFormElement | null;
+  if (form) {
+    const errorBox = document.getElementById('formError');
+    const wa = form.dataset.wa;
+
+    // Datang dari kartu mentor di /mentorship? Pilihannya kita isi otomatis.
+    const wanted = new URLSearchParams(location.search).get('mentor');
+    const mentorSelect = form.elements.namedItem('mentor') as HTMLSelectElement | null;
+    if (wanted && mentorSelect) {
+      const match = Array.from(mentorSelect.options).find((o) => o.value === wanted);
+      if (match) mentorSelect.value = match.value;
+    }
+
+    const val = (name: string) => {
+      const el = form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+      return el ? el.value.trim() : '';
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        errorBox?.removeAttribute('hidden');
+        const firstInvalid = form.querySelector(':invalid') as HTMLElement | null;
+        firstInvalid?.focus();
+        firstInvalid?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return;
+      }
+      errorBox?.setAttribute('hidden', '');
+
+      const block = (label: string, answer: string) => `*${label}*\n${answer}`;
+      const text = [
+        'Halo admin SWE Growth 👋',
+        'Saya mau ikut *SWE Growth Mentor Connect*. Berikut jawaban formulirnya:',
+        '',
+        block('Nama', val('nama')),
+        '',
+        block('Nomor WA aktif', val('wa')),
+        '',
+        block('Mentor yang dituju', val('mentor') || 'Belum ada preferensi, mohon dibantu carikan'),
+        '',
+        block('Kondisi saat ini', val('kondisi')),
+        '',
+        block('Permasalahan / areas of improvement', val('masalah')),
+        '',
+        block('Kenapa tertarik mengikuti mentoring', val('motivasi')),
+        '',
+        block('Kriteria mentor yang diharapkan', val('kriteria')),
+        '',
+        block('Komitmen waktu', val('waktu')),
+        '',
+        block('Siap konsisten & inisiatif', val('konsisten')),
+        '',
+        'Terima kasih!',
+      ].join('\n');
+
+      const url = `https://wa.me/${wa}?text=${encodeURIComponent(text)}`;
+      const tab = window.open(url, '_blank', 'noopener');
+      if (!tab) location.href = url; // popup diblokir (umum di browser mobile)
+    });
+  }
+</script>
+
+<style>
+  /* Kolomnya dibatasi biar enak dibaca, tapi tetap rata kiri dengan judul di hero. */
+  .form-wrap > * { max-width: 720px; }
+  .back { display: block; width: fit-content; color: var(--ink-faint); font-size: 0.9rem; margin-bottom: 16px; }
+  .back:hover { color: var(--ink); }
+  .notice {
+    background: var(--bg-2); border: 1px solid var(--line); border-left: 3px solid var(--green);
+    border-radius: var(--r); padding: 16px 20px; margin-bottom: 22px;
+    color: var(--ink-soft); font-size: 0.93rem;
+  }
+  .notice strong { color: var(--ink); }
+  .form-card.wide { max-width: none; }
+  .group-title { font-size: 1.05rem; margin: 26px 0 14px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .field-hint { color: var(--ink-faint); font-size: 0.86rem; margin: -2px 0 2px; }
+  .req { color: var(--green-deep); }
+  .form-error { color: oklch(0.55 0.19 25); font-size: 0.9rem; margin-bottom: 14px; }
+  :root[data-resolved="dark"] .form-error { color: oklch(0.75 0.15 25); }
+  .field :global(textarea) { resize: vertical; }
+  .privacy { color: var(--ink-faint); font-size: 0.85rem; margin-top: 14px; }
+</style>

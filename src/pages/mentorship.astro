@@ -4,24 +4,13 @@ import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import JoinCta from '../components/JoinCta.astro';
 
-const ADMIN_WA = '6282338588078';
-
 const mentors = (await getCollection('mentors')).sort(
   (a, b) => Number(b.data.available) - Number(a.data.available) || a.data.name.localeCompare(b.data.name),
 );
 
-/** Pesan WhatsApp ke admin, sudah terisi sebagian biar anggota tinggal lengkapi problemnya. */
-const waLink = (mentor?: string) => {
-  const text = [
-    'Halo admin SWE Growth 👋',
-    '',
-    'Saya mau ikut sesi mentorship.',
-    '',
-    `Mentor yang dituju: ${mentor ?? 'belum ada preferensi, mohon dibantu carikan'}`,
-    'Problem/konteks saya: ',
-  ].join('\n');
-  return `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(text)}`;
-};
+/** Form Mentor Connect; nama mentor dikirim lewat query biar pilihannya terisi otomatis. */
+const formLink = (mentor?: string) =>
+  mentor ? `/mentorship/daftar?mentor=${encodeURIComponent(mentor)}` : '/mentorship/daftar';
 
 const steps = [
   {
@@ -31,8 +20,8 @@ const steps = [
   },
   {
     n: '2',
-    t: 'Hubungi admin',
-    d: 'Ceritakan problemnya, lalu sebutkan mau sama mentor siapa — atau bilang saja belum ada preferensi.',
+    t: 'Isi form Mentor Connect',
+    d: 'Ceritakan kondisi dan problemmu di formulir. Sekali kirim, jawabannya langsung jadi pesan WhatsApp ke admin.',
   },
   {
     n: '3',
@@ -48,7 +37,7 @@ const steps = [
   <PageHero
     badge="Mentorship"
     title="Nggak perlu jalan sendirian"
-    lead="Belajar dari yang sudah lebih dulu lewat jalan yang sama. Ceritakan problemmu ke admin, nanti kami cocokkan dengan mentor yang pas."
+    lead="Belajar dari yang sudah lebih dulu lewat jalan yang sama. Isi form Mentor Connect, nanti kami cocokkan dengan mentor yang pas. Batch saat ini berjalan 2 bulan dengan sesi seminggu sekali."
   />
 
   <section class="block">
@@ -70,7 +59,7 @@ const steps = [
     <div class="wrap">
       <h2 class="section-title">Daftar mentor</h2>
       {mentors.length === 0 ? (
-        <div class="empty-note">Daftar mentor lagi disusun. Sementara, langsung hubungi admin aja ya.</div>
+        <div class="empty-note">Daftar mentor lagi disusun. Sementara, isi <a href="/mentorship/daftar">form Mentor Connect</a> aja dulu ya — admin bantu carikan.</div>
       ) : (
         <div class="card-grid">
           {mentors.map((m) => (
@@ -86,8 +75,8 @@ const steps = [
               <span class="spacer"></span>
               <div class="card-actions">
                 {m.data.available ? (
-                  <a class="btn btn-primary sm" href={waLink(m.data.name)} target="_blank" rel="noopener">
-                    Ajukan ke admin
+                  <a class="btn btn-primary sm" href={formLink(m.data.name)}>
+                    Ajukan ke mentor ini
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                   </a>
                 ) : (
@@ -110,12 +99,12 @@ const steps = [
         <div>
           <h2>Belum ada preferensi mentor?</h2>
           <p>
-            Santai, itu normal. Langsung hubungi admin dan ceritakan aja apa yang lagi ganjel —
+            Santai, itu normal. Isi aja formulirnya dan ceritakan apa yang lagi ganjel —
             nanti kami carikan mentor yang paling nyambung sama kondisimu.
           </p>
         </div>
-        <a class="btn btn-primary" href={waLink()} target="_blank" rel="noopener">
-          Hubungi admin
+        <a class="btn btn-primary" href={formLink()}>
+          Isi form mentorship
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
       </div>
