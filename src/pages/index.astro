@@ -15,12 +15,36 @@ const posts = (await getCollection('blog'))
   .slice(0, 2);
 
 const pillars = [
-  { href: '/mentorship', title: 'Mentorship', body: 'Belajar langsung dari yang sudah lebih dulu jalan. Cocokkan topik, lalu ngobrol.' },
-  { href: '/events', title: 'Event & Kelas', body: 'Kelas online, sharing session, dan podcast. Daftar langsung dari web.' },
-  { href: '/videos', title: 'Video', body: 'Ketinggalan sesi live? Semua rekaman ada di sini.' },
-  { href: '/blog', title: 'Blog', body: 'Tulisan dari member untuk member — pengalaman nyata, bukan teori doang.' },
-  { href: '/jobs', title: 'Loker', body: 'Info lowongan yang sudah dikurasi sesuai nilai komunitas.' },
-  { href: '/code-of-conduct', title: 'Code of Conduct', body: 'Aturan main biar ruang belajar ini nyaman buat semua.' },
+  {
+    href: '/mentorship', title: 'Mentorship', tone: 'green',
+    body: 'Belajar langsung dari yang sudah lebih dulu jalan. Cocokkan topik, lalu ngobrol.',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5a4.5 4.5 0 1 1 1.5-8.74A5.5 5.5 0 0 1 19 12v.5a4 4 0 0 1-4 4h-2l-3.5 3v-3.2"/><path d="M8.5 12.5h.01M12 12.5h.01M15.5 12.5h.01"/></svg>',
+  },
+  {
+    href: '/events', title: 'Event & Kelas', tone: 'blue',
+    body: 'Kelas online, sharing session, dan podcast. Daftar langsung dari web.',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18M8 14h3M8 17h7"/></svg>',
+  },
+  {
+    href: '/videos', title: 'Video', tone: 'coral',
+    body: 'Ketinggalan sesi live? Semua rekaman ada di sini.',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 8 6 4-6 4V8Z"/></svg>',
+  },
+  {
+    href: '/blog', title: 'Blog', tone: 'gold',
+    body: 'Tulisan dari member untuk member — pengalaman nyata, bukan teori doang.',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M8 12h8M8 16h6"/></svg>',
+  },
+  {
+    href: '/jobs', title: 'Loker', tone: 'blue',
+    body: 'Info lowongan yang sudah dikurasi sesuai nilai komunitas.',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/></svg>',
+  },
+  {
+    href: '/code-of-conduct', title: 'Code of Conduct', tone: 'green',
+    body: 'Aturan main biar ruang belajar ini nyaman buat semua.',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 20 6v5c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg>',
+  },
 ];
 ---
 <Base title="SWE Growth — tumbuh bareng sebagai software engineer">
@@ -28,9 +52,8 @@ const pillars = [
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <span class="badge mono">Komunitas Software Engineer 🇮🇩</span>
-        <h1 class="hero-title">Bareng - Bareng Bertumbuh sebagai Software Engineer&nbsp;🤝</h1>
-        <p class="hero-sub">Tumbuh sebagai engineer itu capek, kan? Apalagi kalau jalan sendirian.</p>
-        <p class="hero-sub">Yok capeknya bareng - bareng aja.</p>
+        <h1 class="hero-title">Bareng-bareng <span>bertumbuh</span> sebagai Software Engineer.</h1>
+        <p class="hero-sub">Tumbuh sebagai engineer itu capek kalau jalan sendirian. Di sini kita belajar, berbagi, dan ngelewatin prosesnya bareng.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="https://goakal.com/ahsanprojectsbw/swegrowthmember/c79qf/apply" target="_blank" rel="noopener">
             Gabung komunitas
@@ -42,25 +65,33 @@ const pillars = [
           <div class="stat"><span class="num">1024+</span><span class="mono">anggota</span></div>
           <div class="vr"></div>
           <div class="stat"><span class="num">gratis</span><span class="mono">selamanya</span></div>
+          <div class="vr"></div>
+          <div class="stat"><span class="num">8</span><span class="mono">ruang diskusi</span></div>
         </div>
       </div>
 
       <div class="hero-visual">
+        <span class="hero-live" aria-hidden="true">community://live</span>
         <WaChat />
       </div>
     </div>
   </header>
 
-  <section class="block">
+  <section class="block pillars-block">
     <div class="wrap">
-      <h2 class="section-title">Semua yang kita lakuin, dalam satu tempat.</h2>
+      <div class="section-head">
+        <h2 class="section-title">Satu komunitas, banyak cara buat tumbuh.</h2>
+        <p>Pilih jalur yang paling relevan buat fase kariermu sekarang—semuanya terhubung dalam ekosistem yang sama.</p>
+      </div>
       <div class="card-grid">
-        {pillars.map((p) => (
-          <a class="card" href={p.href}>
+        {pillars.map((p, i) => (
+          <a class="card pillar-card" href={p.href} data-tone={p.tone}>
+            <span class="card-index">{String(i + 1).padStart(2, '0')}</span>
+            <span class="card-icon" set:html={p.icon}></span>
             <h3>{p.title}</h3>
             <p>{p.body}</p>
             <span class="spacer"></span>
-            <span class="chip green">Buka →</span>
+            <span class="card-link">Jelajahi <span aria-hidden="true">→</span></span>
           </a>
         ))}
       </div>
@@ -68,12 +99,15 @@ const pillars = [
   </section>
 
   {events.length > 0 && (
-    <section class="block">
+    <section class="block surface-band">
       <div class="wrap">
-        <h2 class="section-title">Event terdekat</h2>
+        <div class="section-head">
+          <h2 class="section-title">Event terdekat</h2>
+          <a class="text-link" href="/events">Lihat semua event →</a>
+        </div>
         <div class="card-grid">
           {events.map((e) => (
-            <a class="card" href={`/events/${e.id}`}>
+            <a class="card content-card" href={`/events/${e.id}`}>
               <span class="chip green">{e.data.mode}</span>
               <h3>{e.data.title}</h3>
               <p>{e.data.description}</p>
@@ -92,10 +126,14 @@ const pillars = [
   {posts.length > 0 && (
     <section class="block">
       <div class="wrap">
-        <h2 class="section-title">Tulisan terbaru</h2>
+        <div class="section-head">
+          <h2 class="section-title">Tulisan terbaru</h2>
+          <a class="text-link" href="/blog">Baca semua tulisan →</a>
+        </div>
         <div class="card-grid">
           {posts.map((p) => (
-            <a class="card" href={`/blog/${p.id}`}>
+            <a class="card content-card article-card" href={`/blog/${p.id}`}>
+              <span class="chip">Dari komunitas</span>
               <h3>{p.data.title}</h3>
               <p>{p.data.description}</p>
               <span class="spacer"></span>
@@ -114,31 +152,68 @@ const pillars = [
 </Base>
 
 <style>
-  .hero { padding: 60px 0 84px; }
-  .hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; }
-  .hero-copy { container-type: inline-size; }
+  .hero { position: relative; overflow: clip; padding: 72px 0 96px; }
+  .hero::before {
+    content: ''; position: absolute; inset: 24px max(18px, calc((100vw - 1240px) / 2)) 28px; z-index: -1;
+    border: 1px solid var(--line); border-radius: 34px;
+    background:
+      radial-gradient(circle at 88% 22%, color-mix(in oklch, var(--green) 19%, transparent), transparent 23rem),
+      linear-gradient(135deg, color-mix(in oklch, var(--paper) 88%, transparent), color-mix(in oklch, var(--bg-2) 66%, transparent));
+    box-shadow: var(--shadow-md);
+  }
+  .hero-grid { display: grid; grid-template-columns: 1.04fr 0.96fr; gap: clamp(40px, 6vw, 76px); align-items: center; }
+  .hero-copy { container-type: inline-size; padding-block: 26px; }
   .badge {
     display: inline-flex; align-items: center; gap: 9px;
-    background: var(--paper); border: 1px solid var(--line);
-    padding: 7px 14px; border-radius: 100px; color: var(--ink-soft);
-    box-shadow: 0 1px 2px oklch(0.4 0.02 250 / .04);
+    background: color-mix(in oklch, var(--paper) 82%, transparent); border: 1px solid var(--line);
+    padding: 7px 12px; border-radius: 9px; color: var(--green-deep); box-shadow: var(--shadow-sm);
   }
-  /* diukur terhadap lebar kolom (cqi), bukan viewport, biar wrap-nya stabil */
+  .badge::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--green); box-shadow: 0 0 0 4px color-mix(in oklch, var(--green) 14%, transparent); }
   .hero-title {
-    font-family: var(--font-display); font-weight: 500;
-    font-size: clamp(2.4rem, 9.4cqi, 5.4rem); line-height: 1.02; letter-spacing: -0.022em;
-    margin: 16px 0 0; text-wrap: balance;
+    max-width: 11ch; margin: 21px 0 0; font-weight: 500;
+    font-size: clamp(2.65rem, 9.8cqi, 5.7rem); line-height: .98; letter-spacing: -.045em; text-wrap: balance;
   }
-  .hero-sub { font-size: 1.16rem; color: var(--ink-soft); max-width: 40ch; margin: 22px 0 0; text-wrap: pretty; }
+  .hero-title span { position: relative; display: inline-block; color: var(--green-deep); }
+  .hero-title span::after { content: ''; position: absolute; left: 1%; right: -2%; bottom: .05em; height: .13em; z-index: -1; border-radius: 8px; background: color-mix(in oklch, var(--green) 34%, transparent); transform: rotate(-1deg); }
+  .hero-sub { font-size: clamp(1.05rem, 2vw, 1.18rem); color: var(--ink-soft); max-width: 46ch; margin: 24px 0 0; }
   .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 32px; }
-  .hero-meta { display: flex; align-items: center; gap: 22px; margin-top: 32px; }
+  .hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-top: 34px; }
+  .hero-visual { position: relative; }
+  .hero-live {
+    position: absolute; right: -8px; top: -26px; z-index: 3;
+    padding: 7px 11px; border-radius: 8px; color: var(--navy); background: var(--green-br);
+    font: 600 .63rem/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+    box-shadow: var(--shadow-md); transform: rotate(2.5deg);
+  }
+  .hero-visual::after { content: ''; position: absolute; width: 96px; height: 96px; right: -34px; bottom: 38px; z-index: -1; border: 1px solid color-mix(in oklch, var(--gold) 56%, var(--line)); border-radius: 24px; transform: rotate(15deg); background: color-mix(in oklch, var(--gold) 14%, transparent); }
+
+  .pillar-card { min-height: 230px; }
+  .card-link { display: inline-flex; align-items: center; gap: 8px; width: fit-content; color: var(--green-deep); font-weight: 700; font-size: .9rem; }
+  .card-link > span { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid color-mix(in oklch, var(--green) 35%, var(--line)); border-radius: 8px; transition: transform .2s var(--ease), background .2s; }
+  .pillar-card:hover .card-link > span { transform: translateX(3px); background: color-mix(in oklch, var(--green) 13%, transparent); }
+  .content-card { min-height: 225px; }
+  .article-card::before { background: linear-gradient(90deg, var(--gold), var(--coral), transparent 76%); }
 
   @media (max-width: 900px) {
-    .hero { padding: 40px 0 56px; }
-    .hero-grid { grid-template-columns: 1fr; gap: 44px; }
+    .hero { padding: 48px 0 68px; }
+    .hero::before { inset: 18px 12px 24px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 52px; }
+    .hero-copy { padding-block: 16px 0; }
+    .hero-title { max-width: 13ch; font-size: clamp(3rem, 12vw, 5.4rem); }
+    .hero-visual :global(.wa-slider) { margin-inline: auto; }
   }
   .stat { display: flex; flex-direction: column; gap: 2px; }
-  .stat .num { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; line-height: 1; }
+  .stat .num { font-family: var(--font-display); font-size: 1.45rem; font-weight: 700; line-height: 1; }
   .stat .mono { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
   .vr { width: 1px; height: 34px; background: var(--line-2); }
+
+  @media (max-width: 520px) {
+    .hero { padding-top: 34px; }
+    .hero::before { inset-inline: 8px; border-radius: 26px; }
+    .hero-title { font-size: clamp(2.65rem, 14vw, 4rem); }
+    .hero-actions .btn { width: 100%; }
+    .hero-meta { gap: 13px; }
+    .hero-meta .vr:nth-last-child(2), .hero-meta .stat:last-child { display: none; }
+    .hero-live { right: 2px; }
+  }
 </style>

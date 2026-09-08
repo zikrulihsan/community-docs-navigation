@@ -46,13 +46,17 @@ const { title, description = 'SWE Growth — komunitas software engineer Indones
     var nav = document.getElementById('siteNav');
     var burger = document.getElementById('navBurger');
     if(burger && nav){
+      function setMenu(open){
+        nav.classList.toggle('menu-open', open);
+        burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        burger.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+      }
       burger.addEventListener('click', function(e){
         e.stopPropagation();
-        var open = nav.classList.toggle('menu-open');
-        burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        setMenu(!nav.classList.contains('menu-open'));
       });
-      document.addEventListener('click', function(e){ if(!nav.contains(e.target)) nav.classList.remove('menu-open'); });
-      document.addEventListener('keydown', function(e){ if(e.key==='Escape') nav.classList.remove('menu-open'); });
+      document.addEventListener('click', function(e){ if(!nav.contains(e.target)) setMenu(false); });
+      document.addEventListener('keydown', function(e){ if(e.key==='Escape') setMenu(false); });
     }
     var root = document.documentElement;
     var mq = matchMedia('(prefers-color-scheme: dark)');
@@ -62,9 +66,11 @@ const { title, description = 'SWE Growth — komunitas software engineer Indones
     function apply(p){
       root.dataset.theme = p;
       root.dataset.resolved = resolve(p);
+      if(btn) btn.setAttribute('aria-label', 'Tema ' + p + '. Klik untuk ganti tema.');
       try{ localStorage.setItem('swe-theme', p); }catch(e){}
     }
     if(btn){
+      btn.setAttribute('aria-label', 'Tema ' + (root.dataset.theme || 'system') + '. Klik untuk ganti tema.');
       btn.addEventListener('click', function(){
         var next = order[(order.indexOf(root.dataset.theme||'system')+1)%order.length];
         apply(next);
