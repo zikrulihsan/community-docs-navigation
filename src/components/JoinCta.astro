@@ -4,7 +4,7 @@ interface Props {
   body?: string;
 }
 const {
-  title = 'Pintunya sudah di hadapanmu🚪',
+  title = 'Pintunya sudah di hadapanmu 🚪',
   body = 'Buka pintu untuk ruang tumbuh bersama.\n\nMasuk ke grup, sapa teman-teman di grup, perkenalan, terus ikut kegiatan apa pun yang lagi jalan. Segampang itu.',
 } = Astro.props;
 ---
@@ -14,6 +14,11 @@ const {
       <span class="mono" style="opacity:.85">Cara gabung</span>
       <h2>{title}</h2>
       <p>{body}</p>
+      <div class="join-proof" aria-label="Informasi komunitas">
+        <span><b>1024+</b> engineer</span>
+        <span aria-hidden="true">•</span>
+        <span><b>Gratis</b> selamanya</span>
+      </div>
       <div class="join-actions">
         <a class="btn btn-white" href="https://goakal.com/ahsanprojectsbw/swegrowthmember/c79qf/apply" target="_blank" rel="noopener">
           Gabung ke WA Community
@@ -24,3 +29,8 @@ const {
     </div>
   </div>
 </section>
+
+<style>
+  .join-proof { display: flex; flex-wrap: wrap; gap: 8px; margin: -7px 0 24px; color: oklch(0.83 0.035 140); font-size: .83rem; }
+  .join-proof b { color: var(--green-br); }
+</style>
