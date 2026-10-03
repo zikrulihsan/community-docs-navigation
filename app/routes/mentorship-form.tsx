@@ -136,7 +136,6 @@ export default function MentorshipForm({ loaderData: { mentors } }: Route.Compon
           <Link className="back" to="/mentorship">← Kembali ke halaman mentorship</Link>
 
           <div className="notice">
-            <strong>Batch yang lagi buka:</strong> mentorship berjalan selama 2 bulan, dengan sesi seminggu sekali.
             Setelah tombol kirim ditekan, jawabanmu langsung terangkum jadi pesan WhatsApp ke admin —
             tinggal tekan <em>send</em> di aplikasi WhatsApp.
           </div>
