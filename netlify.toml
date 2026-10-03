@@ -22,6 +22,77 @@
   to = "/masuk?next=/admin"
   status = 301
 
+# Halaman lama yang dihapus saat portal member diluncurkan
+[[redirects]]
+  from = "/events"
+  to = "/agenda"
+  status = 301
+
+[[redirects]]
+  from = "/events/*"
+  to = "/agenda"
+  status = 301
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/portal"
+  status = 301
+
+[[redirects]]
+  from = "/dashboard/*"
+  to = "/portal/profil"
+  status = 301
+
+[[redirects]]
+  from = "/blog"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/blog/*"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/jobs"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/videos"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/mentorship"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/mentorship/*"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/courses"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/courses/*"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/u/*"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/terima-kasih"
+  to = "/"
+  status = 301
+
 # Semua path tanpa file prerender (course, profil member, activity baru, dst.)
 # dilayani app shell SPA. Netlify mendahulukan file yang ada, jadi ini hanya fallback.
 [[redirects]]
