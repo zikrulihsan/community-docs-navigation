@@ -1,12 +1,12 @@
-# Astro static site — built to dist/
+# React Router (Vite) — halaman publik di-prerender, sisanya SPA.
 [build]
-  publish = "dist"
+  publish = "build/client"
   command = "npm run build"
 
 [build.environment]
   NODE_VERSION = "22"
 
-# Old URLs from the previous single-page site
+# URL dari situs lama
 [[redirects]]
   from = "/code-of-conduct.html"
   to = "/code-of-conduct"
@@ -17,6 +17,18 @@
   to = "/"
   status = 301
 
+[[redirects]]
+  from = "/admin/login"
+  to = "/masuk?next=/admin"
+  status = 301
+
+# Semua path tanpa file prerender (course, profil member, activity baru, dst.)
+# dilayani app shell SPA. Netlify mendahulukan file yang ada, jadi ini hanya fallback.
+[[redirects]]
+  from = "/*"
+  to = "/__spa-fallback.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
@@ -24,14 +36,8 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Fonts and logo are content-stable, so cache them hard
+# Font, logo, dan bundle Vite (nama ber-hash) aman di-cache permanen
 [[headers]]
   for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Astro emits hashed filenames here
-[[headers]]
-  for = "/_astro/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
