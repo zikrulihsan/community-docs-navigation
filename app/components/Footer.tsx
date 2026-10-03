@@ -7,9 +7,9 @@ export function Footer() {
         <div className="foot-brand">
           <Link className="brand" to="/">
             <img className="brand-logo" src="/assets/swe-growth-logo.png" alt="SWE Growth Community" width="38" height="38" loading="lazy" />
-            <span className="b-name"><b>swe growth</b><span>bagian dari ahsan project</span></span>
+            <span className="b-name"><b>swe growth</b></span>
           </Link>
-          <div className="foot-note">Dari, oleh dan untuk Software Engineer yang mau terus tumbuh 🚀</div>
+          <div className="foot-note">Komunitas software engineer Indonesia. Bagian dari Ahsan Project.</div>
           <div className="foot-social">
             <a href="https://www.linkedin.com/company/swegrowthid/" target="_blank" rel="noopener" aria-label="LinkedIn">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.85V21h-4z" /></svg>
@@ -26,13 +26,9 @@ export function Footer() {
           </div>
         </div>
         <div className="foot-links">
-          <Link to="/events">Event</Link>
-          <Link to="/courses">Course</Link>
-          <Link to="/mentorship">Mentorship</Link>
-          <Link to="/videos">Video</Link>
-          <Link to="/blog">Blog</Link>
-          <Link to="/jobs">Loker</Link>
+          <Link to="/agenda">Agenda</Link>
           <Link to="/code-of-conduct">Code of Conduct</Link>
+          <Link to="/masuk?next=/portal">Masuk</Link>
         </div>
       </div>
     </footer>

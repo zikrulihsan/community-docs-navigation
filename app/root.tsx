@@ -8,7 +8,6 @@ import { AuthProvider } from './lib/auth';
 import { DEFAULT_DESCRIPTION } from './lib/site';
 import './styles/global.css';
 import './styles/pages.css';
-import './styles/wa-chat.css';
 import './styles/app.css';
 
 export const links: Route.LinksFunction = () => [
@@ -75,15 +74,15 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       <section className="block nf">
         <div className="wrap">
           <p className="mono">{notFound ? 'Error 404' : 'Error'}</p>
-          <h1>{notFound ? 'Halamannya nggak ketemu 🧭' : 'Ada yang nggak beres 🛠️'}</h1>
+          <h1>{notFound ? 'Halaman tidak ditemukan' : 'Terjadi kesalahan'}</h1>
           <p className="sub">
             {notFound
-              ? 'Mungkin link-nya sudah berubah, atau halamannya sudah dipindah.'
-              : 'Coba muat ulang halaman. Kalau masih error, kabari admin di grup ya.'}
+              ? 'Link-nya mungkin sudah berubah atau halamannya sudah dihapus.'
+              : 'Coba muat ulang halaman. Kalau masih error, kabari admin.'}
           </p>
           <div className="center-actions">
             <Link className="btn btn-primary" to="/">Kembali ke beranda</Link>
-            <Link className="btn btn-ghost" to="/events">Lihat event</Link>
+            <Link className="btn btn-ghost" to="/agenda">Lihat agenda</Link>
           </div>
           {details && <pre style={{ textAlign: 'left', marginTop: 32, overflowX: 'auto' }}><code>{details}</code></pre>}
         </div>

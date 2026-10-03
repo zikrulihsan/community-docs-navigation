@@ -1,29 +1,39 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useRevalidator, useSearchParams } from 'react-router';
 import type { Route } from './+types/admin';
-import { ACTIVITY_STATUSES, activityStatusLabel } from '~/lib/activities';
+import { ACTIVITY_STATUSES, activityStatusLabel, slugify } from '~/lib/activities';
 import { requireAdmin, useAuth } from '~/lib/auth';
-import { levelLabel, slugify } from '~/lib/courses';
-import type { ActivityRegistrationRow, ActivityStatus, CourseLevel, LessonRow } from '~/lib/database.types';
-import { formatWibDate, formatWibTime } from '~/lib/format';
+import type {
+  ActivityMemberInfoRow,
+  ActivityRegistrationRow,
+  ActivityStatus,
+  MembershipRow,
+  ProfileRow,
+  WhatsappGroupRow,
+} from '~/lib/database.types';
+import { formatDate, formatWibDate, formatWibTime, isoDate } from '~/lib/format';
 import { supabase } from '~/lib/supabase';
 
 export const meta: Route.MetaFunction = () => [{ title: 'Admin — SWE Growth' }, { name: 'robots', content: 'noindex' }];
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   await requireAdmin(request);
-  const url = new URL(request.url);
-  const courseId = url.searchParams.get('course');
   const db = supabase();
 
-  const [activities, courses, lessons] = await Promise.all([
+  const [profiles, memberships, activities, memberInfo, groups] = await Promise.all([
+    db.from('profiles').select('*').order('created_at', { ascending: false }),
+    db.from('memberships').select('*'),
     db.from('activities').select('*').order('created_at', { ascending: false }),
-    db.from('courses').select('*').order('sort_order').order('created_at'),
-    courseId
-      ? db.from('course_lessons').select('*').eq('course_id', courseId).order('position').order('created_at')
-      : Promise.resolve({ data: [] as LessonRow[] }),
+    db.from('activity_member_info').select('*'),
+    db.from('whatsapp_groups').select('*').order('sort_order').order('created_at'),
   ]);
-  return { activities: activities.data ?? [], courses: courses.data ?? [], lessons: lessons.data ?? [] };
+  return {
+    profiles: profiles.data ?? [],
+    memberships: memberships.data ?? [],
+    activities: activities.data ?? [],
+    memberInfo: memberInfo.data ?? [],
+    groups: groups.data ?? [],
+  };
 }
 
 export function HydrateFallback() {
@@ -34,6 +44,9 @@ const val = (form: FormData, name: string) => String(form.get(name) ?? '').trim(
 
 /** <input type="datetime-local"> diisi dalam WIB. */
 const wibToIso = (local: string) => (local ? new Date(`${local}:00+07:00`).toISOString() : null);
+
+/** Tanggal hari ini menurut WIB, yyyy-mm-dd. */
+const todayWib = () => isoDate(new Date(Date.now() + 7 * 60 * 60 * 1000));
 
 function useMutation() {
   const revalidator = useRevalidator();
@@ -58,25 +71,36 @@ function useMutation() {
   return { busy, run, flash };
 }
 
+type Tab = 'member' | 'event' | 'grup';
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'member', label: 'Member' },
+  { id: 'event', label: 'Event' },
+  { id: 'grup', label: 'Grup WhatsApp' },
+];
+
 export default function Admin({ loaderData }: Route.ComponentProps) {
   const { user } = useAuth();
   const [params] = useSearchParams();
-  const tab = params.get('tab') === 'course' ? 'course' : 'activity';
+  const tab = TABS.find((t) => t.id === params.get('tab'))?.id ?? 'member';
 
   return (
     <section className="block">
       <div className="wrap admin-wrap">
-        <span className="eyebrow">Admin workspace</span>
-        <h1 style={{ margin: '4px 0 6px' }}>Kelola platform</h1>
-        <p className="form-sub">Masuk sebagai {user?.email}. Perubahan langsung tampil di situs tanpa deploy ulang.</p>
+        <h1 className="page-title">Admin</h1>
+        <p className="form-sub">Masuk sebagai {user?.email}. Perubahan langsung berlaku tanpa deploy ulang.</p>
 
         <nav className="member-tabs" aria-label="Bagian admin">
-          <Link to="/admin" aria-current={tab === 'activity' ? 'page' : undefined}>Event & activity</Link>
-          <Link to="/admin?tab=course" aria-current={tab === 'course' ? 'page' : undefined}>Course & materi</Link>
+          {TABS.map((t) => (
+            <Link key={t.id} to={t.id === 'member' ? '/admin' : `/admin?tab=${t.id}`} aria-current={tab === t.id ? 'page' : undefined}>
+              {t.label}
+            </Link>
+          ))}
         </nav>
 
         <div style={{ marginTop: 24 }}>
-          {tab === 'activity' ? <ActivitiesAdmin activities={loaderData.activities} /> : <CoursesAdmin {...loaderData} />}
+          {tab === 'member' && <MembersAdmin profiles={loaderData.profiles} memberships={loaderData.memberships} />}
+          {tab === 'event' && <ActivitiesAdmin activities={loaderData.activities} memberInfo={loaderData.memberInfo} />}
+          {tab === 'grup' && <GroupsAdmin groups={loaderData.groups} />}
         </div>
       </div>
     </section>
@@ -84,14 +108,122 @@ export default function Admin({ loaderData }: Route.ComponentProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Activities
+// Member
+// ---------------------------------------------------------------------------
+
+function MembersAdmin({ profiles, memberships }: { profiles: ProfileRow[]; memberships: MembershipRow[] }) {
+  const { user } = useAuth();
+  const { busy, run, flash } = useMutation();
+  const [query, setQuery] = useState('');
+  const [editing, setEditing] = useState<string | null>(null);
+
+  const today = todayWib();
+  const membershipOf = new Map(memberships.map((m) => [m.user_id, m]));
+  const q = query.trim().toLowerCase();
+  const matches = (p: ProfileRow) =>
+    !q || [p.full_name, p.email, p.whatsapp, p.company].some((v) => v?.toLowerCase().includes(q));
+
+  const rows = profiles.filter(matches);
+  const isActive = (p: ProfileRow) => (membershipOf.get(p.id)?.active_until ?? '') >= today;
+  const pending = rows.filter((p) => !isActive(p));
+  const active = rows.filter(isActive);
+
+  const save = async (e: FormEvent<HTMLFormElement>, userId: string) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const ok = await run(
+      () =>
+        supabase().from('memberships').upsert({
+          user_id: userId,
+          active_until: val(form, 'active_until'),
+          goakal_ref: val(form, 'goakal_ref') || null,
+          note: val(form, 'note') || null,
+          activated_by: user?.id ?? null,
+          activated_at: new Date().toISOString(),
+        }),
+      'Membership disimpan.',
+    );
+    if (ok) setEditing(null);
+  };
+
+  const deactivate = (p: ProfileRow) => {
+    if (!confirm(`Akhiri membership ${p.full_name || p.email} hari ini? Akses portal langsung tertutup.`)) return;
+    const yesterday = isoDate(new Date(Date.parse(today) - 86_400_000));
+    void run(() => supabase().from('memberships').update({ active_until: yesterday }).eq('user_id', p.id), 'Membership diakhiri.');
+  };
+
+  const renderRow = (p: ProfileRow) => {
+    const m = membershipOf.get(p.id);
+    return (
+      <li key={p.id}>
+        <div className="line">
+          <div>
+            <strong>{p.full_name || '(tanpa nama)'}</strong>
+            <span className="slug">{[p.email, p.whatsapp].filter(Boolean).join(' · ')}</span>
+            <span className="slug">
+              {m
+                ? `${m.active_until >= today ? 'aktif sampai' : 'berakhir'} ${formatDate(m.active_until)}${m.goakal_ref ? ` · ${m.goakal_ref}` : ''}`
+                : p.onboarded_at ? 'belum aktif' : 'belum isi data'}
+            </span>
+          </div>
+          <div className="inline-actions">
+            <button className="btn btn-ghost sm" type="button" onClick={() => setEditing(editing === p.id ? null : p.id)}>
+              {m && m.active_until >= today ? 'Ubah' : m ? 'Perpanjang' : 'Aktifkan'}
+            </button>
+            {m && m.active_until >= today && (
+              <button className="link-btn" type="button" disabled={busy} onClick={() => deactivate(p)}>Akhiri</button>
+            )}
+          </div>
+        </div>
+        {editing === p.id && (
+          <form className="inline-form" onSubmit={(e) => save(e, p.id)}>
+            <Field id={`until-${p.id}`} label="Aktif sampai">
+              <input id={`until-${p.id}`} name="active_until" type="date" required min={today} defaultValue={m && m.active_until >= today ? m.active_until : ''} />
+            </Field>
+            <Field id={`ref-${p.id}`} label="Ref. goakal" optional>
+              <input id={`ref-${p.id}`} name="goakal_ref" maxLength={120} defaultValue={m?.goakal_ref ?? ''} placeholder="No. order / invoice" />
+            </Field>
+            <Field id={`note-${p.id}`} label="Catatan" optional>
+              <input id={`note-${p.id}`} name="note" maxLength={500} defaultValue={m?.note ?? ''} />
+            </Field>
+            <button className="btn btn-primary sm" type="submit" disabled={busy}>Simpan</button>
+          </form>
+        )}
+      </li>
+    );
+  };
+
+  return (
+    <div className="admin-stack">
+      <div className="field" style={{ maxWidth: 420 }}>
+        <label htmlFor="member-search">Cari nama, email, atau WhatsApp</label>
+        <input id="member-search" type="search" value={query} onChange={(e) => setQuery(e.target.value)} />
+      </div>
+      {flash}
+      <div className="panel">
+        <h2>Belum aktif ({pending.length})</h2>
+        <p className="form-sub">Akun yang sudah login tapi belum punya membership aktif. Cocokkan dengan pembayaran di goakal.</p>
+        {pending.length === 0 ? <p className="muted">Tidak ada.</p> : <ul className="admin-list">{pending.map(renderRow)}</ul>}
+      </div>
+      <div className="panel">
+        <h2>Member aktif ({active.length})</h2>
+        {active.length === 0 ? <p className="muted">Belum ada.</p> : <ul className="admin-list">{active.map(renderRow)}</ul>}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Event
 // ---------------------------------------------------------------------------
 
 type Activities = Route.ComponentProps['loaderData']['activities'];
 
-function ActivitiesAdmin({ activities }: { activities: Activities }) {
+function ActivitiesAdmin({ activities, memberInfo }: { activities: Activities; memberInfo: ActivityMemberInfoRow[] }) {
   const { busy, run, flash } = useMutation();
   const [openRegs, setOpenRegs] = useState<string | null>(null);
+  const [openLinks, setOpenLinks] = useState<string | null>(null);
+  const infoOf = new Map(memberInfo.map((i) => [i.activity_id, i]));
 
   const create = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -106,7 +238,6 @@ function ActivitiesAdmin({ activities }: { activities: Activities }) {
           slug: slugify(val(form, 'slug') || title),
           summary: val(form, 'summary'),
           description: val(form, 'description'),
-          activity_type: val(form, 'activity_type') || 'event',
           status: val(form, 'status') as ActivityStatus,
           mode: val(form, 'mode') as 'online' | 'offline' | 'hybrid',
           starts_at: wibToIso(val(form, 'starts_at')),
@@ -115,16 +246,32 @@ function ActivitiesAdmin({ activities }: { activities: Activities }) {
           capacity: capacityRaw ? Number.parseInt(capacityRaw, 10) : null,
           is_public: form.get('is_public') === 'on',
         }),
-      'Activity dibuat dan langsung muncul sesuai status publiknya.',
+      'Event dibuat.',
     );
     if (ok) formEl.reset();
+  };
+
+  const saveLinks = async (e: FormEvent<HTMLFormElement>, activityId: string) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const ok = await run(
+      () =>
+        supabase().from('activity_member_info').upsert({
+          activity_id: activityId,
+          meeting_url: val(form, 'meeting_url') || null,
+          recording_url: val(form, 'recording_url') || null,
+          updated_at: new Date().toISOString(),
+        }),
+      'Link member disimpan.',
+    );
+    if (ok) setOpenLinks(null);
   };
 
   return (
     <div className="admin-grid">
       <form className="form-card" onSubmit={create}>
-        <h2>Tambah activity</h2>
-        <p className="form-sub">Untuk teaser, pilih <em>coming soon</em> dan biarkan jadwal kosong.</p>
+        <h2>Tambah event</h2>
+        <p className="form-sub">Judul, tanggal, dan format tampil di agenda publik. Detail, pendaftaran, dan link hanya untuk member.</p>
         {flash}
         <Field id="title" label="Judul"><input id="title" name="title" required minLength={3} /></Field>
         <Field id="slug" label="Slug URL" optional><input id="slug" name="slug" placeholder="otomatis dari judul" /></Field>
@@ -132,63 +279,74 @@ function ActivitiesAdmin({ activities }: { activities: Activities }) {
         <Field id="description" label="Detail"><textarea id="description" name="description" rows={5} /></Field>
         <div className="form-grid">
           <Field id="status" label="Status">
-            <select id="status" name="status" defaultValue="coming_soon">
+            <select id="status" name="status" defaultValue="registration_open">
               {ACTIVITY_STATUSES.map((s) => <option key={s} value={s}>{activityStatusLabel[s]}</option>)}
             </select>
           </Field>
-          <Field id="activity_type" label="Tipe">
-            <select id="activity_type" name="activity_type" defaultValue="event">
-              <option value="event">Event</option><option value="class">Kelas</option><option value="workshop">Workshop</option>
-              <option value="mentorship">Mentorship</option><option value="other">Lainnya</option>
-            </select>
-          </Field>
-          <Field id="mode" label="Mode">
+          <Field id="mode" label="Format">
             <select id="mode" name="mode" defaultValue="online">
               <option value="online">Online</option><option value="offline">Offline</option><option value="hybrid">Hybrid</option>
             </select>
           </Field>
           <Field id="starts_at" label="Mulai (WIB)" optional><input id="starts_at" name="starts_at" type="datetime-local" /></Field>
-          <Field id="location" label="Lokasi / link"><input id="location" name="location" placeholder="Akan diumumkan" /></Field>
-          <Field id="speaker" label="Pembicara"><input id="speaker" name="speaker" /></Field>
-          <Field id="capacity" label="Kapasitas"><input id="capacity" name="capacity" type="number" min={1} inputMode="numeric" placeholder="Kosong = tanpa batas" /></Field>
+          <Field id="capacity" label="Kapasitas" optional><input id="capacity" name="capacity" type="number" min={1} inputMode="numeric" placeholder="tanpa batas" /></Field>
+          <Field id="location" label="Lokasi" optional><input id="location" name="location" placeholder="Kota / venue (bukan link meeting)" /></Field>
+          <Field id="speaker" label="Pembicara" optional><input id="speaker" name="speaker" /></Field>
         </div>
-        <label className="check-field"><input type="checkbox" name="is_public" defaultChecked /> Tampilkan ke publik</label>
-        <button className="btn btn-primary" type="submit" disabled={busy}>Simpan activity</button>
+        <label className="check-field"><input type="checkbox" name="is_public" defaultChecked /> Tampilkan di agenda</label>
+        <button className="btn btn-primary" type="submit" disabled={busy}>Simpan event</button>
       </form>
 
       <div className="panel">
-        <h2>Activity tersimpan</h2>
+        <h2>Event tersimpan</h2>
         {activities.length === 0 ? (
-          <p className="form-sub">Belum ada. Activity pertama bisa langsung dibuat dari form ini.</p>
+          <p className="form-sub">Belum ada event.</p>
         ) : (
           <ul className="admin-list">
-            {activities.map((a) => (
-              <li key={a.id}>
-                <div className="line">
-                  <div>
-                    <strong>{a.title}{!a.is_public && <span className="muted"> · draft</span>}</strong>
-                    <Link className="slug" to={`/events/${a.slug}`}>/events/{a.slug}</Link>
-                    {a.starts_at && <span className="slug"> · {formatWibDate(a.starts_at)} {formatWibTime(a.starts_at)}</span>}
+            {activities.map((a) => {
+              const info = infoOf.get(a.id);
+              return (
+                <li key={a.id}>
+                  <div className="line">
+                    <div>
+                      <strong>{a.title}{!a.is_public && <span className="muted"> · disembunyikan</span>}</strong>
+                      <Link className="slug" to={`/portal/agenda/${a.slug}`}>/portal/agenda/{a.slug}</Link>
+                      {a.starts_at && <span className="slug"> · {formatWibDate(a.starts_at)} {formatWibTime(a.starts_at)}</span>}
+                    </div>
+                    <select
+                      aria-label={`Status ${a.title}`}
+                      value={a.status}
+                      disabled={busy}
+                      onChange={(e) =>
+                        run(() => supabase().from('activities').update({ status: e.target.value as ActivityStatus }).eq('id', a.id), `Status "${a.title}" diperbarui.`)
+                      }
+                    >
+                      {ACTIVITY_STATUSES.map((s) => <option key={s} value={s}>{activityStatusLabel[s]}</option>)}
+                    </select>
                   </div>
-                  <select
-                    aria-label={`Status ${a.title}`}
-                    value={a.status}
-                    disabled={busy}
-                    onChange={(e) =>
-                      run(() => supabase().from('activities').update({ status: e.target.value as ActivityStatus }).eq('id', a.id), `Status "${a.title}" diperbarui.`)
-                    }
-                  >
-                    {ACTIVITY_STATUSES.map((s) => <option key={s} value={s}>{activityStatusLabel[s]}</option>)}
-                  </select>
-                </div>
-                <div className="inline-actions">
-                  <button className="link-btn" type="button" onClick={() => setOpenRegs(openRegs === a.id ? null : a.id)}>
-                    {openRegs === a.id ? 'Tutup pendaftar' : 'Lihat pendaftar'}
-                  </button>
-                </div>
-                {openRegs === a.id && <Registrants activityId={a.id} />}
-              </li>
-            ))}
+                  <div className="inline-actions">
+                    <button className="link-btn" type="button" onClick={() => setOpenRegs(openRegs === a.id ? null : a.id)}>
+                      {openRegs === a.id ? 'Tutup pendaftar' : 'Pendaftar'}
+                    </button>
+                    <button className="link-btn" type="button" onClick={() => setOpenLinks(openLinks === a.id ? null : a.id)}>
+                      Link meeting & rekaman{info?.meeting_url || info?.recording_url ? ' ✓' : ''}
+                    </button>
+                  </div>
+                  {openRegs === a.id && <Registrants activityId={a.id} />}
+                  {openLinks === a.id && (
+                    <form className="inline-form" onSubmit={(e) => saveLinks(e, a.id)}>
+                      <Field id={`meet-${a.id}`} label="Link meeting" optional>
+                        <input id={`meet-${a.id}`} name="meeting_url" type="url" pattern="https://.*" defaultValue={info?.meeting_url ?? ''} placeholder="https://meet.google.com/…" />
+                      </Field>
+                      <Field id={`rec-${a.id}`} label="Link rekaman" optional>
+                        <input id={`rec-${a.id}`} name="recording_url" type="url" pattern="https://.*" defaultValue={info?.recording_url ?? ''} placeholder="https://youtu.be/…" />
+                      </Field>
+                      <button className="btn btn-primary sm" type="submit" disabled={busy}>Simpan link</button>
+                    </form>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
@@ -238,207 +396,67 @@ function Registrants({ activityId }: { activityId: string }) {
 }
 
 // ---------------------------------------------------------------------------
-// Courses
+// Grup WhatsApp
 // ---------------------------------------------------------------------------
 
-function CoursesAdmin({ courses, lessons }: Route.ComponentProps['loaderData']) {
-  const [params, setParams] = useSearchParams();
-  const selectedId = params.get('course');
-  const selected = courses.find((c) => c.id === selectedId) ?? null;
+function GroupsAdmin({ groups }: { groups: WhatsappGroupRow[] }) {
   const { busy, run, flash } = useMutation();
 
-  const createCourse = async (e: FormEvent<HTMLFormElement>) => {
+  const create = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formEl = e.currentTarget;
     const form = new FormData(formEl);
-    const title = val(form, 'title');
     const ok = await run(
       () =>
-        supabase().from('courses').insert({
-          title,
-          slug: slugify(val(form, 'slug') || title),
-          summary: val(form, 'summary'),
+        supabase().from('whatsapp_groups').insert({
+          name: val(form, 'name'),
           description: val(form, 'description'),
-          level: val(form, 'level') as CourseLevel,
-          instructor: val(form, 'instructor') || null,
-          cover_url: val(form, 'cover_url') || null,
-          is_published: false,
+          invite_url: val(form, 'invite_url'),
+          sort_order: Number.parseInt(val(form, 'sort_order') || '0', 10),
         }),
-      'Course dibuat sebagai draft. Tambahkan lesson, lalu terbitkan.',
+      'Grup ditambahkan. Langsung terlihat di portal member.',
     );
     if (ok) formEl.reset();
   };
 
+  const remove = (g: WhatsappGroupRow) => {
+    if (!confirm(`Hapus grup "${g.name}" dari portal?`)) return;
+    void run(() => supabase().from('whatsapp_groups').delete().eq('id', g.id), 'Grup dihapus dari portal.');
+  };
+
   return (
     <div className="admin-grid">
-      <div className="dash-col">
-        <div className="panel">
-          <h2>Course</h2>
-          {flash}
-          {courses.length === 0 ? (
-            <p className="form-sub">Belum ada course.</p>
-          ) : (
-            <ul className="admin-list">
-              {courses.map((c) => (
-                <li key={c.id}>
-                  <div className="line">
-                    <div>
-                      <strong>{c.title}{!c.is_published && <span className="muted"> · draft</span>}</strong>
-                      <Link className="slug" to={`/courses/${c.slug}`}>/courses/{c.slug}</Link>
-                    </div>
-                    <div className="inline-actions">
-                      <button
-                        className={`btn btn-ghost sm${c.id === selectedId ? ' selected' : ''}`}
-                        type="button"
-                        onClick={() => setParams({ tab: 'course', course: c.id })}
-                      >
-                        Lesson
-                      </button>
-                      <button
-                        className="btn btn-ghost sm"
-                        type="button"
-                        disabled={busy}
-                        onClick={() =>
-                          run(
-                            () => supabase().from('courses').update({ is_published: !c.is_published }).eq('id', c.id),
-                            c.is_published ? `"${c.title}" dikembalikan ke draft.` : `"${c.title}" sudah terbit.`,
-                          )
-                        }
-                      >
-                        {c.is_published ? 'Jadikan draft' : 'Terbitkan'}
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <form className="form-card" onSubmit={createCourse}>
-          <h2>Course baru</h2>
-          <p className="form-sub">Dibuat sebagai draft — hanya admin yang bisa melihat sampai diterbitkan.</p>
-          <Field id="c_title" label="Judul"><input id="c_title" name="title" required minLength={3} /></Field>
-          <Field id="c_slug" label="Slug URL" optional><input id="c_slug" name="slug" placeholder="otomatis dari judul" /></Field>
-          <Field id="c_summary" label="Ringkasan"><textarea id="c_summary" name="summary" rows={2} maxLength={300} /></Field>
-          <Field id="c_description" label="Deskripsi"><textarea id="c_description" name="description" rows={4} /></Field>
-          <div className="form-grid">
-            <Field id="c_level" label="Level">
-              <select id="c_level" name="level" defaultValue="all">
-                {(Object.keys(levelLabel) as CourseLevel[]).map((l) => <option key={l} value={l}>{levelLabel[l]}</option>)}
-              </select>
-            </Field>
-            <Field id="c_instructor" label="Mentor"><input id="c_instructor" name="instructor" /></Field>
-          </div>
-          <Field id="c_cover" label="URL cover" optional><input id="c_cover" name="cover_url" type="url" placeholder="https://…" /></Field>
-          <button className="btn btn-primary" type="submit" disabled={busy}>Buat course</button>
-        </form>
-      </div>
-
-      {selected ? (
-        <LessonsAdmin key={selected.id} courseId={selected.id} courseTitle={selected.title} lessons={lessons} />
-      ) : (
-        <div className="panel"><p className="form-sub">Pilih <strong>Lesson</strong> pada salah satu course untuk mengelola materinya.</p></div>
-      )}
-    </div>
-  );
-}
-
-function LessonsAdmin({ courseId, courseTitle, lessons }: { courseId: string; courseTitle: string; lessons: LessonRow[] }) {
-  const [editing, setEditing] = useState<LessonRow | 'new' | null>(null);
-  const { busy, run, flash } = useMutation();
-
-  const save = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const title = val(form, 'title');
-    const duration = val(form, 'duration_minutes');
-    const row = {
-      title,
-      slug: slugify(val(form, 'slug') || title),
-      summary: val(form, 'summary'),
-      body_md: String(form.get('body_md') ?? ''),
-      video_url: val(form, 'video_url') || null,
-      duration_minutes: duration ? Number.parseInt(duration, 10) : null,
-      position: Number.parseInt(val(form, 'position') || '0', 10),
-      is_preview: form.get('is_preview') === 'on',
-      is_published: form.get('is_published') === 'on',
-    };
-    const ok = await run(
-      () =>
-        editing === 'new'
-          ? supabase().from('course_lessons').insert({ ...row, course_id: courseId })
-          : supabase().from('course_lessons').update(row).eq('id', (editing as LessonRow).id),
-      editing === 'new' ? 'Lesson ditambahkan.' : 'Lesson diperbarui.',
-    );
-    if (ok) setEditing(null);
-  };
-
-  const remove = (lesson: LessonRow) => {
-    if (!confirm(`Hapus lesson "${lesson.title}"? Progress member untuk lesson ini ikut terhapus.`)) return;
-    void run(() => supabase().from('course_lessons').delete().eq('id', lesson.id), 'Lesson dihapus.');
-  };
-
-  if (editing) {
-    const l = editing === 'new' ? null : editing;
-    const nextPosition = lessons.length ? Math.max(...lessons.map((x) => x.position)) + 1 : 1;
-    return (
-      <form className="form-card" onSubmit={save}>
-        <h2>{l ? 'Edit lesson' : 'Lesson baru'}</h2>
-        <p className="form-sub">{courseTitle}</p>
+      <form className="form-card" onSubmit={create}>
+        <h2>Tambah grup</h2>
+        <p className="form-sub">Link invite hanya terlihat oleh member aktif.</p>
         {flash}
-        <Field id="l_title" label="Judul"><input id="l_title" name="title" required minLength={3} defaultValue={l?.title} /></Field>
-        <div className="form-grid">
-          <Field id="l_slug" label="Slug" optional><input id="l_slug" name="slug" defaultValue={l?.slug} placeholder="otomatis dari judul" /></Field>
-          <Field id="l_position" label="Urutan"><input id="l_position" name="position" type="number" defaultValue={l?.position ?? nextPosition} /></Field>
-          <Field id="l_video" label="URL video" optional><input id="l_video" name="video_url" type="url" defaultValue={l?.video_url ?? ''} placeholder="https://youtu.be/…" /></Field>
-          <Field id="l_duration" label="Durasi (menit)" optional><input id="l_duration" name="duration_minutes" type="number" min={1} defaultValue={l?.duration_minutes ?? ''} /></Field>
-        </div>
-        <Field id="l_summary" label="Ringkasan"><input id="l_summary" name="summary" defaultValue={l?.summary} /></Field>
-        <Field id="l_body" label="Materi (markdown)">
-          <textarea id="l_body" name="body_md" rows={14} defaultValue={l?.body_md} style={{ fontFamily: 'var(--font-mono)', fontSize: '.85rem' }} />
-        </Field>
-        <label className="check-field"><input type="checkbox" name="is_preview" defaultChecked={l?.is_preview ?? false} /> Preview — bisa dibuka tanpa login</label>
-        <label className="check-field"><input type="checkbox" name="is_published" defaultChecked={l?.is_published ?? true} /> Tampilkan di course</label>
-        <div className="inline-actions">
-          <button className="btn btn-primary" type="submit" disabled={busy}>Simpan lesson</button>
-          <button className="btn btn-ghost" type="button" onClick={() => setEditing(null)}>Batal</button>
-        </div>
+        <Field id="g_name" label="Nama grup"><input id="g_name" name="name" required minLength={2} maxLength={80} /></Field>
+        <Field id="g_desc" label="Keterangan" optional><input id="g_desc" name="description" maxLength={300} /></Field>
+        <Field id="g_url" label="Link invite"><input id="g_url" name="invite_url" type="url" required pattern="https://.*" placeholder="https://chat.whatsapp.com/…" /></Field>
+        <Field id="g_order" label="Urutan" optional><input id="g_order" name="sort_order" type="number" defaultValue={groups.length + 1} /></Field>
+        <button className="btn btn-primary" type="submit" disabled={busy}>Simpan grup</button>
       </form>
-    );
-  }
 
-  return (
-    <div className="panel">
-      <div className="panel-head">
-        <h2>Lesson · {courseTitle}</h2>
-        <button className="btn btn-primary sm" type="button" onClick={() => setEditing('new')}>Tambah lesson</button>
+      <div className="panel">
+        <h2>Grup di portal</h2>
+        {groups.length === 0 ? (
+          <p className="form-sub">Belum ada grup.</p>
+        ) : (
+          <ul className="admin-list">
+            {groups.map((g) => (
+              <li key={g.id}>
+                <div className="line">
+                  <div>
+                    <strong>{g.sort_order}. {g.name}</strong>
+                    <span className="slug">{g.invite_url}</span>
+                  </div>
+                  <button className="link-btn" type="button" disabled={busy} onClick={() => remove(g)}>Hapus</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-      {flash}
-      {lessons.length === 0 ? (
-        <p className="form-sub">Belum ada lesson.</p>
-      ) : (
-        <ul className="admin-list">
-          {lessons.map((l) => (
-            <li key={l.id}>
-              <div className="line">
-                <div>
-                  <strong>{l.position}. {l.title}</strong>
-                  <span className="slug">
-                    {l.slug}
-                    {l.is_preview && ' · preview'}
-                    {!l.is_published && ' · disembunyikan'}
-                  </span>
-                </div>
-                <div className="inline-actions">
-                  <button className="btn btn-ghost sm" type="button" onClick={() => setEditing(l)}>Edit</button>
-                  <button className="link-btn" type="button" onClick={() => remove(l)} disabled={busy}>Hapus</button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

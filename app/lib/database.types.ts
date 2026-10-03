@@ -13,7 +13,6 @@ export type ActivityStatus =
 export type ActivityMode = 'online' | 'offline' | 'hybrid';
 export type RegistrationStatus = 'confirmed' | 'waitlisted' | 'cancelled';
 export type Seniority = 'student' | 'junior' | 'mid' | 'senior' | 'staff' | 'manager';
-export type CourseLevel = 'beginner' | 'intermediate' | 'advanced' | 'all';
 
 type Table<Row, Required extends keyof Row, Generated extends keyof Row = never> = {
   Row: Row;
@@ -70,6 +69,8 @@ export type ActivityInterestRow = {
 export type ProfileRow = {
   id: string;
   username: string | null;
+  email: string | null;
+  whatsapp: string | null;
   full_name: string;
   headline: string;
   seniority: Seniority | null;
@@ -84,47 +85,30 @@ export type ProfileRow = {
   updated_at: string;
 };
 
-export type CourseRow = {
+export type MembershipRow = {
+  user_id: string;
+  active_until: string;
+  goakal_ref: string | null;
+  note: string | null;
+  activated_by: string | null;
+  activated_at: string;
+};
+
+export type WhatsappGroupRow = {
   id: string;
-  slug: string;
-  title: string;
-  summary: string;
+  name: string;
   description: string;
-  level: CourseLevel;
-  instructor: string | null;
-  cover_url: string | null;
-  is_published: boolean;
+  invite_url: string;
   sort_order: number;
   created_at: string;
+};
+
+export type ActivityMemberInfoRow = {
+  activity_id: string;
+  meeting_url: string | null;
+  recording_url: string | null;
   updated_at: string;
 };
-
-export type LessonRow = {
-  id: string;
-  course_id: string;
-  slug: string;
-  title: string;
-  summary: string;
-  body_md: string;
-  video_url: string | null;
-  duration_minutes: number | null;
-  position: number;
-  is_preview: boolean;
-  is_published: boolean;
-  created_at: string;
-  updated_at: string;
-};
-
-export type LessonProgressRow = {
-  user_id: string;
-  lesson_id: string;
-  completed_at: string;
-};
-
-export type LessonOutline = Pick<
-  LessonRow,
-  'id' | 'slug' | 'title' | 'summary' | 'duration_minutes' | 'position' | 'is_preview'
->;
 
 type Timestamps = 'id' | 'created_at' | 'updated_at';
 
@@ -136,18 +120,16 @@ export type Database = {
       activity_interests: Table<ActivityInterestRow, 'activity_id' | 'email', 'id' | 'created_at'>;
       activity_registrations: Table<ActivityRegistrationRow, 'activity_id' | 'name' | 'email', Timestamps>;
       profiles: Table<ProfileRow, 'id', 'created_at' | 'updated_at'>;
-      courses: Table<CourseRow, 'slug' | 'title', Timestamps>;
-      course_lessons: Table<LessonRow, 'course_id' | 'slug' | 'title', Timestamps>;
-      lesson_progress: Table<LessonProgressRow, 'lesson_id', 'user_id' | 'completed_at'>;
+      memberships: Table<MembershipRow, 'user_id' | 'active_until', 'activated_at'>;
+      curators: Table<{ user_id: string; created_at: string }, 'user_id', 'created_at'>;
+      whatsapp_groups: Table<WhatsappGroupRow, 'name' | 'invite_url', 'id' | 'created_at'>;
+      activity_member_info: Table<ActivityMemberInfoRow, 'activity_id', 'updated_at'>;
     };
     Views: Record<string, never>;
     Functions: {
       is_admin: { Args: Record<string, never>; Returns: boolean };
-      course_outline: { Args: { p_course_slug: string }; Returns: LessonOutline[] };
-      course_stats: {
-        Args: Record<string, never>;
-        Returns: { course_id: string; lesson_count: number; total_minutes: number }[];
-      };
+      is_member: { Args: Record<string, never>; Returns: boolean };
+      is_curator: { Args: Record<string, never>; Returns: boolean };
       join_activity: {
         Args: { p_activity_id: string; p_whatsapp?: string; p_note?: string };
         Returns: { registration_id: string; registration_status: RegistrationStatus }[];

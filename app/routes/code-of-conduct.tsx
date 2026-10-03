@@ -1,5 +1,4 @@
 import type { Route } from './+types/code-of-conduct';
-import { PageHero } from '~/components/PageHero';
 import { pageMeta } from '~/lib/site';
 
 export const meta: Route.MetaFunction = () =>
@@ -37,7 +36,7 @@ const body = `
   <li>Gunakan bahasa yang pantas</li>
 </ul>
 
-<h2 id="sharia">🧭 Prinsip Sharia Compliance dalam Komunitas</h2>
+<h2 id="sharia">Prinsip Sharia Compliance dalam Komunitas</h2>
 <p>
   Komunitas ini menjunjung tinggi <strong>sharia compliance</strong> sebagai
   <strong>prinsip etika dan batas aman</strong> dalam membangun ruang belajar yang sehat, nyaman, dan
@@ -172,12 +171,13 @@ const body = `
 export default function CodeOfConduct() {
   return (
     <>
-      <PageHero
-        badge="Community Guidelines"
-        title="Code of Conduct"
-        lead="Software Engineer Growth adalah komunitas terbuka untuk belajar dan bertumbuh sebagai software engineer. Halaman ini menjelaskan nilai, aturan interaksi, dan batas aman yang kita jaga bersama."
-      />
       <section className="block">
+        <div className="wrap">
+          <h1 className="page-title">Code of Conduct</h1>
+          <p className="muted" style={{ maxWidth: '68ch', marginBottom: 32 }}>
+            Nilai, aturan interaksi, dan batas aman yang kita jaga bersama di semua ruang SWE Growth: grup WhatsApp, kegiatan, dan portal member.
+          </p>
+        </div>
         <div className="wrap coc-grid">
           <nav className="toc" aria-label="Daftar isi">
             <p className="mono toc-lbl">Daftar Isi</p>

@@ -70,10 +70,9 @@ export default function Login() {
     <section className="block auth-block">
       <div className="wrap" style={{ display: 'grid', placeItems: 'center' }}>
         <div className="form-card auth-card">
-          <span className="eyebrow">Member SWE Growth</span>
-          <h1>Masuk atau daftar.</h1>
+          <h1>Masuk ke portal member</h1>
           <p className="form-sub">
-            Satu akun untuk daftar event, belajar di course, dan menyimpan progress-mu. Gratis, tanpa password.
+            Tanpa password. Belum jadi member? Kamu tetap bisa membuat akun dulu, lalu admin mengaktifkannya setelah pembayaran membership.
           </p>
 
           {!hasSupabase && <p className="form-message error">Login belum dikonfigurasi di environment ini.</p>}

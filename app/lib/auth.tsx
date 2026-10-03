@@ -1,7 +1,7 @@
 import type { Session, User } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { redirect } from 'react-router';
-import type { ProfileRow } from './database.types';
+import type { MembershipRow, ProfileRow } from './database.types';
 import { hasSupabase, supabase } from './supabase';
 
 type AuthState = {
@@ -10,6 +10,9 @@ type AuthState = {
   user: User | null;
   profile: ProfileRow | null;
   isAdmin: boolean;
+  /** Member aktif (admin selalu true). */
+  isMember: boolean;
+  membership: MembershipRow | null;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -26,10 +29,22 @@ async function fetchIsAdmin() {
   return data === true;
 }
 
+export async function fetchIsMember() {
+  const { data } = await supabase().rpc('is_member');
+  return data === true;
+}
+
+export async function fetchMembership(userId: string) {
+  const { data } = await supabase().from('memberships').select('*').eq('user_id', userId).maybeSingle();
+  return data;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMember, setIsMember] = useState(false);
+  const [membership, setMembership] = useState<MembershipRow | null>(null);
   const [loading, setLoading] = useState(true);
 
   const userId = session?.user.id;
@@ -50,11 +65,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!userId) {
       setProfile(null);
       setIsAdmin(false);
+      setIsMember(false);
+      setMembership(null);
       return;
     }
-    const [nextProfile, nextIsAdmin] = await Promise.all([fetchProfile(userId), fetchIsAdmin()]);
+    const [nextProfile, nextIsAdmin, nextIsMember, nextMembership] = await Promise.all([
+      fetchProfile(userId),
+      fetchIsAdmin(),
+      fetchIsMember(),
+      fetchMembership(userId),
+    ]);
     setProfile(nextProfile);
     setIsAdmin(nextIsAdmin);
+    setIsMember(nextIsMember);
+    setMembership(nextMembership);
   }, [userId]);
 
   useEffect(() => {
@@ -69,12 +93,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       profile,
       isAdmin,
+      isMember,
+      membership,
       refreshProfile,
       signOut: async () => {
         await supabase().auth.signOut();
       },
     }),
-    [loading, session, profile, isAdmin, refreshProfile],
+    [loading, session, profile, isAdmin, isMember, membership, refreshProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -107,12 +133,19 @@ export async function getOptionalUser() {
 
 export async function requireAdmin(request: Request) {
   const user = await requireUser(request);
-  if (!(await fetchIsAdmin())) throw redirect('/dashboard?admin=denied');
+  if (!(await fetchIsAdmin())) throw redirect('/portal');
+  return user;
+}
+
+/** Untuk clientLoader area member: belum aktif → halaman status membership. */
+export async function requireMember(request: Request) {
+  const user = await requireUser(request);
+  if (!(await fetchIsMember())) throw redirect('/menunggu');
   return user;
 }
 
 /** Hanya izinkan redirect ke path internal (cegah open redirect lewat ?next=). */
-export function safeNext(next: string | null, fallback = '/dashboard') {
+export function safeNext(next: string | null, fallback = '/portal') {
   return next && next.startsWith('/') && !next.startsWith('//') ? next : fallback;
 }
 
