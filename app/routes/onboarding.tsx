@@ -23,7 +23,7 @@ export default function Onboarding({ loaderData }: Route.ComponentProps) {
       <div className="wrap" style={{ maxWidth: 760 }}>
         <h1 className="page-title">Lengkapi data akun</h1>
         <p className="muted" style={{ marginBottom: 26, maxWidth: '58ch' }}>
-          Admin memakai nama, nomor WhatsApp, dan email akun ini ({email}) untuk mencocokkan pembayaran membership-mu.
+          Nama dan nomor WhatsApp dipakai untuk pendaftaran kegiatan. Kalau nanti kamu ambil membership, admin mencocokkan pembayaran dengan data ini dan email akun ({email}).
         </p>
         <ProfileForm
           profile={profile}

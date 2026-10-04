@@ -6,7 +6,7 @@ import { pageMeta } from '~/lib/site';
 import { hasSupabase, supabase } from '~/lib/supabase';
 
 export const meta: Route.MetaFunction = () => [
-  ...pageMeta('Masuk — SWE Growth', 'Masuk ke akun member SWE Growth.'),
+  ...pageMeta('Masuk — SWE Growth', 'Masuk ke akun SWE Growth.'),
   { name: 'robots', content: 'noindex' },
 ];
 
@@ -70,9 +70,9 @@ export default function Login() {
     <section className="block auth-block">
       <div className="wrap" style={{ display: 'grid', placeItems: 'center' }}>
         <div className="form-card auth-card">
-          <h1>Masuk ke portal member</h1>
+          <h1>Masuk ke SWE Growth</h1>
           <p className="form-sub">
-            Tanpa password. Belum jadi member? Kamu tetap bisa membuat akun dulu, lalu admin mengaktifkannya setelah pembayaran membership.
+            Tanpa password. Akun baru langsung dibuat dan bisa dipakai di portal. Membership berbayar opsional untuk jadi verified member.
           </p>
 
           {!hasSupabase && <p className="form-message error">Login belum dikonfigurasi di environment ini.</p>}

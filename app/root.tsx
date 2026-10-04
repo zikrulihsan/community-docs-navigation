@@ -6,14 +6,13 @@ import { Nav } from './components/Nav';
 import { themeInitScript } from './components/ThemeButton';
 import { AuthProvider } from './lib/auth';
 import { DEFAULT_DESCRIPTION } from './lib/site';
+import '@fontsource-variable/plus-jakarta-sans/wght.css';
 import './styles/global.css';
 import './styles/pages.css';
 import './styles/app.css';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'icon', type: 'image/png', href: '/assets/swe-growth-logo.png' },
-  { rel: 'preload', href: '/assets/fonts/hanken-grotesk-400-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
-  { rel: 'preload', href: '/assets/fonts/ubuntu-700-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {

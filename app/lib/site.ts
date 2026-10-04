@@ -12,18 +12,24 @@ export const MEMBERSHIP_URL = 'https://goakal.com/ahsanprojectsbw/swegrowthmembe
  */
 export const WA_COMMUNITY_URL = '';
 
-/** Yang benar-benar tersedia di portal saat ini. Tambah baris saat fitur baru dirilis. */
-export const MEMBER_BENEFITS = [
+/** Isi portal untuk semua akun yang login. */
+export const PORTAL_FEATURES = [
   'Detail agenda kegiatan dan pendaftaran langsung dari portal',
-  'Link meeting dikirim di portal setelah kamu terdaftar',
-  'Grup WhatsApp khusus member',
+  'Link meeting muncul di portal setelah kamu terdaftar',
+  'Link grup WhatsApp komunitas',
+];
+
+/** Yang benar-benar didapat verified member saat ini. Tambah baris saat fitur baru dirilis. */
+export const MEMBER_BENEFITS = [
+  'Badge verified member di portal',
+  'Rekaman kegiatan yang sudah lewat',
 ];
 
 export const adminWaLink = (text?: string) =>
   `https://wa.me/${ADMIN_WA}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
 
 export const DEFAULT_DESCRIPTION =
-  'SWE Growth — komunitas software engineer Indonesia. Portal member berisi agenda, rekaman, rangkuman diskusi, dan grup khusus member.';
+  'SWE Growth — komunitas software engineer Indonesia. Portal berisi agenda kegiatan, pendaftaran, dan grup WhatsApp komunitas.';
 
 /** Meta standar untuk export `meta` tiap route. */
 export const pageMeta = (title: string, description = DEFAULT_DESCRIPTION) => [

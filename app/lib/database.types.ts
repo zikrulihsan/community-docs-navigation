@@ -136,6 +136,10 @@ export type Database = {
       };
       cancel_activity_registration: { Args: { p_activity_id: string }; Returns: undefined };
       follow_activity: { Args: { p_activity_id: string }; Returns: undefined };
+      activity_links: {
+        Args: { p_activity_id: string };
+        Returns: { meeting_url: string | null; recording_url: string | null; has_recording: boolean }[];
+      };
     };
     Enums: {
       activity_status: ActivityStatus;

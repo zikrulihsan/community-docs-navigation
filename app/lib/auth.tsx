@@ -10,7 +10,7 @@ type AuthState = {
   user: User | null;
   profile: ProfileRow | null;
   isAdmin: boolean;
-  /** Member aktif (admin selalu true). */
+  /** Verified member = membership aktif (admin selalu true). */
   isMember: boolean;
   membership: MembershipRow | null;
   refreshProfile: () => Promise<void>;
@@ -134,13 +134,6 @@ export async function getOptionalUser() {
 export async function requireAdmin(request: Request) {
   const user = await requireUser(request);
   if (!(await fetchIsAdmin())) throw redirect('/portal');
-  return user;
-}
-
-/** Untuk clientLoader area member: belum aktif → halaman status membership. */
-export async function requireMember(request: Request) {
-  const user = await requireUser(request);
-  if (!(await fetchIsMember())) throw redirect('/menunggu');
   return user;
 }
 

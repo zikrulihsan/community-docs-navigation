@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import type { Route } from './+types/portal';
 import { PortalHeader } from '~/components/PortalHeader';
 import { activityStatusLabel, isActivityUpcoming, type Activity } from '~/lib/activities';
-import { requireMember } from '~/lib/auth';
+import { requireUser } from '~/lib/auth';
 import type { RegistrationStatus } from '~/lib/database.types';
 import { formatWibTime, relativeFromNow, wibDayParts } from '~/lib/format';
 import { supabase } from '~/lib/supabase';
@@ -10,7 +10,7 @@ import { supabase } from '~/lib/supabase';
 export const meta: Route.MetaFunction = () => [{ title: 'Portal — SWE Growth' }, { name: 'robots', content: 'noindex' }];
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
-  const user = await requireMember(request);
+  const user = await requireUser(request);
   const db = supabase();
 
   const [regs, activities, groups] = await Promise.all([

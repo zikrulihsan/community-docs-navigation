@@ -5,11 +5,11 @@
 .nav-account-slot { display: inline-block; width: 128px; height: 40px; }
 .nav-account {
   display: inline-flex; align-items: center; gap: 9px; padding: 3px 13px 3px 3px; min-height: 40px;
-  border: 1px solid var(--line); border-radius: 12px; background: var(--paper);
-  font-weight: 700; font-size: .86rem; color: var(--ink); transition: border-color .2s, background .2s;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--paper);
+  font-weight: 700; font-size: .86rem; color: var(--ink); transition: border-color .15s;
 }
-.nav-account:hover { border-color: var(--green); background: var(--paper-2); }
-.nav-account .avatar { border-radius: 9px; }
+.nav-account:hover { border-color: var(--line-2); }
+.nav-account .avatar { border-radius: 50%; }
 .nav-login { min-height: 40px; padding: 8px 14px; font-size: .86rem; }
 @media (max-width: 900px) {
   .nav-account-slot { width: 40px; }
@@ -19,12 +19,10 @@
 
 .avatar {
   flex: none; display: inline-grid; place-items: center; overflow: hidden; border-radius: 50%;
-  background: var(--navy); color: var(--green-br); font-family: var(--font-mono); font-weight: 700; letter-spacing: .02em;
+  background: var(--navy); color: var(--green); font-weight: 700;
 }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-/* ---------- Label kecil (dipakai halaman events & admin, sebelumnya belum punya style) ---------- */
-.eyebrow { display: inline-block; font: 600 .68rem var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--green-deep); }
 .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 24px; }
 .section-heading .section-title { margin: 4px 0 0; }
 .section-heading > p { max-width: 48ch; color: var(--ink-soft); }
@@ -39,7 +37,7 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 .muted { color: var(--ink-faint); }
 .inline-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.btn.sm { min-height: 36px; padding: 7px 13px; font-size: .84rem; border-radius: 11px; }
+.btn.sm { min-height: 36px; padding: 7px 13px; font-size: .86rem; }
 .btn[disabled] { opacity: .6; cursor: progress; transform: none; }
 .link-btn { background: none; border: 0; padding: 0; color: var(--green-deep); font-weight: 700; cursor: pointer; font-size: inherit; }
 .link-btn:hover { text-decoration: underline; }
@@ -50,7 +48,7 @@
 .btn-provider { width: 100%; background: var(--paper); border-color: var(--line-2); color: var(--ink); }
 .btn-provider:hover { border-color: var(--ink-faint); background: var(--paper-2); }
 .btn-provider svg { width: 18px; height: 18px; }
-.or-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--ink-faint); font: .68rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+.or-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--ink-faint); font-size: .85rem; }
 .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 .auth-card form .btn { width: 100%; }
 .auth-foot { margin-top: 18px; font-size: .84rem; color: var(--ink-faint); }
@@ -65,7 +63,7 @@
 .member-tabs a:hover { color: var(--ink); }
 .member-tabs a[aria-current="page"] { color: var(--green-deep); border-bottom-color: var(--green); }
 
-.panel { padding: clamp(20px, 3vw, 26px); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow-sm); }
+.panel { padding: clamp(18px, 3vw, 24px); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); }
 .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .panel-head h2 { font-size: 1.12rem; }
 .panel-head a { color: var(--green-deep); font-weight: 700; font-size: .86rem; }
@@ -80,11 +78,11 @@
 .rows .row-main a.title:hover { color: var(--green-deep); }
 .rows .row-main span { display: block; color: var(--ink-faint); font-size: .84rem; margin-top: 2px; }
 .date-tile {
-  flex: none; display: grid; place-items: center; width: 50px; height: 54px; border-radius: 12px;
+  flex: none; display: grid; place-items: center; width: 50px; height: 54px; border-radius: var(--r-sm);
   background: var(--bg-2); border: 1px solid var(--line); text-align: center; line-height: 1.05;
 }
 .date-tile b { font-family: var(--font-display); font-size: 1.15rem; }
-.date-tile span { font: 600 .6rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+.date-tile span { font-size: .72rem; font-weight: 600; color: var(--ink-faint); }
 
 /* ---------- Form profil ---------- */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
