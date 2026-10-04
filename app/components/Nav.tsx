@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
 import { displayName, useAuth } from '~/lib/auth';
-import { MEMBERSHIP_URL } from '~/lib/site';
 import { Avatar } from './Avatar';
 import { ThemeButton } from './ThemeButton';
 
@@ -10,9 +9,9 @@ export function Nav() {
   const [open, setOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
-  const { loading, user, profile, isMember, isAdmin } = useAuth();
+  const { loading, user, profile, isAdmin } = useAuth();
   const links = [
-    ...(isMember ? [{ to: '/portal', label: 'Portal' }] : []),
+    ...(user ? [{ to: '/portal', label: 'Portal' }] : []),
     { to: '/agenda', label: 'Agenda' },
     { to: '/code-of-conduct', label: 'Code of Conduct' },
     ...(isAdmin ? [{ to: '/admin', label: 'Admin' }] : []),
@@ -40,8 +39,8 @@ export function Nav() {
     <nav className={`site-nav${open ? ' menu-open' : ''}`} ref={navRef}>
       <div className="wrap nav-in">
         <Link className="brand" to="/" aria-label="SWE Growth Community">
-          <img className="brand-logo" src="/assets/swe-growth-logo.png" alt="SWE Growth Community" width="38" height="38" />
-          <span className="b-name"><b>swe growth</b></span>
+          <img className="brand-logo" src="/assets/swe-growth-logo.png" alt="SWE Growth Community" width="32" height="32" />
+          <span className="b-name"><b>SWE Growth</b></span>
         </Link>
         <div className="nav-links" id="navLinks">
           {links.map((l) => (
@@ -54,14 +53,14 @@ export function Nav() {
           {loading ? (
             <span className="nav-account-slot" aria-hidden="true" />
           ) : user ? (
-            <Link className="nav-account" to={isMember ? '/portal/profil' : '/menunggu'} aria-label={`Akun ${name}`}>
+            <Link className="nav-account" to="/portal/profil" aria-label={`Akun ${name}`}>
               <Avatar name={name} src={profile?.avatar_url} size={34} />
-              <span>{isMember ? name.split(' ')[0] : 'Status member'}</span>
+              <span>{name.split(' ')[0]}</span>
             </Link>
           ) : (
             <>
               <Link className="btn btn-ghost nav-login" to="/masuk?next=/portal">Masuk</Link>
-              <a className="btn btn-primary" href={MEMBERSHIP_URL} target="_blank" rel="noopener">Jadi member</a>
+              <Link className="btn btn-primary" to="/masuk?next=/portal">Daftar</Link>
             </>
           )}
           <button

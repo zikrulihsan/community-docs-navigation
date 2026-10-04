@@ -147,7 +147,7 @@ function MembersAdmin({ profiles, memberships }: { profiles: ProfileRow[]; membe
   };
 
   const deactivate = (p: ProfileRow) => {
-    if (!confirm(`Akhiri membership ${p.full_name || p.email} hari ini? Akses portal langsung tertutup.`)) return;
+    if (!confirm(`Akhiri membership ${p.full_name || p.email} hari ini? Badge verified dan rekaman langsung tertutup.`)) return;
     const yesterday = isoDate(new Date(Date.parse(today) - 86_400_000));
     void run(() => supabase().from('memberships').update({ active_until: yesterday }).eq('user_id', p.id), 'Membership diakhiri.');
   };

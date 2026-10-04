@@ -3,8 +3,8 @@ import { data, Link, useRevalidator } from 'react-router';
 import type { Route } from './+types/portal-event';
 import { PortalHeader } from '~/components/PortalHeader';
 import { activityStatusLabel, canRegister, getPublishedActivityBySlug, type Activity } from '~/lib/activities';
-import { requireMember } from '~/lib/auth';
-import type { ActivityMemberInfoRow, RegistrationStatus } from '~/lib/database.types';
+import { requireUser } from '~/lib/auth';
+import type { RegistrationStatus } from '~/lib/database.types';
 import { formatWibDate, formatWibTime } from '~/lib/format';
 import { supabase } from '~/lib/supabase';
 
@@ -14,13 +14,13 @@ export const meta: Route.MetaFunction = ({ loaderData }) => [
 ];
 
 export async function clientLoader({ request, params }: Route.ClientLoaderArgs) {
-  const user = await requireMember(request);
+  const user = await requireUser(request);
   const activity = await getPublishedActivityBySlug(params.slug);
   if (!activity) throw data(null, { status: 404 });
 
   const db = supabase();
   const [info, reg, interest] = await Promise.all([
-    db.from('activity_member_info').select('*').eq('activity_id', activity.id).maybeSingle(),
+    db.rpc('activity_links', { p_activity_id: activity.id }).maybeSingle(),
     db.from('activity_registrations').select('status').eq('activity_id', activity.id).eq('user_id', user.id).maybeSingle(),
     db.from('activity_interests').select('id').eq('activity_id', activity.id).eq('user_id', user.id).maybeSingle(),
   ]);
@@ -36,6 +36,8 @@ export async function clientLoader({ request, params }: Route.ClientLoaderArgs) 
 export function HydrateFallback() {
   return <div className="loading-block">Memuat…</div>;
 }
+
+type Links = { meeting_url: string | null; recording_url: string | null; has_recording: boolean };
 
 export default function PortalEvent({ loaderData }: Route.ComponentProps) {
   const { activity: a, info } = loaderData;
@@ -79,9 +81,7 @@ export default function PortalEvent({ loaderData }: Route.ComponentProps) {
 const errorText = (message: string) =>
   message.includes('registration_closed')
     ? 'Pendaftaran sudah ditutup.'
-    : message.includes('membership_required')
-      ? 'Membership-mu tidak aktif. Muat ulang halaman.'
-      : 'Belum berhasil. Coba lagi sebentar lagi.';
+    : 'Belum berhasil. Coba lagi sebentar lagi.';
 
 function Action({
   activity,
@@ -90,7 +90,7 @@ function Action({
   following,
 }: {
   activity: Activity;
-  info: ActivityMemberInfoRow | null;
+  info: Links | null;
   registration: RegistrationStatus | null;
   following: boolean;
 }) {
@@ -117,6 +117,11 @@ function Action({
         <h3>{activity.status === 'cancelled' ? 'Kegiatan dibatalkan' : 'Kegiatan sudah selesai'}</h3>
         {info?.recording_url ? (
           <a className="btn btn-primary" href={info.recording_url} target="_blank" rel="noopener">Tonton rekaman</a>
+        ) : info?.has_recording ? (
+          <>
+            <p className="form-sub">Rekaman kegiatan ini tersedia untuk verified member.</p>
+            <Link className="btn btn-ghost sm" to="/portal/membership">Jadi verified member</Link>
+          </>
         ) : (
           <p className="form-sub">Belum ada rekaman untuk kegiatan ini.</p>
         )}

@@ -8,7 +8,7 @@ import { formatWibTime, wibDayParts } from '~/lib/format';
  * portal; tamu yang klik diarahkan masuk dulu.
  */
 export function AgendaList({ activities }: { activities: Activity[] }) {
-  const { isMember } = useAuth();
+  const { user } = useAuth();
 
   return (
     <ul className="rows agenda-rows">
@@ -21,7 +21,7 @@ export function AgendaList({ activities }: { activities: Activity[] }) {
               {parts ? <><b>{parts.day}</b><span>{parts.month}</span></> : <span>TBA</span>}
             </span>
             <div className="row-main">
-              <Link className="title" to={isMember ? href : `/masuk?next=${encodeURIComponent(href)}`}>{a.title}</Link>
+              <Link className="title" to={user ? href : `/masuk?next=${encodeURIComponent(href)}`}>{a.title}</Link>
               <span>
                 {[a.starts_at ? formatWibTime(a.starts_at) : 'Jadwal menyusul', a.mode, activityStatusLabel[a.status]]
                   .filter(Boolean)
