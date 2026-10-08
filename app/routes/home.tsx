@@ -2,22 +2,27 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import type { Route } from './+types/home';
 import { AgendaList } from '~/components/AgendaList';
+import { Avatar } from '~/components/Avatar';
 import { SOCIALS } from '~/components/Socials';
-import { BookIcon, BriefcaseIcon, ChatIcon, MicIcon, UsersIcon, VideoIcon } from '~/components/Icons';
+import { ArrowUpRight, BookIcon, BriefcaseIcon, ChatIcon, MicIcon, UsersIcon, VideoIcon } from '~/components/Icons';
 import { getPublishedActivities, isActivityUpcoming } from '~/lib/activities';
 import { useAuth } from '~/lib/auth';
+import { getPublishedContributions } from '~/lib/contributions';
 import { pageMeta } from '~/lib/site';
 
 export const meta: Route.MetaFunction = () => pageMeta('SWE Growth — komunitas software engineer Indonesia');
 
-const upcoming = async () => (await getPublishedActivities()).filter(isActivityUpcoming).slice(0, 3);
+const load = async () => {
+  const [activities, contributions] = await Promise.all([getPublishedActivities(), getPublishedContributions()]);
+  return { activities: activities.filter(isActivityUpcoming).slice(0, 3), contributions };
+};
 
 export async function loader() {
-  return { activities: await upcoming() };
+  return load();
 }
 
 export async function clientLoader() {
-  return { activities: await upcoming() };
+  return load();
 }
 clientLoader.hydrate = true as const;
 
@@ -54,7 +59,7 @@ const TOPICS = [
   { name: 'Hidup sehat', body: 'Olahraga, tidur, dan jaga mental biar nggak burnout. Seharian kerja di depan layar ada harganya.' },
 ];
 
-export default function Home({ loaderData: { activities } }: Route.ComponentProps) {
+export default function Home({ loaderData: { activities, contributions } }: Route.ComponentProps) {
   const { user } = useAuth();
   const [picked, setPicked] = useState(0);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -86,6 +91,19 @@ export default function Home({ loaderData: { activities } }: Route.ComponentProp
         </div>
       </section>
 
+      {activities.length > 0 && (
+        <section className="home-section agenda-band" id="terdekat">
+          <div className="wrap narrow-wrap">
+            <div className="home-head">
+              <p className="home-label">Agenda</p>
+              <h2>Kegiatan terdekat</h2>
+            </div>
+            <div className="panel"><AgendaList activities={activities} /></div>
+            <Link className="text-link more-link" to="/agenda">Semua agenda</Link>
+          </div>
+        </section>
+      )}
+
       <section className="home-section">
         <div className="wrap narrow-wrap">
           <div className="home-head">
@@ -111,6 +129,10 @@ export default function Home({ loaderData: { activities } }: Route.ComponentProp
             <h2>Yang lagi sering dibahas</h2>
           </div>
           <div onMouseLeave={() => setHovered(null)}>
+            <p className="topic-detail" aria-live="polite" key={active.name}>
+              <b>{active.name}</b>
+              {active.body}
+            </p>
             <ul className="topic-cloud">
               {TOPICS.map((t, i) => (
                 <li key={t.name}>
@@ -126,31 +148,56 @@ export default function Home({ loaderData: { activities } }: Route.ComponentProp
                 </li>
               ))}
             </ul>
-            <p className="topic-detail" aria-live="polite" key={active.name}>
-              <b>{active.name}</b>
-              {active.body}
-            </p>
           </div>
         </div>
       </section>
 
-      <section className="home-section" id="terdekat">
+      {contributions.length > 0 && (
+        <section className="home-section contrib-band">
+          <div className="wrap narrow-wrap">
+            <div className="home-head">
+              <p className="home-label">Kontribusi</p>
+              <h2>Dari member ke member</h2>
+            </div>
+            <ul className="contrib-list">
+              {contributions.map((c) => (
+                <li key={c.id}>
+                  {c.icon_url ? (
+                    <img className="contrib-ic" src={c.icon_url} alt="" width="40" height="40" loading="lazy" />
+                  ) : (
+                    <span className="contrib-ic">{c.title.charAt(0).toUpperCase()}</span>
+                  )}
+                  <div className="contrib-main">
+                    <div className="contrib-title">
+                      {/* Seluruh baris bisa diklik lewat link judul; link pembuat ada di atasnya. */}
+                      <h3><a className="contrib-link" href={c.url} target="_blank" rel="noopener">{c.title}</a></h3>
+                      {c.category && <span className="chip">{c.category}</span>}
+                    </div>
+                    {c.description && <p>{c.description}</p>}
+                    {c.maker_name && (
+                      c.maker_handle ? (
+                        <Link className="contrib-maker" to={`/member/${c.maker_handle}`}>
+                          <Avatar name={c.maker_name} src={c.maker_avatar_url} size={20} />
+                          oleh {c.maker_name}
+                        </Link>
+                      ) : (
+                        <span className="contrib-maker">oleh {c.maker_name}</span>
+                      )
+                    )}
+                  </div>
+                  <span className="contrib-go" aria-hidden="true"><ArrowUpRight /></span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      <section className="home-section">
         <div className="wrap narrow-wrap">
-          {activities.length > 0 && (
-            <>
-              <div className="home-head">
-                <p className="home-label">Agenda</p>
-                <h2>Kegiatan terdekat</h2>
-              </div>
-              <div className="panel"><AgendaList activities={activities} /></div>
-            </>
-          )}
           <div className="home-closing on-teal">
             <h2>Buat siapa aja yang mau <span className="hl">survive dan bertumbuh</span> di software engineering.</h2>
-            <div className="inline-actions">
-              {joinButton}
-              <Link className="text-link" to="/agenda">Semua agenda</Link>
-            </div>
+            {joinButton}
             <div className="home-social">
               <span>Ikuti juga</span>
               <ul>

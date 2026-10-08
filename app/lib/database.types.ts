@@ -164,6 +164,29 @@ export type WhatsappGroupRow = {
   created_at: string;
 };
 
+export type MemberContributionRow = {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  url: string;
+  maker_name: string;
+  /** Member terdaftar yang membuat; maker_name dipakai kalau kosong. */
+  maker_id: string | null;
+  icon_url: string | null;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+};
+
+/** Hasil published_contributions(): kontribusi + pembuat, hanya kolom aman. */
+export type PublishedContribution = Pick<MemberContributionRow, 'id' | 'title' | 'category' | 'description' | 'url' | 'icon_url'> & {
+  maker_name: string;
+  /** Terisi kalau pembuat member dengan profil publik (/member/:handle). */
+  maker_handle: string | null;
+  maker_avatar_url: string | null;
+};
+
 export type ActivityMemberInfoRow = {
   activity_id: string;
   meeting_url: string | null;
@@ -198,6 +221,7 @@ export type Database = {
       >;
       curators: Table<{ user_id: string; created_at: string }, 'user_id', 'created_at'>;
       whatsapp_groups: Table<WhatsappGroupRow, 'name' | 'invite_url', 'id' | 'created_at'>;
+      member_contributions: Table<MemberContributionRow, 'title' | 'url', 'id' | 'created_at'>;
       activity_member_info: Table<ActivityMemberInfoRow, 'activity_id', 'updated_at'>;
     };
     Views: Record<string, never>;
@@ -207,6 +231,7 @@ export type Database = {
       is_curator: { Args: Record<string, never>; Returns: boolean };
       has_complete_profile: { Args: Record<string, never>; Returns: boolean };
       public_profile: { Args: { p_handle: string }; Returns: PublicProfile[] };
+      published_contributions: { Args: Record<string, never>; Returns: PublishedContribution[] };
       activity_public_stats: { Args: { p_activity_id: string }; Returns: { confirmed: number; waitlisted: number }[] };
       join_activity: {
         Args: { p_activity_id: string; p_name: string; p_whatsapp: string; p_answers?: Record<string, string> };

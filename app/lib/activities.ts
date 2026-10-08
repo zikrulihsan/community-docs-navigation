@@ -23,7 +23,7 @@ export const isActivityUpcoming = (a: Activity) =>
 export const canRegister = (a: Activity) => a.status === 'registration_open' || a.status === 'full';
 
 /** Saat build pakai client anonim; di browser pakai client bersesi (admin bisa lihat draft). */
-function client() {
+export function client() {
   if (typeof window === 'undefined') return anonSupabase();
   return hasSupabase ? supabase() : null;
 }

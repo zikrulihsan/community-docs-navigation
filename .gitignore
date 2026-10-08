@@ -37,3 +37,6 @@ yarn-error.log*
 # React Router
 /build
 .react-router/
+
+# Supabase CLI (cache lokal, termasuk project-ref & pooler URL)
+supabase/.temp/
