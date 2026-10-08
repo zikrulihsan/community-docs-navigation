@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import type { Route } from './+types/portal';
 import { PortalHeader } from '~/components/PortalHeader';
-import { activityStatusLabel, isActivityUpcoming, type Activity } from '~/lib/activities';
+import { activityPath, activityStatusLabel, isActivityUpcoming, registeredPath, type Activity } from '~/lib/activities';
 import { requireUser } from '~/lib/auth';
 import type { RegistrationStatus } from '~/lib/database.types';
 import { formatWibTime, relativeFromNow, wibDayParts } from '~/lib/format';
@@ -55,14 +55,14 @@ export default function Portal({ loaderData }: Route.ComponentProps) {
           {mine.length > 0 && (
             <div className="panel">
               <div className="panel-head"><h2>Kegiatan yang kamu ikuti</h2></div>
-              <EventRows items={mine.map((m) => ({ activity: m.activity, tag: registrationLabel[m.status] }))} />
+              <EventRows items={mine.map((m) => ({ activity: m.activity, tag: registrationLabel[m.status], href: registeredPath(m.activity) }))} />
             </div>
           )}
 
           {others.length > 0 && (
             <div className="panel">
               <div className="panel-head"><h2>Agenda</h2></div>
-              <EventRows items={others.map((a) => ({ activity: a, tag: activityStatusLabel[a.status] }))} />
+              <EventRows items={others.map((a) => ({ activity: a, tag: activityStatusLabel[a.status], href: activityPath(a) }))} />
             </div>
           )}
 
@@ -88,10 +88,10 @@ export default function Portal({ loaderData }: Route.ComponentProps) {
   );
 }
 
-function EventRows({ items }: { items: { activity: Activity; tag: string }[] }) {
+function EventRows({ items }: { items: { activity: Activity; tag: string; href: string }[] }) {
   return (
     <ul className="rows">
-      {items.map(({ activity: a, tag }) => {
+      {items.map(({ activity: a, tag, href }) => {
         const parts = a.starts_at ? wibDayParts(a.starts_at) : null;
         return (
           <li key={a.id}>
@@ -99,7 +99,7 @@ function EventRows({ items }: { items: { activity: Activity; tag: string }[] }) 
               {parts ? <><b>{parts.day}</b><span>{parts.month}</span></> : <span>TBA</span>}
             </span>
             <div className="row-main">
-              <Link className="title" to={`/portal/agenda/${a.slug}`}>{a.title}</Link>
+              <Link className="title" to={href}>{a.title}</Link>
               <span>
                 {[a.starts_at && `${relativeFromNow(a.starts_at)} · ${formatWibTime(a.starts_at)}`, a.mode].filter(Boolean).join(' · ') || 'Jadwal menyusul'}
               </span>

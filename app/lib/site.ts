@@ -3,8 +3,11 @@ export const ADMIN_WA = '6282338588078';
 
 export const SITE_NAME = 'SWE Growth';
 
-/** Form membership berbayar di goakal. */
-export const MEMBERSHIP_URL = 'https://goakal.com/ahsanprojectsbw/swegrowthmember/c79qf/apply';
+/**
+ * Membership berbayar & badge verified belum dibuka ("segera hadir"). Saat
+ * dirilis: set true, lalu kembalikan alur bayar di routes/membership.tsx.
+ */
+export const MEMBERSHIP_LIVE = false;
 
 /**
  * Link gabung komunitas WhatsApp yang gratis. Kosongkan kalau belum ada link
@@ -16,12 +19,12 @@ export const WA_COMMUNITY_URL = '';
 export const PORTAL_FEATURES = [
   'Detail agenda kegiatan dan pendaftaran langsung dari portal',
   'Link meeting muncul di portal setelah kamu terdaftar',
-  'Link grup WhatsApp komunitas',
+  'Profil member yang bisa kamu perbarui kapan saja',
 ];
 
-/** Yang benar-benar didapat verified member saat ini. Tambah baris saat fitur baru dirilis. */
+/** Yang disiapkan untuk verified member (tampil di halaman membership "segera hadir"). */
 export const MEMBER_BENEFITS = [
-  'Badge verified member di portal',
+  'Badge verified member di profil',
   'Rekaman kegiatan yang sudah lewat',
 ];
 

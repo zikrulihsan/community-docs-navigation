@@ -12,14 +12,25 @@ Prinsip isi: tidak ada data contoh atau angka karangan. Bagian yang datanya koso
 | URL | Akses | Isi |
 | --- | --- | --- |
 | `/` | publik | Penjelasan singkat, komunitas WA (gratis) vs portal member, agenda terdekat |
-| `/agenda` | publik | Judul & tanggal kegiatan mendatang |
+| `/tentang` | publik | Cerita & tujuan SWE Growth (dulu di halaman goakal) |
+| `/agenda` | publik | Daftar kegiatan mendatang |
+| `/agenda/:slug` | publik | Detail kegiatan (link yang dibagikan): biaya (Gratis/harga), jadwal, tombol Daftar |
+| `/agenda/:slug/daftar` | login | Form pendaftaran: data peserta dari profil + pertanyaan khusus event + setuju CoC |
+| `/agenda/:slug/terdaftar` | login (peserta) | Konfirmasi: kode pendaftaran, kalender, link meeting (terbuka 1 jam sebelum acara), batal |
+| `/onboarding` | login | Kenalan (motivasi) → isi profil → link grup WhatsApp |
 | `/code-of-conduct` | publik | Aturan komunitas |
+| `/privasi` | publik | Kebijakan privasi (dipakai juga di OAuth consent Google). Perbarui saat ada data/layanan baru |
+| `/term-of-service` | publik | Syarat layanan |
+| `/member/:handle` | publik | Profil publik member (username atau id) + "Member sejak". Tanpa WA, email, dan jawaban kenalan |
 | `/masuk` | publik | Login Google / magic link |
 | `/menunggu` | login | Status membership: cara bayar & kabari admin |
 | `/portal` | member aktif | Kegiatan yang diikuti, agenda, grup WhatsApp member |
-| `/portal/agenda/:slug` | member aktif | Detail kegiatan, daftar/batal, link meeting & rekaman |
-| `/portal/profil` | member aktif | Data akun & masa aktif |
-| `/admin` | admin | Aktivasi member, event, grup WhatsApp |
+| `/portal/profil` | login | Profil member + link profil publik untuk dibagikan |
+| `/portal/membership` | login | Membership & verified member: **segera hadir** (`MEMBERSHIP_LIVE` di `app/lib/site.ts`) |
+| `/portal/profil/edit` | login | Form profil member |
+| `/admin` | admin | Data member (cari + unduh CSV), aktivasi membership, event, grup WhatsApp |
+| `/admin/member/:id` | admin | Profil lengkap satu member + kegiatan yang diikuti |
+| `/admin/event/:id` | admin | Editor event (urutan = halaman publik): info, jadwal, pembicara + foto LinkedIn, detail, pendaftaran, langkah setelah daftar; statistik & pendaftar (CSV). `/admin/event/baru` untuk event baru |
 
 Halaman publik di-prerender saat build; sisanya SPA lewat `__spa-fallback.html` (lihat `netlify.toml`). URL lama
 (`/events`, `/blog`, `/jobs`, `/videos`, `/mentorship`, `/courses`, `/dashboard`, `/u/*`) diarahkan 301.
@@ -50,6 +61,37 @@ npm run build      # output ke build/client
 4. **Admin**: tambahkan email ke tabel `activity_admin_emails`.
 
 `app/lib/database.types.ts` ditulis tangan mengikuti migration; perbarui saat skema berubah.
+
+## Google Calendar (undangan otomatis)
+
+Peserta terkonfirmasi otomatis jadi **tamu** event di Google Calendar akun Gmail SWE Growth. Google yang mengirim
+undangan, perubahan jadwal, dan pembatalan. Tamu tidak bisa melihat tamu lain. Sinkron dijalankan edge function
+`supabase/functions/calendar-sync` setelah peserta daftar/batal dan setelah admin menyimpan event (tombol
+**Sinkronkan sekarang** di editor event untuk sinkron ulang / mengundang peserta lama). Sebelum langkah di bawah
+selesai, fungsi ini membalas `not_configured` dan pendaftaran tetap jalan normal.
+
+1. **Google Cloud Console** → buat project → *APIs & Services → Library* → aktifkan **Google Calendar API**.
+2. *OAuth consent screen* → **External**, isi nama app & email → tambahkan scope
+   `https://www.googleapis.com/auth/calendar.events` → **Publish app** (status *In production*). Kalau dibiarkan
+   *Testing*, refresh token kedaluwarsa setelah 7 hari. Peringatan "app belum diverifikasi" saat login aman dilewati
+   karena hanya akun SWE Growth yang memberi izin.
+3. *Credentials → Create credentials → OAuth client ID* → **Web application**, Authorized redirect URI:
+   `https://developers.google.com/oauthplayground`.
+4. Buka [OAuth Playground](https://developers.google.com/oauthplayground) → ikon ⚙️ → centang *Use your own OAuth
+   credentials* → isi client ID & secret → di kolom scope ketik `https://www.googleapis.com/auth/calendar.events` →
+   **Authorize APIs** → login dengan **Gmail SWE Growth** → **Exchange authorization code for tokens** → salin
+   *Refresh token*.
+5. Simpan sebagai secret Supabase dan deploy fungsinya:
+
+   ```bash
+   supabase secrets set --project-ref <ref> \
+     GOOGLE_CLIENT_ID=… GOOGLE_CLIENT_SECRET=… GOOGLE_REFRESH_TOKEN=…
+   supabase functions deploy calendar-sync --no-verify-jwt --project-ref <ref>
+   ```
+
+   Opsional: `GOOGLE_CALENDAR_ID` (default kalender utama) dan `SITE_URL` (default `https://swegrowth.id`).
+6. Jalankan migration `20261014000000_google_calendar.sql`, lalu coba dulu di event tes: daftar dengan email kedua,
+   cek undangan masuk, ubah jam di editor, cek email perubahan, lalu batal daftar.
 
 ## Alur membership
 

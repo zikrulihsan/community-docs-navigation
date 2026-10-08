@@ -4,7 +4,9 @@
   "description": "SWE Growth — platform komunitas software engineer Indonesia",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/check-node.mjs",
     "dev": "react-router dev",
+    "prebuild": "node scripts/check-node.mjs",
     "build": "react-router build",
     "preview": "vite preview --outDir build/client --port 4321",
     "typecheck": "react-router typegen && tsc"

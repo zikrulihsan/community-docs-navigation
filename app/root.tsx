@@ -3,7 +3,6 @@ import { isRouteErrorResponse, Link, Links, Meta, Outlet, Scripts, ScrollRestora
 import type { Route } from './+types/root';
 import { Footer } from './components/Footer';
 import { Nav } from './components/Nav';
-import { themeInitScript } from './components/ThemeButton';
 import { AuthProvider } from './lib/auth';
 import { DEFAULT_DESCRIPTION } from './lib/site';
 import '@fontsource-variable/plus-jakarta-sans/wght.css';
@@ -24,8 +23,6 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="description" content={DEFAULT_DESCRIPTION} />
         <Meta />
         <Links />
-        {/* Pasang tema sebelum paint supaya tidak ada flash terang/gelap. */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>
         {children}

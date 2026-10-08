@@ -1,17 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import type { Route } from './+types/login';
-import { safeNext, useAuth } from '~/lib/auth';
+import { safeNext, sendMagicLink as sendLink, signInWithGoogle as googleSignIn, useAuth } from '~/lib/auth';
 import { pageMeta } from '~/lib/site';
-import { hasSupabase, supabase } from '~/lib/supabase';
+import { hasSupabase } from '~/lib/supabase';
 
 export const meta: Route.MetaFunction = () => [
   ...pageMeta('Masuk — SWE Growth', 'Masuk ke akun SWE Growth.'),
   { name: 'robots', content: 'noindex' },
 ];
-
-const callbackUrl = (next: string) =>
-  `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -39,10 +36,7 @@ export default function Login() {
   const signInWithGoogle = async () => {
     setBusy(true);
     setError(null);
-    const { error: oauthError } = await supabase().auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: callbackUrl(next) },
-    });
+    const { error: oauthError } = await googleSignIn(next);
     if (oauthError) {
       setError('Login Google belum bisa dipakai. Coba lewat email dulu ya.');
       setBusy(false);
@@ -54,10 +48,7 @@ export default function Login() {
     const email = String(new FormData(e.currentTarget).get('email') ?? '').trim().toLowerCase();
     setBusy(true);
     setError(null);
-    const { error: otpError } = await supabase().auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: callbackUrl(next), shouldCreateUser: true },
-    });
+    const { error: otpError } = await sendLink(email, next);
     setBusy(false);
     if (otpError) {
       setError(otpError.status === 429 ? 'Terlalu sering. Tunggu sebentar sebelum minta link lagi.' : 'Link login belum bisa dikirim. Coba lagi.');
@@ -70,9 +61,9 @@ export default function Login() {
     <section className="block auth-block">
       <div className="wrap" style={{ display: 'grid', placeItems: 'center' }}>
         <div className="form-card auth-card">
-          <h1>Masuk ke SWE Growth</h1>
+          <h1>Daftar / masuk SWE Growth</h1>
           <p className="form-sub">
-            Tanpa password. Akun baru langsung dibuat dan bisa dipakai di portal. Membership berbayar opsional untuk jadi verified member.
+            Tanpa password. Akun baru langsung dibuat. Setelah itu isi profil singkat, lalu link grup WhatsApp komunitas langsung muncul.
           </p>
 
           {!hasSupabase && <p className="form-message error">Login belum dikonfigurasi di environment ini.</p>}
@@ -89,9 +80,9 @@ export default function Login() {
             <>
               <button className="btn btn-provider" type="button" onClick={signInWithGoogle} disabled={busy || !hasSupabase}>
                 <GoogleIcon />
-                Lanjut dengan Google
+                Daftar / masuk dengan Google
               </button>
-              <div className="or-divider">atau lewat email</div>
+              <div className="or-divider">tidak pakai Gmail? lewat email</div>
               <form onSubmit={sendMagicLink}>
                 <div className="field">
                   <label htmlFor="email">Email</label>
@@ -105,7 +96,8 @@ export default function Login() {
           )}
 
           <p className="auth-foot">
-            Dengan masuk, kamu setuju menjaga <Link to="/code-of-conduct">Code of Conduct</Link> komunitas.
+            Dengan masuk, kamu setuju dengan <Link to="/term-of-service">Syarat Layanan</Link>,{' '}
+            <Link to="/privasi">Kebijakan Privasi</Link>, dan <Link to="/code-of-conduct">Code of Conduct</Link> komunitas.
           </p>
         </div>
       </div>

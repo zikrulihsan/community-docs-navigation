@@ -6,8 +6,13 @@
 .lead { font-size: clamp(1.02rem, 1.8vw, 1.15rem); color: var(--ink-soft); max-width: 62ch; margin-bottom: 24px; }
 
 /* --- Landing --- */
-.intro { padding: clamp(56px, 10vw, 112px) 0 clamp(24px, 4vw, 40px); }
+.intro { padding: clamp(56px, 10vw, 112px) 0 clamp(48px, 7vw, 80px); }
 .intro h1 { font-size: clamp(2.2rem, 5.6vw, 3.6rem); letter-spacing: -0.022em; max-width: 17ch; margin-bottom: 18px; }
+
+.on-teal .lead { color: var(--on-teal); }
+.on-teal .eyebrow { color: var(--yellow); font-weight: 700; font-size: .9rem; margin-bottom: 10px; }
+/* Bar info seperti bar tanggal di poster. */
+.on-teal .info-bar { display: inline-block; margin-top: 28px; padding: 10px 16px; border-radius: var(--r-sm); background: var(--teal-panel); color: var(--cream); font-weight: 600; font-size: .95rem; }
 .plain-list { margin: 0 0 6px; padding-left: 18px; color: var(--ink-soft); font-size: .95rem; display: grid; gap: 6px; }
 .plain-list li::marker { color: var(--green-deep); }
 .panel-head .section-title { font-size: clamp(1.45rem, 2.6vw, 1.85rem); margin-bottom: 0; }
@@ -24,14 +29,13 @@
 }
 .ladder > li:nth-child(1) { margin-top: 64px; border-top-width: 3px; }
 .ladder > li:nth-child(2) { margin-top: 32px; border-top-width: 6px; }
-.ladder > li:nth-child(3) { border-top-width: 9px; background: var(--navy); border-color: var(--navy); border-top-color: var(--green); color: #fff; }
+.ladder > li:nth-child(3) { border-top-width: 9px; background: var(--teal); border-color: var(--teal); border-top-color: var(--yellow); color: var(--cream); }
 .ladder > li::before { content: "Langkah " counter(rung); font-size: .8rem; font-weight: 700; color: var(--green-deep); }
-.ladder > li:nth-child(3)::before { color: var(--green); }
-.ladder > li:nth-child(3) .plain-list { color: #c9d3e1; }
-.ladder > li:nth-child(3) .plain-list li::marker { color: var(--green); }
+.ladder > li:nth-child(3)::before { color: var(--yellow); }
+.ladder > li:nth-child(3) .plain-list, .ladder > li:nth-child(3) p { color: var(--on-teal); }
+.ladder > li:nth-child(3) .plain-list li::marker { color: var(--yellow); }
 .ladder > li:nth-child(3) .chip { background: transparent; border-color: color-mix(in srgb, var(--green) 70%, transparent); color: var(--green); }
 .ladder > li:nth-child(3) .text-link { color: var(--green); }
-:root[data-resolved="dark"] .ladder > li:nth-child(3) { background: var(--paper-2); border-color: var(--line-2); border-top-color: var(--green); }
 .ladder-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
 .ladder h3 { font-size: 1.15rem; }
 .ladder p { color: var(--ink-soft); font-size: .95rem; }
@@ -95,3 +99,116 @@
 .nf .mono { color: var(--ink-faint); margin-bottom: 10px; }
 .nf h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: 12px; }
 .nf .sub { color: var(--ink-soft); max-width: 44ch; margin: 0 auto; }
+
+/* --- Form & konfirmasi pendaftaran --- */
+.event-summary { display: flex; gap: 14px; align-items: center; padding: 14px 16px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); }
+.event-summary .row-main { flex: 1; min-width: 0; }
+.event-summary .title { display: block; font-weight: 700; color: var(--ink); }
+.event-summary .title:hover { color: var(--green-deep); }
+.event-summary-meta { display: block; color: var(--ink-faint); font-size: .86rem; margin-top: 2px; }
+.registered-hero { padding: clamp(36px, 7vw, 64px) 0; }
+.check-badge {
+  display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 14px; border-radius: 50%;
+  background: var(--yellow); color: var(--teal); font-size: 1.5rem; font-weight: 800;
+}
+.ticket { padding: 0; overflow: hidden; }
+.ticket .event-summary { border: 0; border-radius: 0; border-bottom: 1px dashed var(--line-2); }
+.ticket-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; padding: 16px; }
+.ticket-meta dt { font-size: .8rem; color: var(--ink-faint); font-weight: 600; margin-bottom: 2px; }
+.ticket-meta dd { font-weight: 700; }
+.mono-code { font-family: var(--font-mono); letter-spacing: .04em; }
+.next-steps { list-style: none; counter-reset: ns; padding: 0; display: grid; gap: 18px; }
+.next-steps > li { counter-increment: ns; position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding-left: 40px; }
+.next-steps > li::before {
+  content: counter(ns); position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 26px; height: 26px;
+  border-radius: 50%; background: var(--teal); color: var(--cream); font-weight: 700; font-size: .8rem;
+}
+.next-steps span { color: var(--ink-soft); font-size: .93rem; }
+
+/* --- Detail event publik ---
+   Hero teal (apa & kapan) → kolom utama + kartu daftar sticky. Di layar
+   sempit kartu daftar naik tepat di bawah hero supaya tombolnya langsung terlihat. */
+/* Hero teal selebar layar lewat box-shadow + clip-path; isi di bawahnya satu kolom. */
+.event-page { padding-bottom: 56px; }
+.event-hero {
+  padding: clamp(24px, 4vw, 40px) 0 clamp(36px, 5vw, 52px);
+  box-shadow: 0 0 0 100vmax var(--teal); clip-path: inset(0 -100vmax);
+}
+.event-main { min-width: 0; max-width: 720px; display: grid; gap: 34px; padding-top: 40px; }
+
+/* Quick CTA di hero: gulir ke bagian pendaftaran. */
+.quick-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 28px; min-height: 44px; }
+.quick-cta span { color: var(--on-teal); font-size: .92rem; }
+
+/* Bagian pendaftaran lengkap di bawah isi. */
+.event-register {
+  display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 32px; align-items: center;
+  margin-top: 48px; padding: clamp(22px, 4vw, 32px); scroll-margin-top: 84px;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r);
+}
+.event-register-recap { display: grid; gap: 10px; align-content: start; }
+.event-register-recap h2 { font-size: clamp(1.35rem, 2.6vw, 1.7rem); }
+.event-register-title { font-weight: 700; font-size: 1.05rem; color: var(--ink); }
+.event-meta.plain { margin-top: 0; padding: 0; background: none; color: var(--ink-soft); flex-direction: column; gap: 6px; font-size: .95rem; }
+.event-meta.plain .meta-icon { color: var(--green-deep); }
+@media (max-width: 860px) { .event-register { grid-template-columns: 1fr; } }
+.event-hero .back { display: inline-block; margin-bottom: 18px; font-size: .88rem; color: var(--on-teal); }
+.event-hero .back:hover { color: var(--cream); }
+.event-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.price-chip { background: transparent; border-color: color-mix(in srgb, var(--cream) 45%, transparent); color: var(--cream); }
+
+/* Ukuran: judul (terbesar) > nama pembicara > ringkasan > bar tanggal > label. */
+.event-hero .event-title { font-size: clamp(2rem, 4.4vw, 3rem); line-height: 1.08; letter-spacing: -.025em; margin: 16px 0 12px; max-width: 24ch; }
+.event-summary-text { font-size: clamp(1.02rem, 1.6vw, 1.15rem); color: var(--on-teal); max-width: 56ch; }
+
+/* Bar tanggal seperti di poster: panel teal muda, tanggal tebal. */
+.event-meta {
+  list-style: none; display: flex; flex-wrap: wrap; gap: 8px 22px; width: fit-content; max-width: 100%;
+  margin-top: 24px; padding: 12px 18px; border-radius: var(--r-sm); background: var(--teal-panel); color: var(--cream); font-size: .98rem;
+}
+.event-meta li { display: flex; align-items: center; gap: 8px; }
+.event-meta b { font-weight: 750; }
+.meta-icon { display: inline-grid; place-items: center; width: 18px; height: 18px; flex: none; }
+.meta-icon svg { width: 18px; height: 18px; }
+.event-meta .meta-icon { color: var(--yellow); }
+
+/* Pembicara: garis kiri + nama kuning besar, seperti "Bareng: NAMA" di poster. */
+.hero-speaker { display: flex; gap: 12px; align-items: center; margin-top: 22px; padding-left: 14px; border-left: 3px solid var(--teal-panel); }
+.hero-speaker .avatar { background: var(--teal-panel); color: var(--yellow); box-shadow: 0 0 0 3px var(--teal), 0 0 0 4px var(--yellow); }
+.hero-speaker > div { display: grid; gap: 2px; min-width: 0; }
+.hero-speaker-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--on-teal); }
+.hero-speaker strong { font-size: clamp(1.15rem, 2.2vw, 1.4rem); line-height: 1.2; color: var(--yellow); letter-spacing: -.015em; }
+.hero-speaker-role { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--cream); font-size: .9rem; }
+.hero-speaker-role a { color: var(--yellow); font-weight: 700; }
+.hero-speaker-role a:hover { text-decoration: underline; }
+
+.event-poster { width: 100%; border-radius: var(--r); border: 1px solid var(--line); }
+.event-section h2 { font-size: 1.25rem; margin-bottom: 14px; }
+.event-section .prose { max-width: none; }
+
+/* "Yang akan dibahas": kotak seperti kisi-kisi obrolan di poster. */
+.highlights { padding: 20px 22px; background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--yellow); border-radius: var(--r); }
+.highlights h2 { margin-bottom: 12px; }
+.highlights ul { list-style: none; padding: 0; display: grid; gap: 10px; }
+.highlights li { position: relative; padding-left: 26px; color: var(--ink); font-weight: 500; }
+.highlights li::before { content: '→'; position: absolute; left: 0; color: var(--green-deep); font-weight: 800; }
+
+/* Kartu daftar */
+.register-card { display: grid; gap: 18px; padding: 22px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); box-shadow: 0 12px 32px -24px rgb(11 61 64 / .35); }
+.register-price { display: grid; gap: 2px; }
+.register-label { font-size: .8rem; font-weight: 600; color: var(--ink-faint); }
+.register-price b { font-size: 1.7rem; line-height: 1.15; color: var(--ink); }
+.seats { display: grid; gap: 8px; font-size: .92rem; }
+.seats-line { display: flex; justify-content: space-between; gap: 10px; }
+.seats-track { height: 8px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+.seats-track span { display: block; height: 100%; border-radius: 999px; background: var(--teal); min-width: 4px; }
+.seats-note { font-size: .84rem; color: var(--ink-faint); }
+.seats-count { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); }
+.seats-count .meta-icon { color: var(--green-deep); }
+.register-action { display: grid; gap: 10px; }
+.register-state { font-weight: 700; }
+.register-state.ok { color: var(--green-deep); }
+.register-note { font-size: .84rem; color: var(--ink-faint); }
+.register-note a { color: var(--green-deep); font-weight: 600; }
+.register-share { justify-self: center; background: none; border: 0; padding: 12px 0 0; width: 100%; border-top: 1px dashed var(--line-2); color: var(--ink-soft); font-weight: 600; font-size: .86rem; cursor: pointer; }
+.register-share:hover { color: var(--green-deep); }

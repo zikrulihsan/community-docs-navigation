@@ -114,6 +114,16 @@ export function useAuth() {
 
 export const loginPath = (next: string) => `/masuk?next=${encodeURIComponent(next)}`;
 
+const callbackUrl = (next: string) => `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+
+/** Login Google; setelah selesai kembali ke `next` (path internal). */
+export const signInWithGoogle = (next: string) =>
+  supabase().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: callbackUrl(next) } });
+
+/** Magic link ke email; link-nya kembali ke `next`. */
+export const sendMagicLink = (email: string, next: string) =>
+  supabase().auth.signInWithOtp({ email, options: { emailRedirectTo: callbackUrl(next), shouldCreateUser: true } });
+
 /** Untuk clientLoader: ambil user yang login, atau lempar redirect ke halaman masuk. */
 export async function requireUser(request: Request) {
   const url = new URL(request.url);

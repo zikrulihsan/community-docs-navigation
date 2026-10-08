@@ -1,39 +1,199 @@
-import { useNavigate, useSearchParams } from 'react-router';
+import { useState, type FormEvent } from 'react';
+import { Link, useSearchParams } from 'react-router';
 import type { Route } from './+types/onboarding';
 import { ProfileForm } from '~/components/ProfileForm';
 import { fetchProfile, requireUser, safeNext, useAuth } from '~/lib/auth';
+import type { MemberMotivationRow, WhatsappGroupRow } from '~/lib/database.types';
+import { fetchMotivation, MOTIVATION_QUESTIONS } from '~/lib/profile';
+import { adminWaLink, WA_COMMUNITY_URL } from '~/lib/site';
+import { supabase } from '~/lib/supabase';
 
-export const meta: Route.MetaFunction = () => [{ title: 'Lengkapi data — SWE Growth' }];
+export const meta: Route.MetaFunction = () => [{ title: 'Gabung SWE Growth' }];
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const user = await requireUser(request);
-  const profile = await fetchProfile(user.id);
+  const [profile, motivation] = await Promise.all([fetchProfile(user.id), fetchMotivation(user.id)]);
   if (!profile) throw new Error('Profil tidak ditemukan. Pastikan migration Supabase sudah dijalankan.');
-  return { profile, email: user.email };
+  return { profile, motivation, email: user.email };
 }
 
+type Step = 'kenalan' | 'profil' | 'grup';
+const STEPS: { id: Step | 'akun'; label: string }[] = [
+  { id: 'akun', label: 'Daftar akun' },
+  { id: 'kenalan', label: 'Kenalan' },
+  { id: 'profil', label: 'Isi profil' },
+  { id: 'grup', label: 'Gabung grup WhatsApp' },
+];
+
+/**
+ * Alur setelah daftar: kenalan (konteks + motivasi) → isi profil → link grup
+ * WhatsApp. RLS whatsapp_groups baru terbuka setelah keduanya tersimpan.
+ */
 export default function Onboarding({ loaderData }: Route.ComponentProps) {
   const { profile, email } = loaderData;
   const [params] = useSearchParams();
-  const navigate = useNavigate();
   const { refreshProfile } = useAuth();
+  const [motivation, setMotivation] = useState(loaderData.motivation);
+  const [step, setStep] = useState<Step>(loaderData.motivation ? 'profil' : 'kenalan');
+  const [groups, setGroups] = useState<WhatsappGroupRow[]>([]);
+  const next = safeNext(params.get('next'));
+
+  const goTo = (s: Step) => {
+    setStep(s);
+    window.scrollTo({ top: 0 });
+  };
 
   return (
     <section className="block">
       <div className="wrap" style={{ maxWidth: 760 }}>
-        <h1 className="page-title">Lengkapi data akun</h1>
-        <p className="muted" style={{ marginBottom: 26, maxWidth: '58ch' }}>
-          Nama dan nomor WhatsApp dipakai untuk pendaftaran kegiatan. Kalau nanti kamu ambil membership, admin mencocokkan pembayaran dengan data ini dan email akun ({email}).
-        </p>
-        <ProfileForm
-          profile={profile}
-          submitLabel="Simpan & lanjut"
-          onSaved={async () => {
-            await refreshProfile();
-            navigate(safeNext(params.get('next')), { replace: true });
-          }}
-        />
+        <Steps current={step} />
+
+        {step === 'kenalan' && (
+          <MotivationStep
+            motivation={motivation}
+            onSaved={(m) => {
+              setMotivation(m);
+              goTo('profil');
+            }}
+          />
+        )}
+
+        {step === 'profil' && (
+          <>
+            <h1 className="page-title">Lengkapi profil member</h1>
+            <p className="muted" style={{ marginBottom: 26, maxWidth: '60ch' }}>
+              Setelah profil tersimpan, link grup WhatsApp komunitas langsung muncul. Bagian bertanda (opsional) boleh
+              dilengkapi nanti. Profil akan tampil publik; nomor WhatsApp dan email hanya terlihat oleh kamu dan admin. Email akun: {email}.{' '}
+              <button className="link-btn" type="button" onClick={() => goTo('kenalan')}>Ubah jawaban kenalan</button>
+            </p>
+            <ProfileForm
+              profile={profile}
+              submitLabel="Simpan & dapatkan link grup"
+              onSaved={async () => {
+                const [{ data }] = await Promise.all([
+                  supabase().from('whatsapp_groups').select('*').order('sort_order').order('created_at'),
+                  refreshProfile(),
+                ]);
+                setGroups(data ?? []);
+                goTo('grup');
+              }}
+            />
+          </>
+        )}
+
+        {step === 'grup' && <Welcome groups={groups} next={next} name={profile.full_name} />}
       </div>
     </section>
+  );
+}
+
+function Steps({ current }: { current: Step }) {
+  const index = STEPS.findIndex((s) => s.id === current);
+  return (
+    <ol className="signup-steps" aria-label="Langkah pendaftaran">
+      {STEPS.map((s, i) => (
+        <li key={s.id} data-state={i < index ? 'done' : undefined} aria-current={i === index ? 'step' : undefined}>
+          {s.label}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function MotivationStep({ motivation, onSaved }: { motivation: MemberMotivationRow | null; onSaved: (m: MemberMotivationRow) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const answers = Object.fromEntries(
+      MOTIVATION_QUESTIONS.map((q) => [q.name, String(form.get(q.name) ?? '').trim()]),
+    ) as Record<(typeof MOTIVATION_QUESTIONS)[number]['name'], string>;
+
+    setBusy(true);
+    setError(null);
+    const db = supabase().from('member_motivations');
+    // Insert dulu; kalau sudah pernah mengisi, perbarui (upsert butuh hak update atas user_id).
+    const { data, error: saveError } = motivation
+      ? await db.update(answers).eq('user_id', motivation.user_id).select().single()
+      : await db.insert(answers).select().single();
+    setBusy(false);
+
+    if (saveError) {
+      setError('Jawaban belum tersimpan. Coba lagi.');
+      return;
+    }
+    onSaved(data);
+  };
+
+  return (
+    <>
+      <h1 className="page-title">Kenalan dulu, yuk</h1>
+      <div className="panel" style={{ marginBottom: 22 }}>
+        <p style={{ marginBottom: 10 }}>
+          SWE Growth adalah komunitas software engineer Indonesia yang fokus bareng-bareng belajar{' '}
+          <strong>career growth</strong>, bukan satu tech stack tertentu. Topiknya seperti Effective Engineer, Going
+          Abroad, sampai System Design Interview.
+        </p>
+        <p className="muted">
+          Jawabanmu di bawah membantu kami menyusun kelas, sharing session, dan program lain sesuai masalah yang
+          teman-teman hadapi.{' '}
+          <Link className="text-link" to="/tentang" target="_blank" rel="noopener">Baca cerita lengkap SWE Growth ↗</Link>
+        </p>
+      </div>
+
+      <form className="form-card wide" onSubmit={onSubmit}>
+        {error && <p className="form-message error">{error}</p>}
+        {MOTIVATION_QUESTIONS.map((q) => (
+          <div className="field" key={q.name}>
+            <label htmlFor={q.name}>{q.label}{!q.required && <small> (opsional)</small>}</label>
+            <textarea id={q.name} name={q.name} rows={3} maxLength={2000} required={q.required} defaultValue={motivation?.[q.name] ?? ''} />
+          </div>
+        ))}
+        <button className="btn btn-primary" type="submit" disabled={busy}>{busy ? 'Menyimpan…' : 'Lanjut isi profil'}</button>
+      </form>
+    </>
+  );
+}
+
+function Welcome({ groups, next, name }: { groups: WhatsappGroupRow[]; next: string; name: string }) {
+  // Belum ada grup di admin: pakai link komunitas publik, atau minta ke admin.
+  const fallback = WA_COMMUNITY_URL || adminWaLink(`Halo admin, saya ${name}. Profil saya di swegrowth.id sudah lengkap, minta link grup WhatsApp ya.`);
+
+  return (
+    <>
+      <h1 className="page-title">Profil tersimpan. Selamat bergabung, {name.split(' ')[0]}!</h1>
+      <p className="muted" style={{ marginBottom: 22, maxWidth: '58ch' }}>
+        Gabung ke grup WhatsApp di bawah. Link ini juga selalu ada di portal kalau nanti kamu butuh lagi.
+      </p>
+
+      <div className="panel" style={{ marginBottom: 22 }}>
+        {groups.length > 0 ? (
+          <ul className="rows">
+            {groups.map((g) => (
+              <li key={g.id}>
+                <div className="row-main">
+                  <strong>{g.name}</strong>
+                  {g.description && <span>{g.description}</span>}
+                </div>
+                <a className="btn btn-primary sm" href={g.invite_url} target="_blank" rel="noopener">Gabung</a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="rows">
+            <div className="row-main" style={{ marginBottom: 12 }}>
+              <strong>Grup WhatsApp SWE Growth</strong>
+            </div>
+            <a className="btn btn-primary sm" href={fallback} target="_blank" rel="noopener">
+              {WA_COMMUNITY_URL ? 'Gabung grup' : 'Minta link ke admin'}
+            </a>
+          </div>
+        )}
+      </div>
+
+      <Link className="btn btn-ghost" to={next}>Lanjut ke portal</Link>
+    </>
   );
 }

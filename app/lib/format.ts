@@ -34,6 +34,17 @@ const toDate = (d: Date | string) => (typeof d === 'string' ? new Date(d) : d);
 export const formatDate = (d: Date | string) => dateFmt.format(toDate(d));
 export const formatShortDate = (d: Date | string) => shortDateFmt.format(toDate(d));
 
+const wibWeekdayFmt = new Intl.DateTimeFormat('id-ID', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'Asia/Jakarta',
+});
+
+/** Timestamp activity → "Sabtu, 10 Oktober 2026". */
+export const formatWibDay = (ts: string) => wibWeekdayFmt.format(new Date(ts));
+
 /** Timestamp activity → "12 Oktober 2026". */
 export const formatWibDate = (ts: string) => wibDateFmt.format(new Date(ts));
 /** Timestamp activity → "19.30 WIB". */

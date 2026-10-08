@@ -1,17 +1,19 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { Link, useRevalidator, useSearchParams } from 'react-router';
+import { useState, type FormEvent } from 'react';
+import { Link, useSearchParams } from 'react-router';
 import type { Route } from './+types/admin';
-import { ACTIVITY_STATUSES, activityStatusLabel, slugify } from '~/lib/activities';
+import { ACTIVITY_STATUSES, activityStatusLabel } from '~/lib/activities';
+import { Field, todayWib, useMutation, val } from '~/lib/admin-form';
 import { requireAdmin, useAuth } from '~/lib/auth';
 import type {
-  ActivityMemberInfoRow,
-  ActivityRegistrationRow,
   ActivityStatus,
+  MemberMotivationRow,
   MembershipRow,
   ProfileRow,
   WhatsappGroupRow,
 } from '~/lib/database.types';
 import { formatDate, formatWibDate, formatWibTime, isoDate } from '~/lib/format';
+import { experiencePeriod, MOTIVATION_QUESTIONS, seniorityLabel, sortExperiences } from '~/lib/profile';
+import { MEMBERSHIP_LIVE } from '~/lib/site';
 import { supabase } from '~/lib/supabase';
 
 export const meta: Route.MetaFunction = () => [{ title: 'Admin — SWE Growth' }, { name: 'robots', content: 'noindex' }];
@@ -20,55 +22,26 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   await requireAdmin(request);
   const db = supabase();
 
-  const [profiles, memberships, activities, memberInfo, groups] = await Promise.all([
+  const [profiles, memberships, motivations, activities, registrations, groups] = await Promise.all([
     db.from('profiles').select('*').order('created_at', { ascending: false }),
     db.from('memberships').select('*'),
+    db.from('member_motivations').select('*'),
     db.from('activities').select('*').order('created_at', { ascending: false }),
-    db.from('activity_member_info').select('*'),
+    db.from('activity_registrations').select('activity_id, status'),
     db.from('whatsapp_groups').select('*').order('sort_order').order('created_at'),
   ]);
   return {
     profiles: profiles.data ?? [],
     memberships: memberships.data ?? [],
+    motivations: motivations.data ?? [],
     activities: activities.data ?? [],
-    memberInfo: memberInfo.data ?? [],
+    registrations: registrations.data ?? [],
     groups: groups.data ?? [],
   };
 }
 
 export function HydrateFallback() {
   return <div className="loading-block">Memuat admin…</div>;
-}
-
-const val = (form: FormData, name: string) => String(form.get(name) ?? '').trim();
-
-/** <input type="datetime-local"> diisi dalam WIB. */
-const wibToIso = (local: string) => (local ? new Date(`${local}:00+07:00`).toISOString() : null);
-
-/** Tanggal hari ini menurut WIB, yyyy-mm-dd. */
-const todayWib = () => isoDate(new Date(Date.now() + 7 * 60 * 60 * 1000));
-
-function useMutation() {
-  const revalidator = useRevalidator();
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
-
-  const run = async (fn: () => PromiseLike<{ error: { message: string; code?: string } | null }>, success: string) => {
-    setBusy(true);
-    setMessage(null);
-    const { error } = await fn();
-    setBusy(false);
-    if (error) {
-      setMessage({ kind: 'error', text: error.code === '23505' ? 'Slug sudah dipakai. Ganti slug-nya.' : `Belum tersimpan: ${error.message}` });
-      return false;
-    }
-    setMessage({ kind: 'success', text: success });
-    await revalidator.revalidate();
-    return true;
-  };
-
-  const flash = message && <p className={`form-message ${message.kind}`}>{message.text}</p>;
-  return { busy, run, flash };
 }
 
 type Tab = 'member' | 'event' | 'grup';
@@ -98,8 +71,8 @@ export default function Admin({ loaderData }: Route.ComponentProps) {
         </nav>
 
         <div style={{ marginTop: 24 }}>
-          {tab === 'member' && <MembersAdmin profiles={loaderData.profiles} memberships={loaderData.memberships} />}
-          {tab === 'event' && <ActivitiesAdmin activities={loaderData.activities} memberInfo={loaderData.memberInfo} />}
+          {tab === 'member' && <MembersAdmin profiles={loaderData.profiles} memberships={loaderData.memberships} motivations={loaderData.motivations} />}
+          {tab === 'event' && <ActivitiesAdmin activities={loaderData.activities} registrations={loaderData.registrations} />}
           {tab === 'grup' && <GroupsAdmin groups={loaderData.groups} />}
         </div>
       </div>
@@ -111,7 +84,15 @@ export default function Admin({ loaderData }: Route.ComponentProps) {
 // Member
 // ---------------------------------------------------------------------------
 
-function MembersAdmin({ profiles, memberships }: { profiles: ProfileRow[]; memberships: MembershipRow[] }) {
+function MembersAdmin({
+  profiles,
+  memberships,
+  motivations,
+}: {
+  profiles: ProfileRow[];
+  memberships: MembershipRow[];
+  motivations: MemberMotivationRow[];
+}) {
   const { user } = useAuth();
   const { busy, run, flash } = useMutation();
   const [query, setQuery] = useState('');
@@ -119,9 +100,13 @@ function MembersAdmin({ profiles, memberships }: { profiles: ProfileRow[]; membe
 
   const today = todayWib();
   const membershipOf = new Map(memberships.map((m) => [m.user_id, m]));
+  const motivationOf = new Map(motivations.map((m) => [m.user_id, m]));
   const q = query.trim().toLowerCase();
   const matches = (p: ProfileRow) =>
-    !q || [p.full_name, p.email, p.whatsapp, p.company].some((v) => v?.toLowerCase().includes(q));
+    !q ||
+    [p.full_name, p.email, p.whatsapp, p.company, p.headline, p.location, ...p.skills, ...p.tech_stack].some((v) =>
+      v?.toLowerCase().includes(q),
+    );
 
   const rows = profiles.filter(matches);
   const isActive = (p: ProfileRow) => (membershipOf.get(p.id)?.active_until ?? '') >= today;
@@ -158,24 +143,28 @@ function MembersAdmin({ profiles, memberships }: { profiles: ProfileRow[]; membe
       <li key={p.id}>
         <div className="line">
           <div>
-            <strong>{p.full_name || '(tanpa nama)'}</strong>
+            <Link to={`/admin/member/${p.id}`}><strong>{p.full_name || '(tanpa nama)'}</strong></Link>
+            {(p.headline || p.company) && <span className="muted">{[p.headline, p.company].filter(Boolean).join(' · ')}</span>}
             <span className="slug">{[p.email, p.whatsapp].filter(Boolean).join(' · ')}</span>
+            {p.tech_stack.length > 0 && <span className="slug">{p.tech_stack.join(', ')}</span>}
             <span className="slug">
-              {m
-                ? `${m.active_until >= today ? 'aktif sampai' : 'berakhir'} ${formatDate(m.active_until)}${m.goakal_ref ? ` · ${m.goakal_ref}` : ''}`
-                : p.onboarded_at ? 'belum aktif' : 'belum isi data'}
+              {!MEMBERSHIP_LIVE
+                ? `${motivationOf.has(p.id) && p.onboarded_at ? 'onboarding selesai' : 'belum selesai onboarding'} · daftar ${formatDate(p.created_at)}`
+                : m
+                  ? `${m.active_until >= today ? 'aktif sampai' : 'berakhir'} ${formatDate(m.active_until)}${m.goakal_ref ? ` · ${m.goakal_ref}` : ''}`
+                  : p.onboarded_at ? 'belum aktif' : 'belum isi data'}
             </span>
           </div>
-          <div className="inline-actions">
+          {MEMBERSHIP_LIVE && <div className="inline-actions">
             <button className="btn btn-ghost sm" type="button" onClick={() => setEditing(editing === p.id ? null : p.id)}>
               {m && m.active_until >= today ? 'Ubah' : m ? 'Perpanjang' : 'Aktifkan'}
             </button>
             {m && m.active_until >= today && (
               <button className="link-btn" type="button" disabled={busy} onClick={() => deactivate(p)}>Akhiri</button>
             )}
-          </div>
+          </div>}
         </div>
-        {editing === p.id && (
+        {MEMBERSHIP_LIVE && editing === p.id && (
           <form className="inline-form" onSubmit={(e) => save(e, p.id)}>
             <Field id={`until-${p.id}`} label="Aktif sampai">
               <input id={`until-${p.id}`} name="active_until" type="date" required min={today} defaultValue={m && m.active_until >= today ? m.active_until : ''} />
@@ -195,11 +184,22 @@ function MembersAdmin({ profiles, memberships }: { profiles: ProfileRow[]; membe
 
   return (
     <div className="admin-stack">
-      <div className="field" style={{ maxWidth: 420 }}>
-        <label htmlFor="member-search">Cari nama, email, atau WhatsApp</label>
-        <input id="member-search" type="search" value={query} onChange={(e) => setQuery(e.target.value)} />
+      <div className="line admin-toolbar">
+        <div className="field" style={{ maxWidth: 420, flex: 1 }}>
+          <label htmlFor="member-search">Cari nama, email, WhatsApp, keahlian, atau teknologi</label>
+          <input id="member-search" type="search" value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
+        <button className="btn btn-ghost sm" type="button" onClick={() => downloadMembersCsv(rows, membershipOf, motivationOf)}>
+          Unduh CSV ({rows.length})
+        </button>
       </div>
       {flash}
+      {!MEMBERSHIP_LIVE ? (
+        <div className="panel">
+          <h2>Member ({rows.length})</h2>
+          {rows.length === 0 ? <p className="muted">Tidak ada.</p> : <ul className="admin-list">{rows.map(renderRow)}</ul>}
+        </div>
+      ) : (<>
       <div className="panel">
         <h2>Belum aktif ({pending.length})</h2>
         <p className="form-sub">Akun yang sudah login tapi belum punya membership aktif. Cocokkan dengan pembayaran di goakal.</p>
@@ -209,8 +209,45 @@ function MembersAdmin({ profiles, memberships }: { profiles: ProfileRow[]; membe
         <h2>Member aktif ({active.length})</h2>
         {active.length === 0 ? <p className="muted">Belum ada.</p> : <ul className="admin-list">{active.map(renderRow)}</ul>}
       </div>
+      </>)}
     </div>
   );
+}
+
+const csvCell = (v: string | number | null | undefined) => {
+  const s = String(v ?? '');
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+
+/** Data member (hasil pencarian saat ini) sebagai CSV — bisa dibuka di Excel / Google Sheets. */
+function downloadMembersCsv(
+  rows: ProfileRow[],
+  membershipOf: Map<string, MembershipRow>,
+  motivationOf: Map<string, MemberMotivationRow>,
+) {
+  const header = [
+    'Nama', 'Email', 'WhatsApp', 'Domisili', 'Peran', 'Perusahaan', 'Level', 'Tahun pengalaman',
+    'LinkedIn', 'GitHub', 'Portfolio', 'Keahlian', 'Teknologi', 'Pengalaman',
+    'Masalah karier', 'Yang bisa membantu', 'Alasan bergabung', 'Harapan', 'Membership sampai', 'Bergabung',
+  ];
+  const lines = rows.map((p) =>
+    [
+      p.full_name, p.email, p.whatsapp, p.location, p.headline, p.company,
+      p.seniority && seniorityLabel[p.seniority], p.years_experience,
+      p.linkedin_url, p.github_url, p.portfolio_url,
+      p.skills.join(', '), p.tech_stack.join(', '),
+      sortExperiences(p.experiences).map((e) => `${e.role} @ ${e.company} (${experiencePeriod(e)})`).join('; '),
+      ...MOTIVATION_QUESTIONS.map((q) => motivationOf.get(p.id)?.[q.name]),
+      membershipOf.get(p.id)?.active_until, isoDate(new Date(p.created_at)),
+    ].map(csvCell).join(','),
+  );
+  // BOM supaya Excel membaca UTF-8 dengan benar.
+  const blob = new Blob(['\uFEFF' + [header.join(','), ...lines].join('\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `member-swegrowth-${todayWib()}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ---------------------------------------------------------------------------
@@ -218,132 +255,59 @@ function MembersAdmin({ profiles, memberships }: { profiles: ProfileRow[]; membe
 // ---------------------------------------------------------------------------
 
 type Activities = Route.ComponentProps['loaderData']['activities'];
+type RegistrationSummary = Route.ComponentProps['loaderData']['registrations'];
 
-function ActivitiesAdmin({ activities, memberInfo }: { activities: Activities; memberInfo: ActivityMemberInfoRow[] }) {
+/** Daftar event + statistik singkat; edit lengkap di /admin/event/:id. */
+function ActivitiesAdmin({ activities, registrations }: { activities: Activities; registrations: RegistrationSummary }) {
   const { busy, run, flash } = useMutation();
-  const [openRegs, setOpenRegs] = useState<string | null>(null);
-  const [openLinks, setOpenLinks] = useState<string | null>(null);
-  const infoOf = new Map(memberInfo.map((i) => [i.activity_id, i]));
-
-  const create = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formEl = e.currentTarget;
-    const form = new FormData(formEl);
-    const title = val(form, 'title');
-    const capacityRaw = val(form, 'capacity');
-    const ok = await run(
-      () =>
-        supabase().from('activities').insert({
-          title,
-          slug: slugify(val(form, 'slug') || title),
-          summary: val(form, 'summary'),
-          description: val(form, 'description'),
-          status: val(form, 'status') as ActivityStatus,
-          mode: val(form, 'mode') as 'online' | 'offline' | 'hybrid',
-          starts_at: wibToIso(val(form, 'starts_at')),
-          location: val(form, 'location') || null,
-          speaker: val(form, 'speaker') || null,
-          capacity: capacityRaw ? Number.parseInt(capacityRaw, 10) : null,
-          is_public: form.get('is_public') === 'on',
-        }),
-      'Event dibuat.',
-    );
-    if (ok) formEl.reset();
-  };
-
-  const saveLinks = async (e: FormEvent<HTMLFormElement>, activityId: string) => {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const ok = await run(
-      () =>
-        supabase().from('activity_member_info').upsert({
-          activity_id: activityId,
-          meeting_url: val(form, 'meeting_url') || null,
-          recording_url: val(form, 'recording_url') || null,
-          updated_at: new Date().toISOString(),
-        }),
-      'Link member disimpan.',
-    );
-    if (ok) setOpenLinks(null);
-  };
+  const countOf = (id: string, status: string) => registrations.filter((r) => r.activity_id === id && r.status === status).length;
 
   return (
-    <div className="admin-grid">
-      <form className="form-card" onSubmit={create}>
-        <h2>Tambah event</h2>
-        <p className="form-sub">Judul, tanggal, dan format tampil di agenda publik. Detail, pendaftaran, dan link hanya untuk member.</p>
-        {flash}
-        <Field id="title" label="Judul"><input id="title" name="title" required minLength={3} /></Field>
-        <Field id="slug" label="Slug URL" optional><input id="slug" name="slug" placeholder="otomatis dari judul" /></Field>
-        <Field id="summary" label="Ringkasan"><textarea id="summary" name="summary" rows={2} maxLength={500} /></Field>
-        <Field id="description" label="Detail"><textarea id="description" name="description" rows={5} /></Field>
-        <div className="form-grid">
-          <Field id="status" label="Status">
-            <select id="status" name="status" defaultValue="registration_open">
-              {ACTIVITY_STATUSES.map((s) => <option key={s} value={s}>{activityStatusLabel[s]}</option>)}
-            </select>
-          </Field>
-          <Field id="mode" label="Format">
-            <select id="mode" name="mode" defaultValue="online">
-              <option value="online">Online</option><option value="offline">Offline</option><option value="hybrid">Hybrid</option>
-            </select>
-          </Field>
-          <Field id="starts_at" label="Mulai (WIB)" optional><input id="starts_at" name="starts_at" type="datetime-local" /></Field>
-          <Field id="capacity" label="Kapasitas" optional><input id="capacity" name="capacity" type="number" min={1} inputMode="numeric" placeholder="tanpa batas" /></Field>
-          <Field id="location" label="Lokasi" optional><input id="location" name="location" placeholder="Kota / venue (bukan link meeting)" /></Field>
-          <Field id="speaker" label="Pembicara" optional><input id="speaker" name="speaker" /></Field>
-        </div>
-        <label className="check-field"><input type="checkbox" name="is_public" defaultChecked /> Tampilkan di agenda</label>
-        <button className="btn btn-primary" type="submit" disabled={busy}>Simpan event</button>
-      </form>
-
+    <div className="admin-stack">
+      <div className="line admin-toolbar">
+        <p className="form-sub" style={{ margin: 0 }}>Setiap event punya halaman publik /agenda/slug untuk dibagikan.</p>
+        <Link className="btn btn-primary sm" to="/admin/event/baru">+ Tambah event</Link>
+      </div>
+      {flash}
       <div className="panel">
-        <h2>Event tersimpan</h2>
+        <h2>Event ({activities.length})</h2>
         {activities.length === 0 ? (
           <p className="form-sub">Belum ada event.</p>
         ) : (
           <ul className="admin-list">
             {activities.map((a) => {
-              const info = infoOf.get(a.id);
+              const confirmed = countOf(a.id, 'confirmed');
+              const waitlisted = countOf(a.id, 'waitlisted');
               return (
                 <li key={a.id}>
                   <div className="line">
                     <div>
-                      <strong>{a.title}{!a.is_public && <span className="muted"> · disembunyikan</span>}</strong>
-                      <Link className="slug" to={`/portal/agenda/${a.slug}`}>/portal/agenda/{a.slug}</Link>
-                      {a.starts_at && <span className="slug"> · {formatWibDate(a.starts_at)} {formatWibTime(a.starts_at)}</span>}
+                      <Link to={`/admin/event/${a.id}`}><strong>{a.title}</strong></Link>
+                      <span className="slug">
+                        {[
+                          a.starts_at ? `${formatWibDate(a.starts_at)} ${formatWibTime(a.starts_at)}` : 'jadwal belum diisi',
+                          a.price_idr > 0 ? `Rp${a.price_idr.toLocaleString('id-ID')}` : 'gratis',
+                          !a.is_public && 'disembunyikan',
+                        ].filter(Boolean).join(' · ')}
+                      </span>
+                      <span className="slug">
+                        {confirmed} terdaftar{a.capacity ? ` / ${a.capacity} kursi` : ''}{waitlisted ? ` · ${waitlisted} waitlist` : ''}
+                      </span>
                     </div>
-                    <select
-                      aria-label={`Status ${a.title}`}
-                      value={a.status}
-                      disabled={busy}
-                      onChange={(e) =>
-                        run(() => supabase().from('activities').update({ status: e.target.value as ActivityStatus }).eq('id', a.id), `Status "${a.title}" diperbarui.`)
-                      }
-                    >
-                      {ACTIVITY_STATUSES.map((s) => <option key={s} value={s}>{activityStatusLabel[s]}</option>)}
-                    </select>
+                    <div className="inline-actions">
+                      <select
+                        aria-label={`Status ${a.title}`}
+                        value={a.status}
+                        disabled={busy}
+                        onChange={(e) =>
+                          run(() => supabase().from('activities').update({ status: e.target.value as ActivityStatus }).eq('id', a.id), `Status "${a.title}" diperbarui.`)
+                        }
+                      >
+                        {ACTIVITY_STATUSES.map((st) => <option key={st} value={st}>{activityStatusLabel[st]}</option>)}
+                      </select>
+                      <Link className="btn btn-ghost sm" to={`/admin/event/${a.id}`}>Edit</Link>
+                    </div>
                   </div>
-                  <div className="inline-actions">
-                    <button className="link-btn" type="button" onClick={() => setOpenRegs(openRegs === a.id ? null : a.id)}>
-                      {openRegs === a.id ? 'Tutup pendaftar' : 'Pendaftar'}
-                    </button>
-                    <button className="link-btn" type="button" onClick={() => setOpenLinks(openLinks === a.id ? null : a.id)}>
-                      Link meeting & rekaman{info?.meeting_url || info?.recording_url ? ' ✓' : ''}
-                    </button>
-                  </div>
-                  {openRegs === a.id && <Registrants activityId={a.id} />}
-                  {openLinks === a.id && (
-                    <form className="inline-form" onSubmit={(e) => saveLinks(e, a.id)}>
-                      <Field id={`meet-${a.id}`} label="Link meeting" optional>
-                        <input id={`meet-${a.id}`} name="meeting_url" type="url" pattern="https://.*" defaultValue={info?.meeting_url ?? ''} placeholder="https://meet.google.com/…" />
-                      </Field>
-                      <Field id={`rec-${a.id}`} label="Link rekaman" optional>
-                        <input id={`rec-${a.id}`} name="recording_url" type="url" pattern="https://.*" defaultValue={info?.recording_url ?? ''} placeholder="https://youtu.be/…" />
-                      </Field>
-                      <button className="btn btn-primary sm" type="submit" disabled={busy}>Simpan link</button>
-                    </form>
-                  )}
                 </li>
               );
             })}
@@ -353,52 +317,6 @@ function ActivitiesAdmin({ activities, memberInfo }: { activities: Activities; m
     </div>
   );
 }
-
-function Registrants({ activityId }: { activityId: string }) {
-  const [rows, setRows] = useState<ActivityRegistrationRow[] | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    void supabase()
-      .from('activity_registrations')
-      .select('*')
-      .eq('activity_id', activityId)
-      .order('created_at')
-      .then(({ data }) => !cancelled && setRows(data ?? []));
-    return () => {
-      cancelled = true;
-    };
-  }, [activityId]);
-
-  if (!rows) return <div className="registrants">Memuat…</div>;
-  if (rows.length === 0) return <div className="registrants">Belum ada pendaftar.</div>;
-
-  const counts = rows.reduce<Record<string, number>>((acc, r) => ({ ...acc, [r.status]: (acc[r.status] ?? 0) + 1 }), {});
-  return (
-    <div className="registrants">
-      <p style={{ marginBottom: 6 }}>
-        {counts.confirmed ?? 0} terdaftar · {counts.waitlisted ?? 0} waitlist · {counts.cancelled ?? 0} batal
-      </p>
-      <table>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.id} style={r.status === 'cancelled' ? { opacity: 0.5 } : undefined}>
-              <td>{r.name}</td>
-              <td>{r.email}</td>
-              <td>{r.whatsapp ?? '—'}</td>
-              <td>{r.status}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Grup WhatsApp
-// ---------------------------------------------------------------------------
-
 function GroupsAdmin({ groups }: { groups: WhatsappGroupRow[] }) {
   const { busy, run, flash } = useMutation();
 
@@ -461,11 +379,3 @@ function GroupsAdmin({ groups }: { groups: WhatsappGroupRow[] }) {
   );
 }
 
-function Field({ id, label, optional, children }: { id: string; label: string; optional?: boolean; children: ReactNode }) {
-  return (
-    <div className="field">
-      <label htmlFor={id}>{label}{optional && <small> (opsional)</small>}</label>
-      {children}
-    </div>
-  );
-}

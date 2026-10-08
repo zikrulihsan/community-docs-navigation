@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 
 export function Footer() {
   return (
-    <footer className="site-footer">
+    <footer className="site-footer on-teal">
       <div className="wrap foot-in">
         <div className="foot-brand">
           <Link className="brand" to="/">
@@ -26,8 +26,11 @@ export function Footer() {
           </div>
         </div>
         <div className="foot-links">
+          <Link to="/tentang">Tentang</Link>
           <Link to="/agenda">Agenda</Link>
           <Link to="/code-of-conduct">Code of Conduct</Link>
+          <Link to="/privasi">Privasi</Link>
+          <Link to="/term-of-service">Syarat Layanan</Link>
           <Link to="/masuk?next=/portal">Masuk</Link>
         </div>
       </div>

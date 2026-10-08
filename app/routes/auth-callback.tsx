@@ -1,6 +1,6 @@
 import { redirect } from 'react-router';
 import type { Route } from './+types/auth-callback';
-import { fetchProfile, safeNext } from '~/lib/auth';
+import { safeNext } from '~/lib/auth';
 import { hasSupabase, supabase } from '~/lib/supabase';
 
 /**
@@ -23,8 +23,8 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   }
   if (!data.session) throw redirect(`/masuk?error=callback&next=${encodeURIComponent(next)}`);
 
-  const profile = await fetchProfile(data.session.user.id);
-  if (!profile?.onboarded_at) throw redirect(`/onboarding?next=${encodeURIComponent(next)}`);
+  // Kembali ke halaman asal (mis. detail event untuk lanjut daftar). Halaman
+  // portal sendiri yang mengarahkan ke /onboarding kalau perlu (member-layout).
   throw redirect(next);
 }
 

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
 import { displayName, useAuth } from '~/lib/auth';
 import { Avatar } from './Avatar';
-import { ThemeButton } from './ThemeButton';
 
 
 export function Nav() {
@@ -12,6 +11,7 @@ export function Nav() {
   const { loading, user, profile, isAdmin } = useAuth();
   const links = [
     ...(user ? [{ to: '/portal', label: 'Portal' }] : []),
+    { to: '/tentang', label: 'Tentang' },
     { to: '/agenda', label: 'Agenda' },
     { to: '/code-of-conduct', label: 'Code of Conduct' },
     ...(isAdmin ? [{ to: '/admin', label: 'Admin' }] : []),
@@ -36,7 +36,7 @@ export function Nav() {
   const name = displayName(profile, user);
 
   return (
-    <nav className={`site-nav${open ? ' menu-open' : ''}`} ref={navRef}>
+    <nav className={`site-nav on-teal${open ? ' menu-open' : ''}`} ref={navRef}>
       <div className="wrap nav-in">
         <Link className="brand" to="/" aria-label="SWE Growth Community">
           <img className="brand-logo" src="/assets/swe-growth-logo.png" alt="SWE Growth Community" width="32" height="32" />
@@ -48,7 +48,6 @@ export function Nav() {
           ))}
         </div>
         <div className="nav-cta">
-          <ThemeButton />
           {/* Saat prerender sesi belum diketahui: sisakan tempat supaya layout tidak lompat. */}
           {loading ? (
             <span className="nav-account-slot" aria-hidden="true" />
