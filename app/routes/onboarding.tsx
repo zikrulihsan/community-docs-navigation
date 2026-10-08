@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import type { Route } from './+types/onboarding';
+import { CommunityChannels } from '~/components/CommunityChannels';
 import { ProfileForm } from '~/components/ProfileForm';
 import { fetchProfile, requireUser, safeNext, useAuth } from '~/lib/auth';
 import type { MemberMotivationRow, WhatsappGroupRow } from '~/lib/database.types';
 import { fetchMotivation, MOTIVATION_QUESTIONS } from '~/lib/profile';
-import { adminWaLink, WA_COMMUNITY_URL } from '~/lib/site';
 import { supabase } from '~/lib/supabase';
 
 export const meta: Route.MetaFunction = () => [{ title: 'Gabung SWE Growth' }];
@@ -22,12 +22,12 @@ const STEPS: { id: Step | 'akun'; label: string }[] = [
   { id: 'akun', label: 'Daftar akun' },
   { id: 'kenalan', label: 'Kenalan' },
   { id: 'profil', label: 'Isi profil' },
-  { id: 'grup', label: 'Gabung grup WhatsApp' },
+  { id: 'grup', label: 'Gabung komunitas' },
 ];
 
 /**
- * Alur setelah daftar: kenalan (konteks + motivasi) → isi profil → link grup
- * WhatsApp. RLS whatsapp_groups baru terbuka setelah keduanya tersimpan.
+ * Alur setelah daftar: kenalan (konteks + motivasi) → isi profil → kanal
+ * komunitas (WhatsApp aktif; Telegram & Discord menyusul) + grup per bidang. RLS whatsapp_groups baru terbuka setelah keduanya tersimpan.
  */
 export default function Onboarding({ loaderData }: Route.ComponentProps) {
   const { profile, email } = loaderData;
@@ -62,13 +62,13 @@ export default function Onboarding({ loaderData }: Route.ComponentProps) {
           <>
             <h1 className="page-title">Lengkapi profil member</h1>
             <p className="muted" style={{ marginBottom: 26, maxWidth: '60ch' }}>
-              Setelah profil tersimpan, link grup WhatsApp komunitas langsung muncul. Bagian bertanda (opsional) boleh
+              Setelah profil tersimpan, link komunitas (WhatsApp, Telegram, Discord) langsung muncul. Bagian bertanda (opsional) boleh
               dilengkapi nanti. Profil akan tampil publik; nomor WhatsApp dan email hanya terlihat oleh kamu dan admin. Email akun: {email}.{' '}
               <button className="link-btn" type="button" onClick={() => goTo('kenalan')}>Ubah jawaban kenalan</button>
             </p>
             <ProfileForm
               profile={profile}
-              submitLabel="Simpan & dapatkan link grup"
+              submitLabel="Simpan & dapatkan link komunitas"
               onSaved={async () => {
                 const [{ data }] = await Promise.all([
                   supabase().from('whatsapp_groups').select('*').order('sort_order').order('created_at'),
@@ -158,18 +158,21 @@ function MotivationStep({ motivation, onSaved }: { motivation: MemberMotivationR
 }
 
 function Welcome({ groups, next, name }: { groups: WhatsappGroupRow[]; next: string; name: string }) {
-  // Belum ada grup di admin: pakai link komunitas publik, atau minta ke admin.
-  const fallback = WA_COMMUNITY_URL || adminWaLink(`Halo admin, saya ${name}. Profil saya di swegrowth.id sudah lengkap, minta link grup WhatsApp ya.`);
-
   return (
     <>
       <h1 className="page-title">Profil tersimpan. Selamat bergabung, {name.split(' ')[0]}!</h1>
       <p className="muted" style={{ marginBottom: 22, maxWidth: '58ch' }}>
-        Gabung ke grup WhatsApp di bawah. Link ini juga selalu ada di portal kalau nanti kamu butuh lagi.
+        Yuk langsung gabung ke WhatsApp, tempat ngobrol utama yang sudah aktif dari awal. Telegram dan Discord bakal
+        diaktifkan ke depannya. Semua link ini juga selalu ada di portal.
       </p>
 
       <div className="panel" style={{ marginBottom: 22 }}>
-        {groups.length > 0 ? (
+        <CommunityChannels />
+      </div>
+
+      {groups.length > 0 && (
+        <div className="panel" style={{ marginBottom: 22 }}>
+          <div className="panel-head"><h2>Grup per bidang</h2></div>
           <ul className="rows">
             {groups.map((g) => (
               <li key={g.id}>
@@ -177,21 +180,12 @@ function Welcome({ groups, next, name }: { groups: WhatsappGroupRow[]; next: str
                   <strong>{g.name}</strong>
                   {g.description && <span>{g.description}</span>}
                 </div>
-                <a className="btn btn-primary sm" href={g.invite_url} target="_blank" rel="noopener">Gabung</a>
+                <a className="btn btn-ghost sm" href={g.invite_url} target="_blank" rel="noopener">Gabung</a>
               </li>
             ))}
           </ul>
-        ) : (
-          <div className="rows">
-            <div className="row-main" style={{ marginBottom: 12 }}>
-              <strong>Grup WhatsApp SWE Growth</strong>
-            </div>
-            <a className="btn btn-primary sm" href={fallback} target="_blank" rel="noopener">
-              {WA_COMMUNITY_URL ? 'Gabung grup' : 'Minta link ke admin'}
-            </a>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <Link className="btn btn-ghost" to={next}>Lanjut ke portal</Link>
     </>

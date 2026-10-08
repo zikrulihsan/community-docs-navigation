@@ -12,11 +12,44 @@ export const SITE_URL = 'https://swegrowth.id';
  */
 export const MEMBERSHIP_LIVE = false;
 
+export type CommunityChannel = {
+  id: 'whatsapp' | 'telegram' | 'discord';
+  name: string;
+  /** null = link belum ada (tombol tampil "Menyusul"). */
+  url: string | null;
+  /** active = sudah jalan; soon = diaktifkan ke depannya. */
+  status: 'active' | 'soon';
+  note: string;
+};
+
 /**
- * Link gabung komunitas WhatsApp yang gratis. Kosongkan kalau belum ada link
- * publik — tombolnya otomatis diganti "Tanya admin".
+ * Kanal komunitas yang ditawarkan setelah member selesai daftar (onboarding)
+ * dan di portal. Saat Telegram/Discord sudah jalan: ubah status jadi 'active'
+ * (Discord: isi url-nya juga).
  */
-export const WA_COMMUNITY_URL = '';
+export const COMMUNITY_CHANNELS: CommunityChannel[] = [
+  {
+    id: 'whatsapp',
+    name: 'WhatsApp',
+    url: 'https://chat.whatsapp.com/KljBBOPkaGlHlBnrqY8tnz',
+    status: 'active',
+    note: 'Tempat ngobrol utama, sudah aktif dari awal. Mulai dari sini.',
+  },
+  {
+    id: 'telegram',
+    name: 'Telegram',
+    url: 'https://t.me/+-qwYuyEIHgswN2Fl',
+    status: 'soon',
+    note: 'Segera diaktifkan. Boleh gabung duluan.',
+  },
+  {
+    id: 'discord',
+    name: 'Discord',
+    url: null,
+    status: 'soon',
+    note: 'Segera diaktifkan. Link-nya menyusul.',
+  },
+];
 
 /** Yang disiapkan untuk verified member (tampil di halaman membership "segera hadir"). */
 export const MEMBER_BENEFITS = [

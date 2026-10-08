@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useRevalidator } from 'react-router';
 import type { Route } from './+types/portal';
+import { CommunityChannels } from '~/components/CommunityChannels';
 import { PortalHeader } from '~/components/PortalHeader';
 import { activityPath, activityStatusLabel, isActivityUpcoming, registeredPath, type Activity } from '~/lib/activities';
 import { requireUser } from '~/lib/auth';
@@ -47,14 +48,14 @@ const registrationLabel: Record<RegistrationStatus, string> = {
 
 export default function Portal({ loaderData }: Route.ComponentProps) {
   const { mine, others, groups, recommendations } = loaderData;
-  const empty = mine.length === 0 && others.length === 0 && groups.length === 0;
+  const empty = mine.length === 0 && others.length === 0;
 
   return (
     <>
       <PortalHeader />
       <section className="block" style={{ paddingTop: 8 }}>
         <div className="wrap narrow-wrap portal-stack">
-          {empty && <p className="muted">Belum ada agenda atau grup. Saat admin menambahkannya, semuanya muncul di halaman ini.</p>}
+          {empty && <p className="muted">Belum ada agenda. Saat admin menambahkannya, semuanya muncul di halaman ini.</p>}
 
           {mine.length > 0 && (
             <div className="panel">
@@ -70,9 +71,14 @@ export default function Portal({ loaderData }: Route.ComponentProps) {
             </div>
           )}
 
+          <div className="panel">
+            <div className="panel-head"><h2>Gabung komunitas</h2></div>
+            <CommunityChannels />
+          </div>
+
           {groups.length > 0 && (
             <div className="panel">
-              <div className="panel-head"><h2>Grup WhatsApp member</h2></div>
+              <div className="panel-head"><h2>Grup per bidang</h2></div>
               <ul className="rows">
                 {groups.map((g) => (
                   <li key={g.id}>

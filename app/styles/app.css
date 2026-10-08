@@ -220,3 +220,20 @@
 .calendar-panel.error { border-left-color: #e5484d; }
 .calendar-panel > div:first-child { display: grid; gap: 2px; max-width: 62ch; }
 .calendar-panel span { color: var(--ink-soft); font-size: .9rem; }
+
+/* Kanal komunitas (onboarding & portal). */
+.channels { list-style: none; padding: 0; margin: 0; display: grid; }
+.channels > li { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.channels > li:first-child { padding-top: 0; }
+.channels > li:last-child { border-bottom: 0; padding-bottom: 0; }
+.channel-ic { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: var(--bg-2); color: var(--teal); }
+.channel-ic svg { width: 21px; height: 21px; }
+.channels > li[data-status="active"] .channel-ic { background: var(--teal); color: var(--yellow); }
+.channel-main { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.channel-name { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.channel-main > span { color: var(--ink-faint); font-size: .86rem; }
+.channel-later { flex: none; padding: 6px 12px; border: 1px dashed var(--line-2); border-radius: var(--r-sm); color: var(--ink-faint); font-size: .84rem; font-weight: 650; }
+@media (max-width: 520px) {
+  .channels > li { flex-wrap: wrap; }
+  .channels > li > .btn, .channel-later { margin-left: 56px; }
+}
