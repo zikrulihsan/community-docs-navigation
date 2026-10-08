@@ -27,7 +27,7 @@ export function useMutation() {
     const { error } = await fn();
     setBusy(false);
     if (error) {
-      setMessage({ kind: 'error', text: error.code === '23505' ? 'Slug sudah dipakai. Ganti slug-nya.' : `Belum tersimpan: ${error.message}` });
+      setMessage({ kind: 'error', text: error.code === '23505' ? 'Sudah ada data yang sama (slug atau link). Ganti dulu, ya.' : `Belum tersimpan: ${error.message}` });
       return false;
     }
     setMessage({ kind: 'success', text: success });

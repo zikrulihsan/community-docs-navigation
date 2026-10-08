@@ -187,6 +187,56 @@ export type PublishedContribution = Pick<MemberContributionRow, 'id' | 'title' |
   maker_avatar_url: string | null;
 };
 
+export type RecommendationCategory = 'acara' | 'komunitas' | 'course' | 'buku' | 'podcast' | 'youtube' | 'newsletter' | 'lainnya';
+export type RecommendationStatus = 'pending' | 'approved' | 'rejected' | 'hidden';
+export type RecommendationPrice = 'gratis' | 'berbayar' | 'freemium';
+export type RecommendationLanguage = 'id' | 'en';
+export type RecommendationRejectReason = 'duplikat' | 'kurang_relevan' | 'link_mati' | 'promosi' | 'tidak_sesuai_coc';
+
+export type RecommendationRow = {
+  id: string;
+  category: RecommendationCategory;
+  title: string;
+  url: string;
+  /** "Kenapa direkomendasikan" — isi utama kartu. */
+  reason: string;
+  /** Penulis (buku) atau penyelenggara/pembuat. */
+  organizer: string;
+  topics: string[];
+  price: RecommendationPrice | null;
+  language: RecommendationLanguage | null;
+  /** Khusus acara (yyyy-mm-dd); acara yang lewat tidak tampil di direktori. */
+  event_date: string | null;
+  event_mode: ActivityMode | null;
+  location: string;
+  /** Link afiliasi resmi SWE Growth (hanya admin yang menandai). */
+  is_affiliate: boolean;
+  source: 'admin' | 'member';
+  submitted_by: string | null;
+  show_recommender: boolean;
+  status: RecommendationStatus;
+  is_featured: boolean;
+  featured_order: number;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  reject_reason: RecommendationRejectReason | null;
+  reject_note: string;
+  created_at: string;
+  updated_at: string;
+};
+
+/** Hasil published_recommendations(): hanya kolom aman. */
+export type PublishedRecommendation = Pick<
+  RecommendationRow,
+  | 'id' | 'category' | 'title' | 'url' | 'reason' | 'organizer' | 'topics' | 'price' | 'language'
+  | 'event_date' | 'event_mode' | 'location' | 'is_affiliate' | 'source' | 'is_featured' | 'featured_order' | 'created_at'
+> & {
+  /** Terisi kalau usulan member yang mengizinkan namanya tampil dan profilnya publik. */
+  recommender_name: string | null;
+  recommender_handle: string | null;
+  recommender_avatar_url: string | null;
+};
+
 export type ActivityMemberInfoRow = {
   activity_id: string;
   meeting_url: string | null;
@@ -222,6 +272,7 @@ export type Database = {
       curators: Table<{ user_id: string; created_at: string }, 'user_id', 'created_at'>;
       whatsapp_groups: Table<WhatsappGroupRow, 'name' | 'invite_url', 'id' | 'created_at'>;
       member_contributions: Table<MemberContributionRow, 'title' | 'url', 'id' | 'created_at'>;
+      recommendations: Table<RecommendationRow, 'category' | 'title' | 'url' | 'reason', Timestamps>;
       activity_member_info: Table<ActivityMemberInfoRow, 'activity_id', 'updated_at'>;
     };
     Views: Record<string, never>;
@@ -232,6 +283,26 @@ export type Database = {
       has_complete_profile: { Args: Record<string, never>; Returns: boolean };
       public_profile: { Args: { p_handle: string }; Returns: PublicProfile[] };
       published_contributions: { Args: Record<string, never>; Returns: PublishedContribution[] };
+      published_recommendations: { Args: Record<string, never>; Returns: PublishedRecommendation[] };
+      check_recommendation_url: { Args: { p_url: string; p_exclude_id?: string | null }; Returns: { title: string; status: RecommendationStatus }[] };
+      submit_recommendation: {
+        Args: {
+          p_category: RecommendationCategory;
+          p_title: string;
+          p_url: string;
+          p_reason: string;
+          p_organizer?: string;
+          p_topics?: string[];
+          p_price?: RecommendationPrice | null;
+          p_language?: RecommendationLanguage | null;
+          p_event_date?: string | null;
+          p_event_mode?: ActivityMode | null;
+          p_location?: string;
+          p_show_recommender?: boolean;
+          p_id?: string | null;
+        };
+        Returns: string;
+      };
       activity_public_stats: { Args: { p_activity_id: string }; Returns: { confirmed: number; waitlisted: number }[] };
       join_activity: {
         Args: { p_activity_id: string; p_name: string; p_whatsapp: string; p_answers?: Record<string, string> };

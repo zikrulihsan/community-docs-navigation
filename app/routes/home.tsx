@@ -2,19 +2,31 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import type { Route } from './+types/home';
 import { AgendaList } from '~/components/AgendaList';
+import { RecommendationCard } from '~/components/RecommendationCard';
 import { Avatar } from '~/components/Avatar';
 import { SOCIALS } from '~/components/Socials';
-import { ArrowUpRight, BookIcon, BriefcaseIcon, ChatIcon, MicIcon, UsersIcon, VideoIcon } from '~/components/Icons';
+import { ArrowRight, ArrowUpRight, BookIcon, BriefcaseIcon, ChatIcon, MicIcon, UsersIcon, VideoIcon } from '~/components/Icons';
 import { getPublishedActivities, isActivityUpcoming } from '~/lib/activities';
 import { useAuth } from '~/lib/auth';
 import { getPublishedContributions } from '~/lib/contributions';
+import type { RecommendationCategory } from '~/lib/database.types';
+import { CATEGORIES, directoryPath, getPublishedRecommendations, SUBMIT_PATH } from '~/lib/recommendations';
+import { TOPICS } from '~/lib/topics';
 import { pageMeta } from '~/lib/site';
 
 export const meta: Route.MetaFunction = () => pageMeta('SWE Growth — komunitas software engineer Indonesia');
 
 const load = async () => {
-  const [activities, contributions] = await Promise.all([getPublishedActivities(), getPublishedContributions()]);
-  return { activities: activities.filter(isActivityUpcoming).slice(0, 3), contributions };
+  const [activities, contributions, recommendations] = await Promise.all([
+    getPublishedActivities(),
+    getPublishedContributions(),
+    getPublishedRecommendations(),
+  ]);
+  return {
+    activities: activities.filter(isActivityUpcoming).slice(0, 3),
+    contributions,
+    recommendations: recommendations.filter((r) => r.is_featured),
+  };
 };
 
 export async function loader() {
@@ -42,28 +54,15 @@ const ACTIVITIES = [
   { icon: <MicIcon />, name: 'Talkshow', body: 'Cerita perjalanan karier langsung dari praktisi.' },
 ];
 
-/** Pola: apa yang dibahas + kenapa penting sekarang. Maksimal dua kalimat. */
-const TOPICS = [
-  { name: 'AI terkini', body: 'Tools dan model AI terbaru, plus cara makenya di kerjaan. Cara kerja engineer lagi berubah cepet.' },
-  { name: 'CS fundamental', body: 'Struktur data, algoritma, OS, jaringan. Pas AI bisa nulis kode, pemahaman dasar jadi pembeda.' },
-  { name: 'English speaking', body: 'Latihan ngomong Inggris bareng. Peluang remote dan tim global makin kebuka.' },
-  { name: 'Backend', body: 'API, database, arsitektur. Salah desain di awal makin mahal benerinnya.' },
-  { name: 'Frontend', body: 'Framework, performa, aksesibilitas. Ekosistemnya gerak cepet banget.' },
-  { name: 'Mobile dev', body: 'Android, iOS, Flutter, React Native. Kebanyakan pengguna di Indonesia aksesnya lewat HP.' },
-  { name: 'Infra & DevOps', body: 'Cloud, CI/CD, observability. Biaya infra makin disorot.' },
-  { name: 'Managerial', body: 'Jadi tech lead atau EM. Naik level butuh skill ngurus orang, bukan cuma kode.' },
-  { name: 'Karier & loker', body: 'Loker, referral, persiapan interview. Pasar kerja lagi ketat.' },
-  { name: 'System design', body: 'Bedah cara sistem besar dibangun. Ini tolok ukur buat naik ke senior.' },
-  { name: 'Personal project', body: 'Side project dari iseng sampai jadi produk. Cara paling cepet buat belajar hal baru sekaligus nambah portofolio.' },
-  { name: 'Buku', body: 'Rekomendasi dan obrolan buku, dari engineering sampai pengembangan diri. Biar belajarnya nggak cuma dari thread.' },
-  { name: 'Hidup sehat', body: 'Olahraga, tidur, dan jaga mental biar nggak burnout. Seharian kerja di depan layar ada harganya.' },
-];
 
-export default function Home({ loaderData: { activities, contributions } }: Route.ComponentProps) {
+export default function Home({ loaderData: { activities, contributions, recommendations } }: Route.ComponentProps) {
   const { user } = useAuth();
   const [picked, setPicked] = useState(0);
   const [hovered, setHovered] = useState<number | null>(null);
   const active = TOPICS[hovered ?? picked];
+  const [recCategory, setRecCategory] = useState<RecommendationCategory | null>(null);
+  const recCategories = CATEGORIES.filter((c) => recommendations.some((r) => r.category === c.id));
+  const featured = recommendations.filter((r) => !recCategory || r.category === recCategory).slice(0, 6);
 
   const joinButton = user ? (
     <Link className="btn btn-primary" to="/portal">Buka portal</Link>
@@ -99,7 +98,7 @@ export default function Home({ loaderData: { activities, contributions } }: Rout
               <h2>Kegiatan terdekat</h2>
             </div>
             <div className="panel"><AgendaList activities={activities} /></div>
-            <Link className="text-link more-link" to="/agenda">Semua agenda</Link>
+            <Link className="btn btn-ghost more-link" to="/agenda">Lihat semua agenda <ArrowRight /></Link>
           </div>
         </section>
       )}
@@ -151,6 +150,32 @@ export default function Home({ loaderData: { activities, contributions } }: Rout
           </div>
         </div>
       </section>
+
+      {recommendations.length > 0 && (
+        <section className="home-section">
+          <div className="wrap narrow-wrap">
+            <div className="home-head">
+              <p className="home-label">Rekomendasi</p>
+              <h2>Tempat lain buat grow</h2>
+            </div>
+            {recCategories.length > 1 && (
+              <div className="rec-tabs home-rec-tabs" role="group" aria-label="Kategori rekomendasi">
+                <button type="button" aria-pressed={!recCategory} onClick={() => setRecCategory(null)}>Semua</button>
+                {recCategories.map((c) => (
+                  <button key={c.id} type="button" aria-pressed={recCategory === c.id} onClick={() => setRecCategory(c.id)}>{c.label}</button>
+                ))}
+              </div>
+            )}
+            <ul className="rec-grid">
+              {featured.map((r) => <RecommendationCard key={r.id} r={r} />)}
+            </ul>
+            <div className="home-rec-more">
+              <Link className="btn btn-ghost" to={directoryPath(recCategory ?? undefined)}>Lihat semua rekomendasi <ArrowRight /></Link>
+              <Link className="text-link" to={SUBMIT_PATH}>Punya rekomendasi? Kirim ke kita</Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {contributions.length > 0 && (
         <section className="home-section contrib-band">

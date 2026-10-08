@@ -88,7 +88,7 @@ a.contrib-maker:hover { text-decoration: underline; text-underline-offset: 3px; 
 @media (max-width: 560px) { .contrib-main p { white-space: normal; } }
 
 /* Agenda (tepat di bawah hero) + penutup. */
-.home .more-link { display: inline-block; margin-top: 16px; }
+.home .more-link { margin-top: 24px; }
 #terdekat { scroll-margin-top: 64px; }
 .home .panel { max-width: 720px; margin-inline: auto; text-align: left; }
 /* Penutup: satu kotak teal berisi ajakan + media sosial. */
@@ -274,3 +274,105 @@ a.contrib-maker:hover { text-decoration: underline; text-underline-offset: 3px; 
 .past-activities time { flex: none; width: 72px; }
 .past-activities p { margin-top: 12px; }
 .past-activities a { color: inherit; text-decoration: underline; }
+
+/* --- Rekomendasi (landing, /rekomendasi, form kirim, portal, admin) ---
+   Kartu grid dengan warna per kategori: beda dari agenda (panel baris) dan
+   kontribusi (daftar baris). Warna kategori hanya di label & garis atas kartu. */
+.rec-card { --cat: var(--line-2); }
+.rec-card[data-category="acara"] { --cat: #f0d65c; }
+.rec-card[data-category="komunitas"] { --cat: #7dd957; }
+.rec-card[data-category="course"] { --cat: #6cc4c9; }
+.rec-card[data-category="buku"] { --cat: #e8a87c; }
+.rec-card[data-category="podcast"] { --cat: #c9a6e8; }
+.rec-card[data-category="youtube"] { --cat: #f08a7e; }
+.rec-card[data-category="newsletter"] { --cat: #9cc7f0; }
+
+.rec-grid { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; text-align: left; }
+.rec-card {
+  position: relative; flex: 0 1 calc((100% - 32px) / 3); min-width: 0; display: flex; flex-direction: column; gap: 8px;
+  padding: 18px 20px 16px; background: var(--paper); border: 1px solid var(--line); border-top: 4px solid var(--cat); border-radius: var(--r);
+  transition: transform .2s var(--ease), box-shadow .2s;
+}
+.rec-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -22px rgb(11 61 64 / .45); }
+.rec-top { display: flex; align-items: center; justify-content: space-between; }
+.rec-cat { padding: 2px 10px; border-radius: 999px; background: color-mix(in srgb, var(--cat) 35%, var(--paper)); color: var(--ink); font-size: .74rem; font-weight: 700; }
+.rec-go { display: grid; color: var(--ink-faint); transition: color .15s; }
+.rec-go svg { width: 16px; height: 16px; }
+.rec-card:hover .rec-go { color: var(--green-deep); }
+.rec-card h3 { font-size: 1.05rem; line-height: 1.3; }
+.rec-link::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+.rec-organizer { font-size: .84rem; color: var(--ink-faint); font-weight: 600; }
+.rec-reason { color: var(--ink-soft); font-size: .92rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.rec-meta { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.rec-meta li { padding: 1px 8px; border-radius: 6px; background: var(--bg); color: var(--ink-soft); font-size: .76rem; font-weight: 600; }
+.rec-by { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; margin-top: auto; padding-top: 10px; border-top: 1px dashed var(--line); font-size: .8rem; font-weight: 600; color: var(--ink-faint); }
+.rec-by-member, .rec-by-swe { display: inline-flex; align-items: center; gap: 6px; }
+.rec-by-member { position: relative; z-index: 1; color: var(--green-deep); }
+.rec-by-member:hover { text-decoration: underline; text-underline-offset: 3px; }
+.rec-by-swe img { border-radius: 5px; }
+.rec-aff { font-size: .72rem; color: var(--ink-faint); }
+@media (max-width: 860px) { .rec-card { flex-basis: calc((100% - 16px) / 2); } }
+@media (max-width: 560px) { .rec-card { flex-basis: 100%; } }
+
+/* Tab kategori (landing & direktori). */
+.rec-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.home-rec-tabs { justify-content: center; }
+.rec-tabs button {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px;
+  border: 1px solid var(--line-2); background: var(--paper); color: var(--ink-soft); font-weight: 650; font-size: .88rem; cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.rec-tabs button:hover { border-color: var(--ink-faint); color: var(--ink); }
+.rec-tabs button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: var(--cream); }
+.rec-tabs button span { font-size: .74rem; opacity: .7; }
+.home-rec-more { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 22px; margin-top: 28px; }
+
+/* Direktori /rekomendasi */
+.rec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 24px; margin-bottom: 26px; }
+.rec-head .muted { max-width: 60ch; }
+.rec-filters { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 24px; }
+.rec-filters input, .rec-filters select { width: 100%; min-height: 42px; padding: 8px 12px; border: 1px solid var(--line-2); border-radius: var(--r-sm); background: var(--paper); color: var(--ink); }
+.rec-filters input:focus, .rec-filters select:focus { outline: none; border-color: var(--green-deep); box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 28%, transparent); }
+.rec-grid.start { justify-content: flex-start; }
+.rec-empty { display: grid; justify-items: center; gap: 14px; }
+@media (max-width: 760px) { .rec-filters { grid-template-columns: 1fr 1fr; } .rec-filters input { grid-column: 1 / -1; } }
+
+/* Form kirim */
+.rec-form-wrap { max-width: calc(640px + 56px); }
+.rec-form { max-width: none; }
+.rec-form .page-title { font-size: clamp(1.5rem, 3vw, 1.9rem); }
+.rec-form fieldset { border: 0; padding: 0; }
+.rec-form legend { margin-bottom: 8px; font-weight: 700; font-size: .88rem; }
+.rec-form legend small, .field label small { font-weight: 500; color: var(--ink-faint); }
+.rec-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.rec-pick label {
+  display: inline-flex; align-items: center; padding: 6px 13px; border: 1px solid var(--line-2); border-radius: 999px;
+  background: var(--paper); color: var(--ink-soft); font-size: .86rem; font-weight: 650; cursor: pointer; transition: background .15s, border-color .15s, color .15s;
+}
+.rec-pick label:hover { border-color: var(--ink-faint); }
+.rec-pick label.on { background: var(--teal); border-color: var(--teal); color: var(--cream); }
+.rec-pick label:has(input:disabled) { opacity: .45; cursor: not-allowed; }
+.rec-pick label:has(input:focus-visible) { outline: 2px solid var(--green-deep); outline-offset: 2px; }
+.rec-pick input { position: absolute; opacity: 0; pointer-events: none; }
+.rec-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 14px; }
+.rec-check { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: .92rem; font-weight: 600; cursor: pointer; }
+.rec-check input { width: 18px; height: 18px; accent-color: var(--teal); }
+.rec-rules { margin-bottom: 18px; padding: 12px 14px; border-radius: var(--r-sm); background: var(--bg); color: var(--ink-soft); font-size: .85rem; }
+.rec-rules a { color: var(--green-deep); font-weight: 700; }
+.rec-done { max-width: 560px; margin-inline: auto; text-align: center; justify-items: center; display: grid; }
+.rec-done .inline-actions { justify-content: center; }
+
+/* Portal: Rekomendasiku */
+#rekomendasiku { scroll-margin-top: 84px; }
+.rows .row-main .rec-row-actions { display: flex; gap: 16px; margin-top: 4px; }
+.rec-status.pending { background: color-mix(in srgb, var(--yellow) 40%, var(--paper)); border-color: var(--yellow); color: var(--teal); }
+.rec-status.approved { background: color-mix(in srgb, var(--green) 20%, var(--paper)); border-color: color-mix(in srgb, var(--green) 60%, var(--line)); color: var(--ink); }
+.rec-status.rejected { background: color-mix(in srgb, #e5484d 12%, var(--paper)); border-color: color-mix(in srgb, #e5484d 35%, var(--line)); color: var(--ink); }
+
+/* Admin */
+.rec-admin-tabs { margin-top: 0; }
+.rec-admin-item { display: grid; gap: 10px; }
+.rec-admin-item > div:first-child { display: grid; gap: 3px; }
+.rec-admin-item a.slug { color: var(--green-deep); overflow-wrap: anywhere; }
+.rec-admin-reason { margin: 4px 0; padding-left: 10px; border-left: 3px solid var(--line-2); color: var(--ink-soft); font-size: .92rem; }
+.rec-reject { padding: 14px; border-radius: var(--r-sm); background: var(--bg); }

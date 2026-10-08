@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import type { Route } from './+types/admin';
+import { RecommendationsAdmin } from '~/components/RecommendationsAdmin';
 import { ACTIVITY_STATUSES, activityStatusLabel } from '~/lib/activities';
 import { Field, todayWib, useMutation, val } from '~/lib/admin-form';
 import { requireAdmin, useAuth } from '~/lib/auth';
@@ -23,7 +24,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   await requireAdmin(request);
   const db = supabase();
 
-  const [profiles, memberships, motivations, activities, registrations, groups, contributions] = await Promise.all([
+  const [profiles, memberships, motivations, activities, registrations, groups, contributions, recommendations] = await Promise.all([
     db.from('profiles').select('*').order('created_at', { ascending: false }),
     db.from('memberships').select('*'),
     db.from('member_motivations').select('*'),
@@ -31,6 +32,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
     db.from('activity_registrations').select('activity_id, status'),
     db.from('whatsapp_groups').select('*').order('sort_order').order('created_at'),
     db.from('member_contributions').select('*').order('sort_order').order('created_at'),
+    db.from('recommendations').select('*').order('created_at', { ascending: false }),
   ]);
   return {
     profiles: profiles.data ?? [],
@@ -40,6 +42,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
     registrations: registrations.data ?? [],
     groups: groups.data ?? [],
     contributions: contributions.data ?? [],
+    recommendations: recommendations.data ?? [],
   };
 }
 
@@ -47,18 +50,20 @@ export function HydrateFallback() {
   return <div className="loading-block">Memuat admin…</div>;
 }
 
-type Tab = 'member' | 'event' | 'grup' | 'kontribusi';
+type Tab = 'member' | 'event' | 'grup' | 'kontribusi' | 'rekomendasi';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'member', label: 'Member' },
   { id: 'event', label: 'Event' },
   { id: 'grup', label: 'Grup WhatsApp' },
   { id: 'kontribusi', label: 'Kontribusi member' },
+  { id: 'rekomendasi', label: 'Rekomendasi' },
 ];
 
 export default function Admin({ loaderData }: Route.ComponentProps) {
   const { user } = useAuth();
   const [params] = useSearchParams();
   const tab = TABS.find((t) => t.id === params.get('tab'))?.id ?? 'member';
+  const pendingRecs = loaderData.recommendations.filter((r) => r.status === 'pending').length;
 
   return (
     <section className="block">
@@ -70,6 +75,7 @@ export default function Admin({ loaderData }: Route.ComponentProps) {
           {TABS.map((t) => (
             <Link key={t.id} to={t.id === 'member' ? '/admin' : `/admin?tab=${t.id}`} aria-current={tab === t.id ? 'page' : undefined}>
               {t.label}
+              {t.id === 'rekomendasi' && pendingRecs > 0 && <span className="chip yellow tab-soon">{pendingRecs}</span>}
             </Link>
           ))}
         </nav>
@@ -78,6 +84,7 @@ export default function Admin({ loaderData }: Route.ComponentProps) {
           {tab === 'member' && <MembersAdmin profiles={loaderData.profiles} memberships={loaderData.memberships} motivations={loaderData.motivations} />}
           {tab === 'event' && <ActivitiesAdmin activities={loaderData.activities} registrations={loaderData.registrations} />}
           {tab === 'grup' && <GroupsAdmin groups={loaderData.groups} />}
+          {tab === 'rekomendasi' && <RecommendationsAdmin items={loaderData.recommendations} profiles={loaderData.profiles} />}
           {tab === 'kontribusi' && <ContributionsAdmin contributions={loaderData.contributions} profiles={loaderData.profiles} />}
         </div>
       </div>
