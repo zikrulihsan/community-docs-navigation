@@ -3,6 +3,9 @@ export const ADMIN_WA = '6282338588078';
 
 export const SITE_NAME = 'SWE Growth';
 
+/** Domain produksi; dipakai untuk URL absolut (preview link butuh og:image absolut). */
+export const SITE_URL = 'https://swegrowth.id';
+
 /**
  * Membership berbayar & badge verified belum dibuka ("segera hadir"). Saat
  * dirilis: set true, lalu kembalikan alur bayar di routes/membership.tsx.
@@ -33,5 +36,5 @@ export const pageMeta = (title: string, description = DEFAULT_DESCRIPTION) => [
   { name: 'description', content: description },
   { property: 'og:title', content: title },
   { property: 'og:description', content: description },
-  { property: 'og:image', content: '/assets/swe-growth-logo.png' },
+  { property: 'og:image', content: `${SITE_URL}/assets/swe-growth-logo.png` },
 ];
