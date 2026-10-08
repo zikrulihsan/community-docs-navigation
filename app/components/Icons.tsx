@@ -42,3 +42,23 @@ export const PinIcon = () => (
 export const UsersIcon = () => (
   <svg {...stroke} strokeWidth={2}><circle cx="9" cy="8.5" r="3.5" /><path d="M2.5 20c.6-3.4 3.2-5.5 6.5-5.5s5.9 2.1 6.5 5.5M16 5.2a3.5 3.5 0 0 1 0 6.6M18.5 14.8c1.6.8 2.7 2.6 3 5.2" /></svg>
 );
+
+export const ChatIcon = () => (
+  <svg {...stroke} strokeWidth={2}><path d="M4 18.5V6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H8z" /><path d="M8.5 9h7M8.5 12.2h4.5" /></svg>
+);
+
+export const VideoIcon = () => (
+  <svg {...stroke} strokeWidth={2}><rect x="3" y="6" width="12.5" height="12" rx="2.5" /><path d="m15.5 10.5 5-3v9l-5-3" /></svg>
+);
+
+export const BookIcon = () => (
+  <svg {...stroke} strokeWidth={2}><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15.5H5.5A1.5 1.5 0 0 1 4 18zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v15.5h5.5A1.5 1.5 0 0 0 20 18z" /></svg>
+);
+
+export const MicIcon = () => (
+  <svg {...stroke} strokeWidth={2}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" /></svg>
+);
+
+export const BriefcaseIcon = () => (
+  <svg {...stroke} strokeWidth={2}><rect x="3.5" y="7" width="17" height="12.5" rx="2.5" /><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3.5 12.5h17" /></svg>
+);

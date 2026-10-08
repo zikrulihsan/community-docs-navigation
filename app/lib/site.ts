@@ -15,13 +15,6 @@ export const MEMBERSHIP_LIVE = false;
  */
 export const WA_COMMUNITY_URL = '';
 
-/** Isi portal untuk semua akun yang login. */
-export const PORTAL_FEATURES = [
-  'Detail agenda kegiatan dan pendaftaran langsung dari portal',
-  'Link meeting muncul di portal setelah kamu terdaftar',
-  'Profil member yang bisa kamu perbarui kapan saja',
-];
-
 /** Yang disiapkan untuk verified member (tampil di halaman membership "segera hadir"). */
 export const MEMBER_BENEFITS = [
   'Badge verified member di profil',
