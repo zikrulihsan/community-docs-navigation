@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { data, Link, useNavigate } from 'react-router';
 import type { Route } from './+types/event';
 import { Avatar } from '~/components/Avatar';
+import { GoogleSignIn, googleSignInLinks } from '~/components/GoogleSignIn';
 import { CalendarIcon, ClockIcon, PinIcon, UsersIcon } from '~/components/Icons';
 import {
   activityPath,
@@ -20,11 +21,13 @@ import {
   timeRange,
   type Activity,
 } from '~/lib/activities';
-import { signInWithGoogle, useAuth } from '~/lib/auth';
+import { useAuth } from '~/lib/auth';
 import type { RegistrationStatus } from '~/lib/database.types';
 import { formatWibDate, formatWibDay, formatWibTime } from '~/lib/format';
 import { pageMeta } from '~/lib/site';
 import { supabase } from '~/lib/supabase';
+
+export const links: Route.LinksFunction = googleSignInLinks;
 
 export const meta: Route.MetaFunction = ({ loaderData }) => {
   const a = loaderData?.activity;
@@ -252,17 +255,10 @@ function RegisterCard({ activity: a, stats, my }: { activity: Activity; stats: S
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  /** Tamu: login Google lalu lanjut ke `next`. Sudah login: langsung ke `next`. */
-  const go = async (next: string) => {
-    if (user) return navigate(next);
-    setBusy(true);
-    setError(null);
-    const { error: oauthError } = await signInWithGoogle(next);
-    if (oauthError) {
-      setError('Login Google belum bisa dipakai. Coba lewat email.');
-      setBusy(false);
-    }
-  };
+  /** Tombol Google untuk tamu; setelah login lanjut ke `next`. */
+  const guestLogin = (next: string) => (
+    <GoogleSignIn next={next} text="signup_with" onSignedIn={() => navigate(next)} onError={setError} />
+  );
 
   const follow = async () => {
     setBusy(true);
@@ -277,13 +273,6 @@ function RegisterCard({ activity: a, stats, my }: { activity: Activity; stats: S
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const emailFallback = (next: string) =>
-    !user && (
-      <p className="register-note">
-        Tidak pakai Gmail? <Link to={`/masuk?next=${encodeURIComponent(next)}`}>Masuk lewat email</Link>
-      </p>
-    );
 
   const done = a.status === 'completed' || a.status === 'cancelled';
   const action = (() => {
@@ -314,11 +303,14 @@ function RegisterCard({ activity: a, stats, my }: { activity: Activity; stats: S
       if (mine?.following) return <p className="register-state ok">✓ Kamu akan dikabari saat pendaftaran dibuka</p>;
       return (
         <>
-          <button className="btn btn-primary btn-block" type="button" disabled={busy} onClick={() => (user ? follow() : go(activityPath(a)))}>
-            {user ? 'Ingatkan aku' : 'Masuk untuk diingatkan'}
-          </button>
-          <p className="register-note">Pendaftaran belum dibuka. Kami kabari lewat email saat dibuka.</p>
-          {emailFallback(activityPath(a))}
+          {user ? (
+            <button className="btn btn-primary btn-block" type="button" disabled={busy} onClick={follow}>Ingatkan aku</button>
+          ) : (
+            guestLogin(activityPath(a))
+          )}
+          <p className="register-note">
+            {user ? '' : 'Masuk dengan Google, lalu tekan "Ingatkan aku". '}Pendaftaran belum dibuka. Kami kabari lewat email saat dibuka.
+          </p>
         </>
       );
     }
@@ -337,14 +329,15 @@ function RegisterCard({ activity: a, stats, my }: { activity: Activity; stats: S
     const full = a.status === 'full';
     return (
       <>
-        <button className="btn btn-primary btn-block" type="button" disabled={busy} onClick={() => go(registerPath(a))}>
-          {user ? (full ? 'Daftar waitlist' : 'Daftar sekarang') : 'Daftar dengan Google'}
-        </button>
+        {user ? (
+          <Link className="btn btn-primary btn-block" to={registerPath(a)}>{full ? 'Daftar waitlist' : 'Daftar sekarang'}</Link>
+        ) : (
+          guestLogin(registerPath(a))
+        )}
         <p className="register-note">
           {full ? 'Kuota utama penuh; kamu masuk waitlist dan otomatis naik kalau ada yang batal. ' : ''}
           {user ? 'Isi form singkat, data terisi dari profilmu.' : 'Login sekali, lalu isi form singkat.'}
         </p>
-        {emailFallback(registerPath(a))}
       </>
     );
   })();

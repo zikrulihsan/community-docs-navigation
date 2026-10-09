@@ -22,7 +22,7 @@ Prinsip isi: tidak ada data contoh atau angka karangan. Bagian yang datanya koso
 | `/privasi` | publik | Kebijakan privasi (dipakai juga di OAuth consent Google). Perbarui saat ada data/layanan baru |
 | `/term-of-service` | publik | Syarat layanan |
 | `/member/:handle` | publik | Profil publik member (username atau id) + "Member sejak". Tanpa WA, email, dan jawaban kenalan |
-| `/masuk` | publik | Login Google / magic link |
+| `/masuk` | publik | Login Google (satu-satunya metode login) |
 | `/menunggu` | login | Status membership: cara bayar & kabari admin |
 | `/portal` | member aktif | Kegiatan yang diikuti, agenda, grup WhatsApp member |
 | `/portal/profil` | login | Profil member + link profil publik untuk dibagikan |
@@ -55,23 +55,24 @@ npm run build      # output ke build/client
 
 1. Jalankan migration di `supabase/migrations/` **berurutan sesuai nama file** (SQL editor atau `supabase db push`).
    Semuanya aman dijalankan ulang.
-2. **Auth → Providers**: Email (magic link) dan Google aktif, sign-up diizinkan.
+2. **Auth → Providers**: hanya **Google** yang aktif (matikan Email), sign-up diizinkan. Opsi *Skip nonce checks* harus mati.
 3. **Auth → URL Configuration**: Site URL `https://swegrowth.id`; Redirect URLs `https://swegrowth.id/auth/callback`
    dan `http://localhost:4321/auth/callback`.
 4. **Admin**: tambahkan email ke tabel `activity_admin_emails`.
 
-### Uji coba: login Google tanpa domain supabase.co (`/masuk/google`)
+### Login Google tanpa domain supabase.co
 
-Halaman `/masuk/google` memakai tombol Google Identity Services + `signInWithIdToken`, jadi layar dan email
-notifikasi Google menyebut `swegrowth.id`, bukan `<project-ref>.supabase.co`. `/masuk` belum berubah.
+`/masuk` dan tombol daftar di halaman event memakai tombol Google Identity Services + `signInWithIdToken`, jadi layar
+dan email notifikasi Google menyebut `swegrowth.id`, bukan `<project-ref>.supabase.co`. Session tetap dari Supabase.
 
 1. Google Cloud Console → *Credentials* → OAuth client (Web) yang dipakai provider Google di Supabase →
-   **Authorized JavaScript origins**: tambahkan `https://swegrowth.id` dan `http://localhost:4321`.
+   **Authorized JavaScript origins**: `https://swegrowth.id` dan `http://localhost:4321`.
 2. Isi client ID itu ke env `VITE_GOOGLE_CLIENT_ID` (Netlify + `.env`), lalu deploy ulang.
 3. Opsional: *OAuth consent screen → Branding* (nama, logo, homepage, `/privasi`, `/term-of-service`, authorized
    domain `swegrowth.id`) lalu ajukan verifikasi, supaya Google menampilkan nama "SWE Growth".
 
-Tanpa client ID atau kalau script Google diblokir, tombolnya jatuh ke redirect OAuth Supabase seperti di `/masuk`.
+Tanpa client ID atau kalau script Google diblokir, tombolnya jatuh ke redirect OAuth Supabase (`/auth/callback`),
+jadi redirect URL di langkah 3 di atas tetap diperlukan.
 
 `app/lib/database.types.ts` ditulis tangan mengikuti migration; perbarui saat skema berubah.
 

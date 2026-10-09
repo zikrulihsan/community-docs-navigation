@@ -18,6 +18,11 @@
   status = 301
 
 [[redirects]]
+  from = "/masuk/google"
+  to = "/masuk"
+  status = 301
+
+[[redirects]]
   from = "/admin/login"
   to = "/masuk?next=/admin"
   status = 301

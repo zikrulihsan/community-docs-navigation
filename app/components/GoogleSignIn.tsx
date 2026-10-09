@@ -12,6 +12,15 @@ const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
 export const hasGoogleClientId = Boolean(clientId);
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
 
+/** Untuk `links` di route: mulai unduh script Google sejak HTML dibaca, bukan setelah React jalan. */
+export const googleSignInLinks = () =>
+  clientId
+    ? [
+        { rel: 'preconnect', href: 'https://accounts.google.com' },
+        { rel: 'preload', href: GIS_SRC, as: 'script' },
+      ]
+    : [];
+
 type GisButtonText = 'signin_with' | 'signup_with' | 'continue_with';
 
 declare global {
@@ -84,7 +93,7 @@ type Props = {
 const fallbackLabel: Record<GisButtonText, string> = {
   signin_with: 'Masuk dengan Google',
   signup_with: 'Daftar dengan Google',
-  continue_with: 'Lanjut dengan Google',
+  continue_with: 'Lanjutkan dengan Google',
 };
 
 export function GoogleSignIn({ next, text = 'continue_with', onSignedIn, onError }: Props) {
@@ -149,6 +158,13 @@ export function GoogleSignIn({ next, text = 'continue_with', onSignedIn, onError
 
   return (
     <div className="google-signin" aria-busy={busy || mode === 'loading'}>
+      {mode !== 'fallback' && !busy && (
+        // Tiruan tombol Google di bawah slot: langsung tampil, lalu tertutup iframe Google begitu siap.
+        <div className="google-signin-placeholder" aria-hidden="true">
+          <GoogleIcon />
+          {fallbackLabel[text]}
+        </div>
+      )}
       {mode !== 'fallback' && <div ref={slot} className="google-signin-slot" hidden={busy} />}
       {mode === 'fallback' && (
         <button className="btn btn-provider" type="button" onClick={redirectLogin} disabled={busy || !hasSupabase}>
