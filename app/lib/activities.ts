@@ -17,8 +17,15 @@ export const ACTIVITY_STATUSES = Object.keys(activityStatusLabel) as ActivitySta
 
 const isDone = (a: Activity) => a.status === 'completed' || a.status === 'cancelled';
 
-export const isActivityUpcoming = (a: Activity) =>
-  !isDone(a) && (!a.starts_at || isUpcoming(new Date(a.starts_at)));
+/** Belum selesai: dilihat dari ends_at kalau diisi (program panjang yang sudah mulai tetap tampil). */
+export const isActivityUpcoming = (a: Activity) => {
+  const until = a.ends_at ?? a.starts_at;
+  return !isDone(a) && (!until || isUpcoming(new Date(until)));
+};
+
+/** Sudah mulai tapi belum selesai, mis. program yang berjalan beberapa bulan. */
+export const isActivityOngoing = (a: Pick<Activity, 'starts_at' | 'ends_at'>, now = new Date()) =>
+  Boolean(a.starts_at && a.ends_at && new Date(a.starts_at) <= now && new Date(a.ends_at) > now);
 
 export const canRegister = (a: Activity) => a.status === 'registration_open' || a.status === 'full';
 

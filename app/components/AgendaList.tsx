@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
-import { activityPath, activityStatusLabel, type Activity } from '~/lib/activities';
-import { formatWibTime, wibDayParts } from '~/lib/format';
+import { activityPath, activityStatusLabel, isActivityOngoing, type Activity } from '~/lib/activities';
+import { formatWibDate, formatWibTime, wibDayParts } from '~/lib/format';
 
 /** Agenda publik: tiap baris membuka detail event publik (daftar dari sana). */
 export function AgendaList({ activities }: { activities: Activity[] }) {
@@ -16,7 +16,11 @@ export function AgendaList({ activities }: { activities: Activity[] }) {
             <div className="row-main">
               <Link className="title" to={activityPath(a)}>{a.title}</Link>
               <span>
-                {[a.starts_at ? formatWibTime(a.starts_at) : 'Jadwal menyusul', a.mode, activityStatusLabel[a.status]]
+                {[
+                  isActivityOngoing(a) ? `sedang berjalan s.d. ${formatWibDate(a.ends_at!)}` : a.starts_at ? formatWibTime(a.starts_at) : 'Jadwal menyusul',
+                  a.mode,
+                  activityStatusLabel[a.status],
+                ]
                   .filter(Boolean)
                   .join(' · ')}
               </span>
