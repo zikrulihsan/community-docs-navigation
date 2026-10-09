@@ -102,7 +102,7 @@ export default function Portal({ loaderData }: Route.ComponentProps) {
 
 function EventRows({ items }: { items: { activity: Activity; tag: string; href: string }[] }) {
   return (
-    <ul className="rows">
+    <ul className="rows event-rows">
       {items.map(({ activity: a, tag, href }) => {
         const parts = a.starts_at ? wibDayParts(a.starts_at) : null;
         return (

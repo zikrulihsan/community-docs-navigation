@@ -114,6 +114,12 @@ button.nav-account { cursor: pointer; font: inherit; font-weight: 700; font-size
 }
 .date-tile b { font-family: var(--font-display); font-size: 1.15rem; color: var(--yellow); }
 .date-tile span { font-size: .72rem; font-weight: 600; color: var(--on-teal); }
+/* Di HP chip status turun ke bawah judul (sejajar teks), supaya judul tidak terlipat per kata. */
+@media (max-width: 560px) {
+  .event-rows > li { flex-wrap: wrap; row-gap: 6px; }
+  .event-rows .row-main { flex-basis: calc(100% - 64px); }
+  .event-rows .chip { margin-left: 64px; }
+}
 
 /* ---------- Form profil ---------- */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }

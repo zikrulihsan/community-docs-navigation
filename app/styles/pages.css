@@ -167,7 +167,8 @@ a.contrib-maker:hover { text-decoration: underline; text-underline-offset: 3px; 
 /* --- Portal --- */
 .portal-head { padding-top: 36px; }
 .verified-badge { margin-left: 12px; vertical-align: middle; }
-.portal-stack { display: grid; gap: 22px; }
+/* minmax(0, 1fr): scroller kanal di HP tidak boleh melebarkan kolom melewati layar. */
+.portal-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 
 /* --- Detail event --- */
 .back { display: block; width: fit-content; color: var(--ink-faint); font-size: .9rem; margin-bottom: 14px; }
