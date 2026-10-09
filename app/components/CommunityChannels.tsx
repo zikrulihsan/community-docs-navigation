@@ -12,26 +12,34 @@ const ICONS: Record<CommunityChannel['id'], React.ReactNode> = {
   ),
 };
 
-/** Kanal komunitas (onboarding & portal): WhatsApp aktif, Telegram & Discord menyusul. */
+const BADGE: Record<CommunityChannel['status'], { label: string; tone: string }> = {
+  active: { label: 'Aktif', tone: 'green' },
+  new: { label: 'Baru', tone: 'yellow' },
+  soon: { label: 'Segera hadir', tone: '' },
+};
+
+/** Kanal komunitas (onboarding & portal): kartu berjajar dengan tinggi sama. */
 export function CommunityChannels() {
   return (
     <ul className="channels">
       {COMMUNITY_CHANNELS.map((c) => (
         <li key={c.id} data-status={c.status}>
-          <span className="channel-ic" data-channel={c.id}>{ICONS[c.id]}</span>
-          <div className="channel-main">
-            <div className="channel-name">
-              <strong>{c.name}</strong>
-              <span className={`chip ${c.status === 'active' ? 'green' : 'yellow'}`}>{c.status === 'active' ? 'Aktif' : 'Segera aktif'}</span>
-            </div>
-            <span>{c.note}</span>
+          <div className="channel-head">
+            <span className="channel-ic">{ICONS[c.id]}</span>
+            <span className={`chip ${BADGE[c.status].tone}`}>{BADGE[c.status].label}</span>
           </div>
+          <strong className="channel-name">{c.name}</strong>
+          <p className="channel-note">{c.note}</p>
+          {c.topics && (
+            <ul className="channel-topics">
+              {c.topics.map((t) => <li key={t}>{t}</li>)}
+              <li>+ lainnya</li>
+            </ul>
+          )}
           {c.url ? (
-            <a className={`btn ${c.status === 'active' ? 'btn-primary' : 'btn-ghost'} sm`} href={c.url} target="_blank" rel="noopener">
-              {c.status === 'active' ? `Gabung ${c.name}` : 'Gabung duluan'}
-            </a>
+            <a className={`btn ${c.status === 'active' ? 'btn-primary' : 'btn-ghost'} sm channel-cta`} href={c.url} target="_blank" rel="noopener">{c.cta}</a>
           ) : (
-            <span className="channel-later">Menyusul</span>
+            <span className="channel-later channel-cta">{c.cta}</span>
           )}
         </li>
       ))}

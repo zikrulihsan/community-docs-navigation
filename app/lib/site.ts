@@ -17,37 +17,44 @@ export type CommunityChannel = {
   name: string;
   /** null = link belum ada (tombol tampil "Menyusul"). */
   url: string | null;
-  /** active = sudah jalan; soon = diaktifkan ke depannya. */
-  status: 'active' | 'soon';
+  /** active = jalan sejak awal; new = baru dibuka, ajak orang jadi yang pertama; soon = belum dibuka. */
+  status: 'active' | 'new' | 'soon';
   note: string;
+  /** Label tombol. */
+  cta: string;
+  /** Kisi-kisi topik diskusi di kanal ini. */
+  topics?: string[];
 };
 
 /**
  * Kanal komunitas yang ditawarkan setelah member selesai daftar (onboarding)
- * dan di portal. Saat Telegram/Discord sudah jalan: ubah status jadi 'active'
- * (Discord: isi url-nya juga).
+ * dan di portal. Saat Discord dibuka: isi url-nya dan ganti status.
  */
 export const COMMUNITY_CHANNELS: CommunityChannel[] = [
   {
     id: 'whatsapp',
     name: 'WhatsApp',
-    url: 'https://chat.whatsapp.com/KljBBOPkaGlHlBnrqY8tnz',
+    url: 'https://chat.whatsapp.com/JPTgGREOsUwCVJYOSwLkYn?mode=gi_t',
     status: 'active',
-    note: 'Tempat ngobrol utama, sudah aktif dari awal. Mulai dari sini.',
+    note: 'Tempat ngobrol utama, rame dari awal. Diskusinya dipisah per topik:',
+    cta: 'Gabung WhatsApp',
+    topics: ['AI terkini', 'Backend', 'Frontend', 'Infra & DevOps', 'Managerial', 'Karier & loker', 'English speaking'],
   },
   {
     id: 'telegram',
     name: 'Telegram',
     url: 'https://t.me/+-qwYuyEIHgswN2Fl',
-    status: 'soon',
-    note: 'Segera diaktifkan. Boleh gabung duluan.',
+    status: 'new',
+    note: 'Baru dibuka! Yuk jadi yang pertama ngeramein dan ikut nentuin obrolannya mau ke mana.',
+    cta: 'Jadi yang pertama',
   },
   {
     id: 'discord',
     name: 'Discord',
     url: null,
     status: 'soon',
-    note: 'Segera diaktifkan. Link-nya menyusul.',
+    note: 'Lagi disiapin. Link-nya menyusul, nanti kami kabari di WhatsApp.',
+    cta: 'Menyusul',
   },
 ];
 

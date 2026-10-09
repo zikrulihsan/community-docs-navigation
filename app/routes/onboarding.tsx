@@ -162,11 +162,11 @@ function Welcome({ groups, next, name }: { groups: WhatsappGroupRow[]; next: str
     <>
       <h1 className="page-title">Profil tersimpan. Selamat bergabung, {name.split(' ')[0]}!</h1>
       <p className="muted" style={{ marginBottom: 22, maxWidth: '58ch' }}>
-        Yuk langsung gabung ke WhatsApp, tempat ngobrol utama yang sudah aktif dari awal. Telegram dan Discord bakal
-        diaktifkan ke depannya. Semua link ini juga selalu ada di portal.
+        Yuk langsung gabung ke WhatsApp, tempat ngobrol utama yang sudah rame dari awal. Telegram baru dibuka, dan Discord
+        menyusul. Semua link ini juga selalu ada di portal.
       </p>
 
-      <div className="panel" style={{ marginBottom: 22 }}>
+      <div style={{ marginBottom: 22 }}>
         <CommunityChannels />
       </div>
 
