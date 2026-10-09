@@ -7,6 +7,20 @@
 
 /* --- Landing --- */
 .intro { padding: clamp(56px, 10vw, 112px) 0 clamp(48px, 7vw, 80px); }
+/* Latar hero & penutup: cahaya lembut di belakang judul + grid titik yang memudar ke tepi. */
+.intro, .home-closing { position: relative; isolation: isolate; overflow: hidden; }
+.intro::before, .intro::after, .home-closing::before, .home-closing::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.intro::before, .home-closing::before {
+  background:
+    radial-gradient(ellipse 45% 40% at 72% 18%, rgb(240 214 92 / .10), transparent 70%),
+    radial-gradient(ellipse 55% 50% at 22% 75%, rgb(125 217 87 / .07), transparent 70%),
+    radial-gradient(ellipse 70% 60% at 50% 35%, var(--teal-2), transparent 75%);
+}
+.intro::after, .home-closing::after {
+  background-image: radial-gradient(rgb(239 227 208 / .16) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 65% 70% at 50% 40%, #000 20%, transparent 80%);
+}
 .intro h1 { font-size: clamp(2.2rem, 5.6vw, 3.6rem); letter-spacing: -0.022em; max-width: 17ch; margin-bottom: 18px; }
 
 .on-teal .lead { color: var(--on-teal); }
@@ -121,6 +135,14 @@ a.contrib-maker:hover { text-decoration: underline; text-underline-offset: 3px; 
 .home-closing { display: grid; justify-items: center; gap: 20px; padding: clamp(36px, 6vw, 60px) clamp(20px, 5vw, 48px); border-radius: var(--r); }
 .home-closing h2 { max-width: 26ch; font-size: clamp(1.4rem, 3vw, 1.9rem); }
 .home-closing .inline-actions { gap: 18px; }
+/* Kartu penutup lebih pendek: cahaya & grid dipusatkan ke tengah kartu. */
+.home-closing::before {
+  background:
+    radial-gradient(ellipse 40% 60% at 85% 10%, rgb(240 214 92 / .12), transparent 70%),
+    radial-gradient(ellipse 45% 70% at 10% 95%, rgb(125 217 87 / .08), transparent 70%),
+    radial-gradient(ellipse 70% 80% at 50% 45%, var(--teal-2), transparent 75%);
+}
+.home-closing::after { mask-image: radial-gradient(ellipse 60% 80% at 50% 50%, #000 15%, transparent 80%); }
 .home-social { display: grid; justify-items: center; gap: 10px; margin-top: 8px; padding-top: 22px; border-top: 1px solid var(--teal-panel); width: min(100%, 420px); }
 .home-social > span { font-size: .85rem; font-weight: 600; color: var(--on-teal); }
 .home-social ul { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
