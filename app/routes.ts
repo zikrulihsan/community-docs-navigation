@@ -20,6 +20,8 @@ export default [
   // SPA
   route('masuk', 'routes/login.tsx'),
   route('auth/callback', 'routes/auth-callback.tsx'),
+  // Uji coba login Google Identity Services (domain sendiri di layar Google); belum ditautkan dari mana pun
+  route('masuk/google', 'routes/login-google.tsx'),
 
   // Wajib login (lihat member-layout); isi khusus verified dijaga per halaman
   layout('routes/member-layout.tsx', [

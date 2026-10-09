@@ -70,6 +70,8 @@ button.nav-account { cursor: pointer; font: inherit; font-weight: 700; font-size
 .btn-provider { width: 100%; background: var(--paper); border-color: var(--line-2); color: var(--ink); }
 .btn-provider:hover { border-color: var(--ink-faint); background: var(--paper-2); }
 .btn-provider svg { width: 18px; height: 18px; }
+.google-signin-slot { width: 100%; min-height: 44px; display: flex; justify-content: center; }
+.google-signin-busy { text-align: center; margin: 10px 0 0; }
 .or-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--ink-faint); font-size: .85rem; }
 .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 .auth-card form .btn { width: 100%; }

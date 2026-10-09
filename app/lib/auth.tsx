@@ -144,6 +144,10 @@ export const signInWithGoogle = (next: string) =>
 export const sendMagicLink = (email: string, next: string) =>
   supabase().auth.signInWithOtp({ email, options: { emailRedirectTo: callbackUrl(next), shouldCreateUser: true } });
 
+/** Login dengan ID token dari tombol Google Identity Services (tanpa redirect ke supabase.co). */
+export const signInWithGoogleIdToken = (token: string, nonce: string) =>
+  supabase().auth.signInWithIdToken({ provider: 'google', token, nonce });
+
 /** Untuk clientLoader: ambil user yang login, atau lempar redirect ke halaman masuk. */
 export async function requireUser(request: Request) {
   const url = new URL(request.url);
