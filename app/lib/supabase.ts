@@ -9,7 +9,7 @@ export const hasSupabase = Boolean(url && publishableKey);
 let browserClient: SupabaseClient<Database> | null = null;
 
 /**
- * Client untuk browser: sesi disimpan di localStorage dan kode OAuth/magic link
+ * Client untuk browser: sesi disimpan di localStorage dan kode OAuth
  * di URL otomatis ditukar jadi sesi (PKCE).
  */
 export function supabase() {

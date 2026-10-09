@@ -4,7 +4,7 @@ import { safeNext } from '~/lib/auth';
 import { hasSupabase, supabase } from '~/lib/supabase';
 
 /**
- * Tujuan redirect OAuth & magic link. Client Supabase menukar ?code= jadi sesi
+ * Tujuan redirect OAuth Google (alur cadangan, lihat GoogleSignIn). Client Supabase menukar ?code= jadi sesi
  * secara otomatis (detectSessionInUrl), di sini kita tinggal menunggu hasilnya.
  */
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {

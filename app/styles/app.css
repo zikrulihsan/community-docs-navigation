@@ -81,8 +81,6 @@ button.nav-account { cursor: pointer; font: inherit; font-weight: 700; font-size
 .google-signin-placeholder svg { width: 18px; height: 18px; }
 .google-signin-slot[hidden] { display: none; }
 .google-signin-busy { text-align: center; margin: 10px 0 0; grid-area: auto; }
-.or-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--ink-faint); font-size: .85rem; }
-.or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 .auth-card form .btn { width: 100%; }
 .auth-foot { margin-top: 18px; font-size: .84rem; color: var(--ink-faint); }
 .auth-foot a { color: var(--green-deep); font-weight: 600; }

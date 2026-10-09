@@ -136,13 +136,12 @@ export const loginPath = (next: string) => `/masuk?next=${encodeURIComponent(nex
 
 const callbackUrl = (next: string) => `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
-/** Login Google; setelah selesai kembali ke `next` (path internal). */
+/**
+ * Login Google lewat redirect OAuth Supabase; setelah selesai kembali ke `next`.
+ * Cadangan kalau tombol Google Identity Services tidak bisa dimuat (lihat GoogleSignIn).
+ */
 export const signInWithGoogle = (next: string) =>
   supabase().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: callbackUrl(next) } });
-
-/** Magic link ke email; link-nya kembali ke `next`. */
-export const sendMagicLink = (email: string, next: string) =>
-  supabase().auth.signInWithOtp({ email, options: { emailRedirectTo: callbackUrl(next), shouldCreateUser: true } });
 
 /** Login dengan ID token dari tombol Google Identity Services (tanpa redirect ke supabase.co). */
 export const signInWithGoogleIdToken = (token: string, nonce: string) =>
