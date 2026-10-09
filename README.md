@@ -60,6 +60,19 @@ npm run build      # output ke build/client
    dan `http://localhost:4321/auth/callback`.
 4. **Admin**: tambahkan email ke tabel `activity_admin_emails`.
 
+### Uji coba: login Google tanpa domain supabase.co (`/masuk/google`)
+
+Halaman `/masuk/google` memakai tombol Google Identity Services + `signInWithIdToken`, jadi layar dan email
+notifikasi Google menyebut `swegrowth.id`, bukan `<project-ref>.supabase.co`. `/masuk` belum berubah.
+
+1. Google Cloud Console → *Credentials* → OAuth client (Web) yang dipakai provider Google di Supabase →
+   **Authorized JavaScript origins**: tambahkan `https://swegrowth.id` dan `http://localhost:4321`.
+2. Isi client ID itu ke env `VITE_GOOGLE_CLIENT_ID` (Netlify + `.env`), lalu deploy ulang.
+3. Opsional: *OAuth consent screen → Branding* (nama, logo, homepage, `/privasi`, `/term-of-service`, authorized
+   domain `swegrowth.id`) lalu ajukan verifikasi, supaya Google menampilkan nama "SWE Growth".
+
+Tanpa client ID atau kalau script Google diblokir, tombolnya jatuh ke redirect OAuth Supabase seperti di `/masuk`.
+
 `app/lib/database.types.ts` ditulis tangan mengikuti migration; perbarui saat skema berubah.
 
 ## Google Calendar (undangan otomatis)
