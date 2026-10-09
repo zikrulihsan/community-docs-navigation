@@ -10,9 +10,8 @@ import type {
   RecommendationPrice,
   RecommendationRow,
 } from '~/lib/database.types';
-import { CATEGORIES, categoryOf, directoryPath, LANGUAGE_LABEL, PRICE_LABEL, STATUS_LABEL } from '~/lib/recommendations';
+import { CATEGORIES, categoryOf, directoryPath, getRecommendationTopics, LANGUAGE_LABEL, PRICE_LABEL, STATUS_LABEL } from '~/lib/recommendations';
 import { supabase } from '~/lib/supabase';
-import { TOPIC_NAMES } from '~/lib/topics';
 
 export const meta: Route.MetaFunction = () => [{ title: 'Kirim rekomendasi — SWE Growth' }, { name: 'robots', content: 'noindex' }];
 
@@ -24,22 +23,23 @@ const REASON_MAX = 300;
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const user = await requireUser(request);
   const editId = new URL(request.url).searchParams.get('edit');
-  if (!editId) return { editing: null };
+  const topics = await getRecommendationTopics();
+  if (!editId) return { editing: null, topics };
 
   const { data } = await supabase().from('recommendations').select('*').eq('id', editId).eq('submitted_by', user.id).maybeSingle();
   if (!data || data.status !== 'pending') throw redirect('/portal');
-  return { editing: data };
+  return { editing: data, topics };
 }
 
 export function HydrateFallback() {
   return <div className="loading-block">Memuat…</div>;
 }
 
-export default function RecommendationSubmit({ loaderData: { editing } }: Route.ComponentProps) {
-  return <SubmitForm key={editing?.id ?? 'new'} editing={editing} />;
+export default function RecommendationSubmit({ loaderData: { editing, topics } }: Route.ComponentProps) {
+  return <SubmitForm key={editing?.id ?? 'new'} editing={editing} topicNames={topics} />;
 }
 
-function SubmitForm({ editing }: { editing: RecommendationRow | null }) {
+function SubmitForm({ editing, topicNames }: { editing: RecommendationRow | null; topicNames: string[] }) {
   const [category, setCategory] = useState<RecommendationCategory>(editing?.category ?? 'buku');
   const [topics, setTopics] = useState<string[]>(editing?.topics ?? []);
   const [reasonLength, setReasonLength] = useState(editing?.reason.length ?? 0);
@@ -214,7 +214,7 @@ function SubmitForm({ editing }: { editing: RecommendationRow | null }) {
           <fieldset className="field">
             <legend>Topik <small>(opsional, maks. {MAX_TOPICS})</small></legend>
             <div className="rec-pick">
-              {TOPIC_NAMES.map((t) => {
+              {topicNames.map((t) => {
                 const on = topics.includes(t);
                 return (
                   <label key={t} className={on ? 'on' : undefined}>

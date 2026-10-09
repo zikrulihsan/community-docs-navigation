@@ -82,6 +82,18 @@ export async function getCommunityStats() {
   return data;
 }
 
+/** Aktivitas 7 hari terakhir untuk landing (kosong kalau sepi atau gagal diambil). */
+export async function getCommunityPulse() {
+  const db = client();
+  if (!db) return [];
+  const { data, error } = await db.rpc('community_pulse');
+  if (error) {
+    console.error('Tidak dapat mengambil aktivitas komunitas:', error.message);
+    return [];
+  }
+  return data;
+}
+
 /** Path publik detail event — dibagikan saat publikasi. */
 export const activityPath = (a: Pick<Activity, 'slug'>) => `/agenda/${a.slug}`;
 export const registerPath = (a: Pick<Activity, 'slug'>) => `/agenda/${a.slug}/daftar`;

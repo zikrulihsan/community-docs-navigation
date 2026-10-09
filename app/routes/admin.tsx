@@ -24,7 +24,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   await requireAdmin(request);
   const db = supabase();
 
-  const [profiles, memberships, motivations, activities, registrations, groups, contributions, recommendations] = await Promise.all([
+  const [profiles, memberships, motivations, activities, registrations, groups, contributions, recommendations, recommendationTopics] = await Promise.all([
     db.from('profiles').select('*').order('created_at', { ascending: false }),
     db.from('memberships').select('*'),
     db.from('member_motivations').select('*'),
@@ -33,6 +33,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
     db.from('whatsapp_groups').select('*').order('sort_order').order('created_at'),
     db.from('member_contributions').select('*').order('sort_order').order('created_at'),
     db.from('recommendations').select('*').order('created_at', { ascending: false }),
+    db.from('recommendation_topics').select('*').order('sort_order').order('name'),
   ]);
   return {
     profiles: profiles.data ?? [],
@@ -43,6 +44,7 @@ export async function clientLoader({ request }: Route.ClientLoaderArgs) {
     groups: groups.data ?? [],
     contributions: contributions.data ?? [],
     recommendations: recommendations.data ?? [],
+    recommendationTopics: recommendationTopics.data ?? [],
   };
 }
 
@@ -84,7 +86,7 @@ export default function Admin({ loaderData }: Route.ComponentProps) {
           {tab === 'member' && <MembersAdmin profiles={loaderData.profiles} memberships={loaderData.memberships} motivations={loaderData.motivations} />}
           {tab === 'event' && <ActivitiesAdmin activities={loaderData.activities} registrations={loaderData.registrations} />}
           {tab === 'grup' && <GroupsAdmin groups={loaderData.groups} />}
-          {tab === 'rekomendasi' && <RecommendationsAdmin items={loaderData.recommendations} profiles={loaderData.profiles} />}
+          {tab === 'rekomendasi' && <RecommendationsAdmin items={loaderData.recommendations} profiles={loaderData.profiles} topics={loaderData.recommendationTopics} />}
           {tab === 'kontribusi' && <ContributionsAdmin contributions={loaderData.contributions} profiles={loaderData.profiles} />}
         </div>
       </div>

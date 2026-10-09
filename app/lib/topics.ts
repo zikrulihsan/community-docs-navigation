@@ -1,4 +1,4 @@
-/** Topik yang sering dibahas: tampil di landing dan jadi pilihan topik rekomendasi. */
+/** Topik yang sering dibahas di landing. Topik rekomendasi diatur admin di tabel recommendation_topics. */
 
 /** Pola: apa yang dibahas + kenapa penting sekarang. Maksimal dua kalimat. */
 export const TOPICS = [

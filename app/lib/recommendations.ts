@@ -21,6 +21,7 @@ export const CATEGORIES: { id: RecommendationCategory; label: string; organizerL
   { id: 'podcast', label: 'Podcast', organizerLabel: 'Host' },
   { id: 'youtube', label: 'YouTube', organizerLabel: 'Channel' },
   { id: 'newsletter', label: 'Newsletter', organizerLabel: 'Penulis' },
+  { id: 'web', label: 'Web', organizerLabel: 'Pengelola' },
   { id: 'lainnya', label: 'Lainnya', organizerLabel: 'Pembuat' },
 ];
 
@@ -74,6 +75,19 @@ export async function getPublishedRecommendations(): Promise<Recommendation[]> {
     return [];
   }
   return data;
+}
+
+/** Nama topik yang bisa dipilih, urut sesuai yang diatur admin. */
+export async function getRecommendationTopics(): Promise<string[]> {
+  const db = client();
+  if (!db) return [];
+
+  const { data, error } = await db.from('recommendation_topics').select('name').order('sort_order').order('name');
+  if (error) {
+    console.error('Tidak dapat mengambil topik rekomendasi:', error.message);
+    return [];
+  }
+  return data.map((t) => t.name);
 }
 
 /** Usulan milik akun yang login (semua status). */

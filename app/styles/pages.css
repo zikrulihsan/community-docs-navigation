@@ -32,6 +32,11 @@
 .hero-stats { list-style: none; display: flex; justify-content: center; gap: clamp(40px, 8vw, 88px); max-width: 640px; margin: 44px auto 0; padding-top: 28px; border-top: 1px solid var(--teal-panel); }
 .hero-stats b { display: block; font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 800; line-height: 1.05; letter-spacing: -.02em; color: var(--cream); }
 .hero-stats span { font-size: .88rem; color: var(--on-teal); }
+.hero-pulse { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 640px; margin: 20px auto 0; }
+.hero-pulse li { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid var(--teal-panel); border-radius: 999px; color: var(--on-teal); font-size: .84rem; }
+.hero-pulse li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--yellow); }
+.hero-pulse b { color: var(--cream); font-weight: 700; }
+.hero-pulse a { color: var(--cream); text-decoration: underline; text-underline-offset: 2px; }
 
 /* Kartu kegiatan. */
 .card-grid { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -286,6 +291,7 @@ a.contrib-maker:hover { text-decoration: underline; text-underline-offset: 3px; 
 .rec-card[data-category="podcast"] { --cat: #c9a6e8; }
 .rec-card[data-category="youtube"] { --cat: #f08a7e; }
 .rec-card[data-category="newsletter"] { --cat: #9cc7f0; }
+.rec-card[data-category="web"] { --cat: #8fd1b4; }
 
 .rec-grid { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; text-align: left; }
 .rec-card {

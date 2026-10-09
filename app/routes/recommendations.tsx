@@ -5,33 +5,38 @@ import type { RecommendationLanguage, RecommendationPrice } from '~/lib/database
 import {
   CATEGORIES,
   getPublishedRecommendations,
+  getRecommendationTopics,
   isCategory,
   LANGUAGE_LABEL,
   PRICE_LABEL,
   SUBMIT_PATH,
 } from '~/lib/recommendations';
 import { pageMeta } from '~/lib/site';
-import { TOPIC_NAMES } from '~/lib/topics';
 
 export const meta: Route.MetaFunction = () =>
   pageMeta(
     'Rekomendasi — SWE Growth',
-    'Acara, komunitas, course, buku, podcast, YouTube, dan newsletter yang direkomendasikan SWE Growth dan member-nya.',
+    'Acara, komunitas, course, buku, podcast, YouTube, newsletter, dan web yang direkomendasikan SWE Growth dan member-nya.',
   );
 
 /** Saat build: snapshot untuk HTML prerender. */
+const load = async () => {
+  const [items, topics] = await Promise.all([getPublishedRecommendations(), getRecommendationTopics()]);
+  return { items, topics };
+};
+
 export async function loader() {
-  return { items: await getPublishedRecommendations() };
+  return load();
 }
 
 /** Di browser: selalu ambil yang terbaru. */
 export async function clientLoader() {
-  return { items: await getPublishedRecommendations() };
+  return load();
 }
 clientLoader.hydrate = true as const;
 
 /** Filter disimpan di URL supaya hasil filter bisa dibagikan. */
-export default function Recommendations({ loaderData: { items } }: Route.ComponentProps) {
+export default function Recommendations({ loaderData: { items, topics: topicNames } }: Route.ComponentProps) {
   const [params, setParams] = useSearchParams();
   const category = params.get('kategori');
   const topic = params.get('topik') ?? '';
@@ -63,7 +68,7 @@ export default function Recommendations({ loaderData: { items } }: Route.Compone
   const countOf = (id: string) => base.filter((r) => r.category === id).length;
   const filtered = Boolean(topic || price || language || q);
   // Hanya topik yang benar-benar dipakai, urut sesuai daftar topik.
-  const usedTopics = TOPIC_NAMES.filter((t) => items.some((r) => r.topics.includes(t)));
+  const usedTopics = topicNames.filter((t) => items.some((r) => r.topics.includes(t)));
 
   return (
     <section className="block">
@@ -71,7 +76,7 @@ export default function Recommendations({ loaderData: { items } }: Route.Compone
         <div className="rec-head">
           <div>
             <h1 className="page-title">Tempat buat grow</h1>
-            <p className="muted">Acara, komunitas, course, buku, podcast, YouTube, dan newsletter yang kami dan member rekomendasikan.</p>
+            <p className="muted">Acara, komunitas, course, buku, podcast, YouTube, newsletter, dan web yang kami dan member rekomendasikan.</p>
           </div>
           <Link className="btn btn-primary" to={SUBMIT_PATH}>Kirim rekomendasi</Link>
         </div>

@@ -187,11 +187,16 @@ export type PublishedContribution = Pick<MemberContributionRow, 'id' | 'title' |
   maker_avatar_url: string | null;
 };
 
-export type RecommendationCategory = 'acara' | 'komunitas' | 'course' | 'buku' | 'podcast' | 'youtube' | 'newsletter' | 'lainnya';
+export type RecommendationCategory = 'acara' | 'komunitas' | 'course' | 'buku' | 'podcast' | 'youtube' | 'newsletter' | 'web' | 'lainnya';
 export type RecommendationStatus = 'pending' | 'approved' | 'rejected' | 'hidden';
 export type RecommendationPrice = 'gratis' | 'berbayar' | 'freemium';
 export type RecommendationLanguage = 'id' | 'en';
 export type RecommendationRejectReason = 'duplikat' | 'kurang_relevan' | 'link_mati' | 'promosi' | 'tidak_sesuai_coc';
+
+export type RecommendationTopicRow = { name: string; sort_order: number; created_at: string };
+
+/** Angka agregat 7 hari terakhir; slug/title hanya untuk baris 'registration'. */
+export type CommunityPulseRow = { kind: 'member' | 'registration'; slug: string | null; title: string | null; total: number };
 
 export type RecommendationRow = {
   id: string;
@@ -273,6 +278,7 @@ export type Database = {
       whatsapp_groups: Table<WhatsappGroupRow, 'name' | 'invite_url', 'id' | 'created_at'>;
       member_contributions: Table<MemberContributionRow, 'title' | 'url', 'id' | 'created_at'>;
       recommendations: Table<RecommendationRow, 'category' | 'title' | 'url' | 'reason', Timestamps>;
+      recommendation_topics: Table<RecommendationTopicRow, 'name', 'created_at'>;
       activity_member_info: Table<ActivityMemberInfoRow, 'activity_id', 'updated_at'>;
     };
     Views: Record<string, never>;
@@ -284,6 +290,7 @@ export type Database = {
       public_profile: { Args: { p_handle: string }; Returns: PublicProfile[] };
       published_contributions: { Args: Record<string, never>; Returns: PublishedContribution[] };
       published_recommendations: { Args: Record<string, never>; Returns: PublishedRecommendation[] };
+      community_pulse: { Args: Record<string, never>; Returns: CommunityPulseRow[] };
       community_stats: { Args: Record<string, never>; Returns: { member_count: number; session_count: number }[] };
       check_recommendation_url: { Args: { p_url: string; p_exclude_id?: string | null }; Returns: { title: string; status: RecommendationStatus }[] };
       submit_recommendation: {

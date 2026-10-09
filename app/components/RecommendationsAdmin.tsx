@@ -11,6 +11,7 @@ import type {
   RecommendationRejectReason,
   RecommendationRow,
   RecommendationStatus,
+  RecommendationTopicRow,
 } from '~/lib/database.types';
 import { formatDate } from '~/lib/format';
 import {
@@ -24,7 +25,6 @@ import {
   STATUS_LABEL,
 } from '~/lib/recommendations';
 import { supabase } from '~/lib/supabase';
-import { TOPIC_NAMES } from '~/lib/topics';
 
 const VIEWS: { id: RecommendationStatus; label: string }[] = [
   { id: 'pending', label: 'Menunggu' },
@@ -37,9 +37,10 @@ const normalizeUrl = (url: string) => url.trim().replace(/\/+$/, '').toLowerCase
 
 /**
  * Tab "Rekomendasi" di /admin: antrean usulan member, tambah langsung
- * ("Pilihan SWE Growth"), featured untuk landing, sembunyikan/hapus.
+ * ("Pilihan SWE Growth" atau atas nama member), featured untuk landing,
+ * sembunyikan/hapus, dan kelola daftar topik.
  */
-export function RecommendationsAdmin({ items, profiles }: { items: RecommendationRow[]; profiles: ProfileRow[] }) {
+export function RecommendationsAdmin({ items, profiles, topics }: { items: RecommendationRow[]; profiles: ProfileRow[]; topics: RecommendationTopicRow[] }) {
   const { user } = useAuth();
   const { busy, run, flash } = useMutation();
   const [view, setView] = useState<RecommendationStatus>('pending');
@@ -47,6 +48,7 @@ export function RecommendationsAdmin({ items, profiles }: { items: Recommendatio
   const [rejecting, setRejecting] = useState<string | null>(null);
 
   const profileOf = new Map(profiles.map((p) => [p.id, p]));
+  const members = profiles.filter((p) => p.full_name).sort((a, b) => a.full_name.localeCompare(b.full_name));
   const countOf = (s: RecommendationStatus) => items.filter((r) => r.status === s).length;
   const shown = items
     .filter((r) => r.status === view)
@@ -102,6 +104,8 @@ export function RecommendationsAdmin({ items, profiles }: { items: Recommendatio
       <RecommendationForm
         key={editing?.id ?? 'new'}
         editing={editing}
+        members={members}
+        topicNames={topics.map((t) => t.name)}
         busy={busy}
         flash={flash}
         onDone={() => setEditing(null)}
@@ -112,7 +116,7 @@ export function RecommendationsAdmin({ items, profiles }: { items: Recommendatio
                 approve ? `"${row.title}" disetujui dan tayang.` : 'Rekomendasi diperbarui.',
               )
             : run(
-                () => supabase().from('recommendations').insert({ ...row, source: 'admin', status: 'approved', submitted_by: null, ...reviewed() }),
+                () => supabase().from('recommendations').insert({ ...row, source: 'admin', status: 'approved', ...reviewed() }),
                 'Rekomendasi ditambahkan dan langsung tayang.',
               )
         }
@@ -159,7 +163,12 @@ export function RecommendationsAdmin({ items, profiles }: { items: Recommendatio
                       <p className="rec-admin-reason">{r.reason}</p>
                       {r.topics.length > 0 && <span className="slug">Topik: {r.topics.join(', ')}</span>}
                       <span className="slug">
-                        {r.source === 'admin' ? 'Ditambahkan admin' : (
+                        {r.source === 'admin' ? (
+                          <>
+                            Ditambahkan admin
+                            {r.submitted_by && <> atas nama {by ? <Link to={`/admin/member/${by.id}`}>{by.full_name || by.email}</Link> : 'member (akun dihapus)'}</>}
+                          </>
+                        ) : (
                           <>
                             Diusulkan {by ? <Link to={`/admin/member/${by.id}`}>{by.full_name || by.email}</Link> : 'member (akun dihapus)'}
                             {!r.show_recommender && ' · nama disembunyikan'}
@@ -226,6 +235,63 @@ export function RecommendationsAdmin({ items, profiles }: { items: Recommendatio
           </ul>
         )}
       </div>
+
+      <TopicsAdmin topics={topics} items={items} />
+    </div>
+  );
+}
+
+/** Topik rekomendasi: ganti nama & hapus ikut diterapkan ke rekomendasi yang memakainya. */
+function TopicsAdmin({ topics, items }: { topics: RecommendationTopicRow[]; items: RecommendationRow[] }) {
+  const { busy, run, flash } = useMutation();
+  const usage = (name: string) => items.filter((r) => r.topics.includes(name)).length;
+
+  const add = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formEl = e.currentTarget;
+    const name = val(new FormData(formEl), 'name');
+    const sort_order = Math.max(0, ...topics.map((t) => t.sort_order)) + 10;
+    const ok = await run(() => supabase().from('recommendation_topics').insert({ name, sort_order }), `Topik "${name}" ditambahkan.`);
+    if (ok) formEl.reset();
+  };
+
+  const rename = (e: FormEvent<HTMLFormElement>, t: RecommendationTopicRow) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const name = val(form, 'name');
+    const sort_order = Number.parseInt(val(form, 'sort_order') || '0', 10);
+    if (name === t.name && sort_order === t.sort_order) return;
+    void run(() => supabase().from('recommendation_topics').update({ name, sort_order }).eq('name', t.name), `Topik "${name}" disimpan.`);
+  };
+
+  const remove = (t: RecommendationTopicRow) => {
+    const n = usage(t.name);
+    if (!confirm(n > 0 ? `Hapus topik "${t.name}"? Topik ini dilepas dari ${n} rekomendasi.` : `Hapus topik "${t.name}"?`)) return;
+    void run(() => supabase().from('recommendation_topics').delete().eq('name', t.name), 'Topik dihapus.');
+  };
+
+  return (
+    <div className="panel">
+      <h2>Topik</h2>
+      <p className="form-sub">Pilihan topik di form dan filter direktori. Ganti nama ikut mengubah rekomendasi yang memakainya.</p>
+      {flash}
+      <form className="inline-actions" onSubmit={add}>
+        <input name="name" aria-label="Topik baru" placeholder="Topik baru" required minLength={2} maxLength={40} />
+        <button className="btn btn-primary sm" type="submit" disabled={busy}>Tambah</button>
+      </form>
+      <ul className="admin-list">
+        {topics.map((t) => (
+          <li key={t.name}>
+            <form className="inline-actions" onSubmit={(e) => rename(e, t)}>
+              <input name="name" aria-label="Nama topik" required minLength={2} maxLength={40} defaultValue={t.name} />
+              <input name="sort_order" aria-label="Urutan" type="number" style={{ width: 80 }} defaultValue={t.sort_order} />
+              <span className="slug">{usage(t.name)} rekomendasi</span>
+              <button className="btn btn-ghost sm" type="submit" disabled={busy}>Simpan</button>
+              <button className="link-btn" type="button" disabled={busy} onClick={() => remove(t)}>Hapus</button>
+            </form>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -234,16 +300,20 @@ type RowInput = Pick<
   RecommendationRow,
   | 'category' | 'title' | 'url' | 'reason' | 'organizer' | 'topics' | 'price' | 'language'
   | 'event_date' | 'event_mode' | 'location' | 'is_affiliate' | 'is_featured' | 'featured_order'
->;
+> & Partial<Pick<RecommendationRow, 'submitted_by'>>;
 
 function RecommendationForm({
   editing,
+  members,
+  topicNames,
   busy,
   flash,
   save,
   onDone,
 }: {
   editing: RecommendationRow | null;
+  members: ProfileRow[];
+  topicNames: string[];
   busy: boolean;
   flash: React.ReactNode;
   save: (row: RowInput, approve: boolean) => Promise<boolean>;
@@ -252,6 +322,8 @@ function RecommendationForm({
   const [category, setCategory] = useState<RecommendationCategory>(editing?.category ?? 'buku');
   const isEvent = category === 'acara';
   const pending = editing?.status === 'pending';
+  // Usulan member tetap milik pengusulnya; hanya tambahan admin yang bisa dikaitkan ke member.
+  const canAttribute = !editing || editing.source === 'admin';
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -274,6 +346,7 @@ function RecommendationForm({
         is_affiliate: form.get('is_affiliate') === 'on',
         is_featured: form.get('is_featured') === 'on',
         featured_order: Number.parseInt(val(form, 'featured_order') || '0', 10),
+        ...(canAttribute ? { submitted_by: val(form, 'submitted_by') || null } : {}),
       },
       approve,
     );
@@ -317,9 +390,17 @@ function RecommendationForm({
           <Field id="ra_loc" label="Kota" optional><input id="ra_loc" name="location" maxLength={80} defaultValue={editing?.location} /></Field>
         </>
       )}
-      <Field id="ra_topics" label="Topik" optional hint="Tahan Cmd/Ctrl untuk memilih lebih dari satu (maks. 5).">
+      {canAttribute && (
+        <Field id="ra_member" label="Atas nama member" optional hint="Nama & foto member tampil di kartu. Kosongkan supaya tampil sebagai Pilihan SWE Growth.">
+          <select id="ra_member" name="submitted_by" defaultValue={editing?.submitted_by ?? ''}>
+            <option value="">Pilihan SWE Growth</option>
+            {members.map((p) => <option key={p.id} value={p.id}>{p.full_name}{p.email ? ` (${p.email})` : ''}</option>)}
+          </select>
+        </Field>
+      )}
+      <Field id="ra_topics" label="Topik" optional hint="Tahan Cmd/Ctrl untuk memilih lebih dari satu (maks. 5). Daftar topik diatur di panel Topik.">
         <select id="ra_topics" name="topics" multiple size={5} defaultValue={editing?.topics ?? []}>
-          {TOPIC_NAMES.map((t) => <option key={t} value={t}>{t}</option>)}
+          {topicNames.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
       </Field>
       <Field id="ra_price" label="Harga" optional>

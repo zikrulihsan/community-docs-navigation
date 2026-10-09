@@ -6,7 +6,7 @@ import { RecommendationCard } from '~/components/RecommendationCard';
 import { Avatar } from '~/components/Avatar';
 import { SOCIALS } from '~/components/Socials';
 import { ArrowRight, ArrowUpRight, BookIcon, BriefcaseIcon, ChatIcon, MicIcon, UsersIcon, VideoIcon } from '~/components/Icons';
-import { getCommunityStats, getPublishedActivities, isActivityUpcoming } from '~/lib/activities';
+import { activityPath, getCommunityPulse, getCommunityStats, getPublishedActivities, isActivityUpcoming } from '~/lib/activities';
 import { PAST_ACTIVITIES } from '~/lib/past-activities';
 import { useAuth } from '~/lib/auth';
 import { getPublishedContributions } from '~/lib/contributions';
@@ -18,14 +18,16 @@ import { pageMeta } from '~/lib/site';
 export const meta: Route.MetaFunction = () => pageMeta('SWE Growth — komunitas software engineer Indonesia');
 
 const load = async () => {
-  const [activities, contributions, recommendations, stats] = await Promise.all([
+  const [activities, contributions, recommendations, stats, pulse] = await Promise.all([
     getPublishedActivities(),
     getPublishedContributions(),
     getPublishedRecommendations(),
     getCommunityStats(),
+    getCommunityPulse(),
   ]);
   return {
     stats: heroStats(stats),
+    pulse,
     activities: activities.filter(isActivityUpcoming).slice(0, 3),
     contributions,
     recommendations: recommendations.filter((r) => r.is_featured),
@@ -64,7 +66,7 @@ const ACTIVITIES = [
 ];
 
 
-export default function Home({ loaderData: { activities, contributions, recommendations, stats } }: Route.ComponentProps) {
+export default function Home({ loaderData: { activities, contributions, recommendations, stats, pulse } }: Route.ComponentProps) {
   const { user } = useAuth();
   const [picked, setPicked] = useState(0);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -96,6 +98,19 @@ export default function Home({ loaderData: { activities, contributions, recommen
               <li key={s.label}><b>{s.value}</b><span>{s.label}</span></li>
             ))}
           </ul>
+          {pulse.length > 0 && (
+            <ul className="hero-pulse">
+              {pulse.map((p) => (
+                <li key={p.slug ?? p.kind}>
+                  {p.kind === 'member' ? (
+                    <><b>{count(p.total)} engineer</b> baru gabung minggu ini</>
+                  ) : (
+                    <><b>{count(p.total)} orang</b> daftar <Link to={activityPath({ slug: p.slug! })}>{p.title}</Link> minggu ini</>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
 
