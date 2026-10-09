@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import type { Route } from './+types/login-google';
-import { GoogleSignIn, hasGoogleClientId } from '~/components/GoogleSignIn';
+import { GoogleSignIn, googleSignInLinks, hasGoogleClientId } from '~/components/GoogleSignIn';
 import { safeNext, useAuth } from '~/lib/auth';
 import { pageMeta } from '~/lib/site';
 import { hasSupabase } from '~/lib/supabase';
+
+export const links: Route.LinksFunction = googleSignInLinks;
 
 export const meta: Route.MetaFunction = () => [
   ...pageMeta('Masuk dengan Google — SWE Growth', 'Masuk ke akun SWE Growth dengan Google.'),
