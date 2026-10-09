@@ -1,6 +1,6 @@
 import type { Session, User } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { redirect } from 'react-router';
+import { redirect, useNavigate } from 'react-router';
 import type { MembershipRow, ProfileRow } from './database.types';
 import { hasSupabase, supabase } from './supabase';
 
@@ -97,13 +97,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       membership,
       refreshProfile,
       signOut: async () => {
-        await supabase().auth.signOut();
+        // Kalau server tidak terjangkau, tetap hapus sesi di perangkat ini.
+        const { error } = await supabase().auth.signOut();
+        if (error) await supabase().auth.signOut({ scope: 'local' });
       },
     }),
     [loading, session, profile, isAdmin, isMember, membership, refreshProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+/** Keluar lalu kembali ke beranda; dipakai menu akun di navbar dan halaman profil. */
+export function useSignOut() {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+
+  const run = async () => {
+    setBusy(true);
+    try {
+      await signOut();
+    } finally {
+      setBusy(false);
+      navigate('/', { replace: true });
+    }
+  };
+  return { signOut: run, busy };
 }
 
 export function useAuth() {

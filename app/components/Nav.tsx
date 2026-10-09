@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
-import { displayName, useAuth } from '~/lib/auth';
-import { Avatar } from './Avatar';
+import { useAuth } from '~/lib/auth';
+import { AccountMenu } from './AccountMenu';
 
 
 export function Nav() {
   const [open, setOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
-  const { loading, user, profile, isAdmin } = useAuth();
+  const { loading, user, isAdmin } = useAuth();
   const links = [
     ...(user ? [{ to: '/portal', label: 'Portal' }] : []),
     { to: '/tentang', label: 'Tentang' },
@@ -34,8 +34,6 @@ export function Nav() {
     };
   }, [open]);
 
-  const name = displayName(profile, user);
-
   return (
     <nav className={`site-nav on-teal${open ? ' menu-open' : ''}`} ref={navRef}>
       <div className="wrap nav-in">
@@ -53,10 +51,7 @@ export function Nav() {
           {loading ? (
             <span className="nav-account-slot" aria-hidden="true" />
           ) : user ? (
-            <Link className="nav-account" to="/portal/profil" aria-label={`Akun ${name}`}>
-              <Avatar name={name} src={profile?.avatar_url} size={34} />
-              <span>{name.split(' ')[0]}</span>
-            </Link>
+            <AccountMenu />
           ) : (
             <>
               <Link className="btn btn-ghost nav-login" to="/masuk?next=/portal">Masuk</Link>
