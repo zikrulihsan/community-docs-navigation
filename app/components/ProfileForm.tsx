@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import type { Experience, ProfileRow, Seniority } from '~/lib/database.types';
-import { normalizeUrl, parseTags, SENIORITIES, seniorityLabel, sortExperiences, USERNAME_RE, WHATSAPP_RE } from '~/lib/profile';
+import { isLinkedinUrl, normalizeUrl, parseTags, SENIORITIES, seniorityLabel, sortExperiences, USERNAME_RE, WHATSAPP_RE } from '~/lib/profile';
 import { supabase } from '~/lib/supabase';
 
 type Props = {
@@ -32,6 +32,12 @@ export function ProfileForm({ profile, submitLabel, onSaved }: Props) {
     const whatsapp = val('whatsapp');
     if (!WHATSAPP_RE.test(whatsapp)) {
       setError('Nomor WhatsApp 8–20 digit, boleh diawali +.');
+      return;
+    }
+
+    const linkedin = normalizeUrl(val('linkedin_url'));
+    if (!isLinkedinUrl(linkedin)) {
+      setError('Isi link profil LinkedIn kamu, contohnya linkedin.com/in/nama-kamu.');
       return;
     }
 
@@ -73,7 +79,7 @@ export function ProfileForm({ profile, submitLabel, onSaved }: Props) {
         company: val('company') || null,
         seniority: (val('seniority') || null) as Seniority | null,
         years_experience: years ? Number.parseInt(years, 10) : null,
-        linkedin_url: normalizeUrl(val('linkedin_url')),
+        linkedin_url: linkedin,
         github_url: normalizeUrl(val('github_url')),
         portfolio_url: normalizeUrl(val('portfolio_url')),
         skills: parseTags(val('skills')),
@@ -152,8 +158,8 @@ export function ProfileForm({ profile, submitLabel, onSaved }: Props) {
           </div>
         </Field>
         <div className="form-grid">
-          <Field id="linkedin_url" label="LinkedIn" optional>
-            <input id="linkedin_url" name="linkedin_url" maxLength={200} defaultValue={profile.linkedin_url ?? ''} placeholder="linkedin.com/in/…" />
+          <Field id="linkedin_url" label="LinkedIn" hint="Wajib, supaya kami tahu kamu orang asli. Tampil di profil publikmu.">
+            <input id="linkedin_url" name="linkedin_url" required maxLength={200} defaultValue={profile.linkedin_url ?? ''} placeholder="linkedin.com/in/nama-kamu" />
           </Field>
           <Field id="github_url" label="GitHub" optional>
             <input id="github_url" name="github_url" maxLength={200} defaultValue={profile.github_url ?? ''} placeholder="github.com/…" />
@@ -233,11 +239,12 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
   );
 }
 
-function Field({ id, label, optional, children }: { id: string; label: string; optional?: boolean; children: ReactNode }) {
+function Field({ id, label, optional, hint, children }: { id: string; label: string; optional?: boolean; hint?: string; children: ReactNode }) {
   return (
     <div className="field">
       <label htmlFor={id}>{label}{optional && <small> (opsional)</small>}</label>
       {children}
+      {hint && <small className="field-hint">{hint}</small>}
     </div>
   );
 }

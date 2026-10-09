@@ -14,6 +14,9 @@ export const seniorityLabel: Record<Seniority, string> = {
 
 export const WHATSAPP_RE = /^\+?[0-9 -]{8,20}$/;
 export const USERNAME_RE = /^[a-z0-9_]{3,30}$/;
+/** Link profil LinkedIn pribadi (wajib, untuk memastikan member orang asli). Sama dengan has_complete_profile(). */
+export const LINKEDIN_RE = /^https:\/\/([a-z]+\.)?linkedin\.com\/(in|pub)\/[^/?#\s]+/i;
+export const isLinkedinUrl = (url: string | null) => Boolean(url && LINKEDIN_RE.test(url));
 
 /** Path profil publik: pakai username kalau sudah ada, kalau belum pakai id. */
 export const publicProfilePath = (p: Pick<ProfileRow, 'id' | 'username'>) => `/member/${p.username ?? p.id}`;
@@ -62,7 +65,7 @@ export const sortExperiences = (list: Experience[]) =>
 
 /** Field profil yang wajib diisi saat onboarding. */
 export const isProfileComplete = (p: ProfileRow | null) =>
-  Boolean(p && p.full_name && p.whatsapp && p.headline && p.seniority && p.tech_stack.length > 0);
+  Boolean(p && p.full_name && p.whatsapp && isLinkedinUrl(p.linkedin_url) && p.headline && p.seniority && p.tech_stack.length > 0);
 
 /**
  * Onboarding selesai = sudah kenalan + profil lengkap → boleh masuk portal dan
@@ -70,6 +73,19 @@ export const isProfileComplete = (p: ProfileRow | null) =>
  * supabase/migrations/20261009000000_member_motivation.sql.
  */
 export const isOnboarded = (p: ProfileRow | null, m: MemberMotivationRow | null) => Boolean(m) && isProfileComplete(p);
+
+/** Yang masih kurang supaya onboarding selesai (ditampilkan di halaman profil). */
+export function missingOnboardingParts(p: ProfileRow | null, m: MemberMotivationRow | null) {
+  return [
+    !m && 'jawaban kenalan',
+    !p?.full_name && 'nama',
+    !p?.whatsapp && 'nomor WhatsApp',
+    !isLinkedinUrl(p?.linkedin_url ?? null) && 'link LinkedIn',
+    !p?.headline && 'peran / headline',
+    !p?.seniority && 'level',
+    !p?.tech_stack.length && 'teknologi yang dikuasai',
+  ].filter((x): x is string => Boolean(x));
+}
 
 export async function fetchMotivation(userId: string) {
   const { data } = await supabase().from('member_motivations').select('*').eq('user_id', userId).maybeSingle();
@@ -100,7 +116,6 @@ export const MOTIVATION_QUESTIONS = [
 export function missingProfileParts(p: ProfileRow) {
   return [
     !p.username && 'username link profil',
-    !p.linkedin_url && 'LinkedIn',
     p.skills.length === 0 && 'keahlian',
     p.experiences.length === 0 && 'pengalaman',
   ].filter((x): x is string => Boolean(x));
