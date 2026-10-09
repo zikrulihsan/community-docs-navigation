@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import type { Route } from './+types/home';
 import { AgendaList } from '~/components/AgendaList';
@@ -27,6 +27,8 @@ const load = async () => {
   ]);
   return {
     stats: heroStats(stats),
+    // Angka hero baru dianimasikan setelah data terbaru dari browser masuk; sebelumnya placeholder.
+    live: typeof window !== 'undefined',
     pulse,
     activities: activities.filter(isActivityUpcoming).slice(0, 3),
     contributions,
@@ -47,12 +49,38 @@ clientLoader.hydrate = true as const;
 const count = (n: number) => n.toLocaleString('id-ID');
 
 /** Member & sesi dari database (sesi = arsip kegiatan lama + kegiatan di agenda); topik tetap. */
+type HeroStat = { value: number; suffix?: string; label: string };
+
 function heroStats(stats: { member_count: number; session_count: number } | null) {
   return [
-    stats && { value: count(stats.member_count), label: 'member' },
-    { value: count(PAST_ACTIVITIES.length + (stats?.session_count ?? 0)), label: 'sesi komunitas' },
-    { value: '10+', label: 'topik diskusi' },
-  ].filter((s): s is { value: string; label: string } => Boolean(s));
+    stats && { value: stats.member_count, label: 'member' },
+    { value: PAST_ACTIVITIES.length + (stats?.session_count ?? 0), label: 'sesi komunitas' },
+    { value: 10, suffix: '+', label: 'topik diskusi' },
+  ].filter((s): s is HeroStat => Boolean(s));
+}
+
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** Angka naik dari 0 ke target (ease-out, ~1,2 detik); langsung ke target kalau reduced motion. */
+function CountUp({ to, suffix = '' }: { to: number; suffix?: string }) {
+  const [n, setN] = useState(0);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) {
+      setN(to);
+      return;
+    }
+    const duration = 1200;
+    const start = performance.now();
+    let frame = requestAnimationFrame(function tick(now) {
+      const t = Math.min(1, (now - start) / duration);
+      setN(Math.round(to * (1 - (1 - t) ** 3)));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [to]);
+
+  return <>{count(n)}{suffix}</>;
 }
 
 /** Satu kalimat pendek per kartu. */
@@ -66,7 +94,61 @@ const ACTIVITIES = [
 ];
 
 
-export default function Home({ loaderData: { activities, contributions, recommendations, stats, pulse } }: Route.ComponentProps) {
+/**
+ * Aktivitas minggu ini: satu chip tampil bergantian dengan efek flip.
+ * Berhenti saat di-hover/fokus; dengan reduced motion semua chip tampil diam.
+ */
+function HeroPulse({ items }: { items: Route.ComponentProps['loaderData']['pulse'] }) {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [still, setStill] = useState(false);
+  const rotating = items.length > 1 && !still;
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => setStill(media.matches);
+    sync();
+    media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
+
+  useEffect(() => {
+    if (!rotating || paused) return;
+    const id = setInterval(() => setActive((i) => (i + 1) % items.length), 3500);
+    return () => clearInterval(id);
+  }, [rotating, paused, items.length]);
+
+  const previous = (active - 1 + items.length) % items.length;
+
+  return (
+    <ul
+      className={`hero-pulse${items.length > 1 ? ' rotating' : ''}`}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
+      {items.map((p, i) => {
+        const hidden = rotating && i !== active;
+        return (
+          <li
+            key={p.slug ?? p.kind}
+            data-state={i === active ? 'in' : i === previous ? 'out' : undefined}
+            aria-hidden={hidden || undefined}
+          >
+            {p.kind === 'member' ? (
+              <><b>{count(p.total)} engineer</b> baru gabung minggu ini</>
+            ) : (
+              <><b>{count(p.total)} orang</b> daftar <Link to={activityPath({ slug: p.slug! })} tabIndex={hidden ? -1 : undefined}>{p.title}</Link> minggu ini</>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+export default function Home({ loaderData: { activities, contributions, recommendations, stats, live, pulse } }: Route.ComponentProps) {
   const { user } = useAuth();
   const [picked, setPicked] = useState(0);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -95,22 +177,18 @@ export default function Home({ loaderData: { activities, contributions, recommen
           </div>
           <ul className="hero-stats">
             {stats.map((s) => (
-              <li key={s.label}><b>{s.value}</b><span>{s.label}</span></li>
+              <li key={s.label}>
+                {live ? (
+                  <b><CountUp to={s.value} suffix={s.suffix} /></b>
+                ) : (
+                  // Placeholder: angka snapshot tetap ada di HTML (tak terlihat) supaya lebarnya pas.
+                  <b className="stat-skel">{count(s.value)}{s.suffix}</b>
+                )}
+                <span>{s.label}</span>
+              </li>
             ))}
           </ul>
-          {pulse.length > 0 && (
-            <ul className="hero-pulse">
-              {pulse.map((p) => (
-                <li key={p.slug ?? p.kind}>
-                  {p.kind === 'member' ? (
-                    <><b>{count(p.total)} engineer</b> baru gabung minggu ini</>
-                  ) : (
-                    <><b>{count(p.total)} orang</b> daftar <Link to={activityPath({ slug: p.slug! })}>{p.title}</Link> minggu ini</>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
+          {pulse.length > 0 && <HeroPulse items={pulse} />}
         </div>
       </section>
 
