@@ -70,6 +70,18 @@ export async function getPublishedActivityBySlug(slug: string): Promise<Activity
   return data;
 }
 
+/** Angka hero landing dari database (null kalau gagal diambil). */
+export async function getCommunityStats() {
+  const db = client();
+  if (!db) return null;
+  const { data, error } = await db.rpc('community_stats').maybeSingle();
+  if (error) {
+    console.error('Tidak dapat mengambil statistik komunitas:', error.message);
+    return null;
+  }
+  return data;
+}
+
 /** Path publik detail event — dibagikan saat publikasi. */
 export const activityPath = (a: Pick<Activity, 'slug'>) => `/agenda/${a.slug}`;
 export const registerPath = (a: Pick<Activity, 'slug'>) => `/agenda/${a.slug}/daftar`;

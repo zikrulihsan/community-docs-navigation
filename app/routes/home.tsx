@@ -6,7 +6,8 @@ import { RecommendationCard } from '~/components/RecommendationCard';
 import { Avatar } from '~/components/Avatar';
 import { SOCIALS } from '~/components/Socials';
 import { ArrowRight, ArrowUpRight, BookIcon, BriefcaseIcon, ChatIcon, MicIcon, UsersIcon, VideoIcon } from '~/components/Icons';
-import { getPublishedActivities, isActivityUpcoming } from '~/lib/activities';
+import { getCommunityStats, getPublishedActivities, isActivityUpcoming } from '~/lib/activities';
+import { PAST_ACTIVITIES } from '~/lib/past-activities';
 import { useAuth } from '~/lib/auth';
 import { getPublishedContributions } from '~/lib/contributions';
 import type { RecommendationCategory } from '~/lib/database.types';
@@ -17,12 +18,14 @@ import { pageMeta } from '~/lib/site';
 export const meta: Route.MetaFunction = () => pageMeta('SWE Growth — komunitas software engineer Indonesia');
 
 const load = async () => {
-  const [activities, contributions, recommendations] = await Promise.all([
+  const [activities, contributions, recommendations, stats] = await Promise.all([
     getPublishedActivities(),
     getPublishedContributions(),
     getPublishedRecommendations(),
+    getCommunityStats(),
   ]);
   return {
+    stats: heroStats(stats),
     activities: activities.filter(isActivityUpcoming).slice(0, 3),
     contributions,
     recommendations: recommendations.filter((r) => r.is_featured),
@@ -38,11 +41,17 @@ export async function clientLoader() {
 }
 clientLoader.hydrate = true as const;
 
-const STATS = [
-  { value: '1000+', label: 'member' },
-  { value: '50+', label: 'sesi komunitas' },
-  { value: '10+', label: 'topik diskusi' },
-];
+/** Angka persis, pemisah ribuan ala Indonesia (1.024). */
+const count = (n: number) => n.toLocaleString('id-ID');
+
+/** Member & sesi dari database (sesi = arsip kegiatan lama + kegiatan di agenda); topik tetap. */
+function heroStats(stats: { member_count: number; session_count: number } | null) {
+  return [
+    stats && { value: count(stats.member_count), label: 'member' },
+    { value: count(PAST_ACTIVITIES.length + (stats?.session_count ?? 0)), label: 'sesi komunitas' },
+    { value: '10+', label: 'topik diskusi' },
+  ].filter((s): s is { value: string; label: string } => Boolean(s));
+}
 
 /** Satu kalimat pendek per kartu. */
 const ACTIVITIES = [
@@ -55,7 +64,7 @@ const ACTIVITIES = [
 ];
 
 
-export default function Home({ loaderData: { activities, contributions, recommendations } }: Route.ComponentProps) {
+export default function Home({ loaderData: { activities, contributions, recommendations, stats } }: Route.ComponentProps) {
   const { user } = useAuth();
   const [picked, setPicked] = useState(0);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -83,7 +92,7 @@ export default function Home({ loaderData: { activities, contributions, recommen
             )}
           </div>
           <ul className="hero-stats">
-            {STATS.map((s) => (
+            {stats.map((s) => (
               <li key={s.label}><b>{s.value}</b><span>{s.label}</span></li>
             ))}
           </ul>

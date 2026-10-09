@@ -284,6 +284,7 @@ export type Database = {
       public_profile: { Args: { p_handle: string }; Returns: PublicProfile[] };
       published_contributions: { Args: Record<string, never>; Returns: PublishedContribution[] };
       published_recommendations: { Args: Record<string, never>; Returns: PublishedRecommendation[] };
+      community_stats: { Args: Record<string, never>; Returns: { member_count: number; session_count: number }[] };
       check_recommendation_url: { Args: { p_url: string; p_exclude_id?: string | null }; Returns: { title: string; status: RecommendationStatus }[] };
       submit_recommendation: {
         Args: {
